@@ -1,0 +1,6 @@
+run_xalantest.cpp
+run_xalantest
+run_xalantest.exe
+run_XMLTransformTest.jar
+*.out
+results
