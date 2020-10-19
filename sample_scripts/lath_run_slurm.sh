@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # Copyright (c) 2019 Oracle
 # 
@@ -62,10 +62,7 @@ FileBase="$1_test_rep${rep}"
 sbatch -p ${Queue} -t 00:45:00 --comment=benchmark:${FileBase} \
     --exclusive \
     -e ${resultdir}/${FileBase}.err -o ${resultdir}/${FileBase}.result \
-    --wrap="$5 ./$1 $2 ${resultdir}/${FileBase}"
+    --wrap="$5 --cpp=./$1 --java=$2 -o ${resultdir}/${FileBase}"
 
 done
-
-
-
 
