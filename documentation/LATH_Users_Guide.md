@@ -78,8 +78,6 @@ Execution Flow
 
 The execution flow is shown in .
 
-![](media/3bdbeeff2fda87ae3eef12fa5b5d237a.png)
-
 Figure 1 Execution Flow
 
 1.  A file containing the annotated benchmark code is provided by the user.
@@ -151,7 +149,7 @@ The easiest way to do this is to source the lath.rc file located in the
 top-level lath directory:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-source <path_to_lath_directory>/lath.rc	
+source <path_to_lath_directory>/lath.rc 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This will:
@@ -331,28 +329,15 @@ own scripts.
 Here, we’ll use one of the provided scripts, as that is the quickest and easiest
 method:
 
-*Step 2a:* This script uses environment variables. Set one or more of the
-following environment variables to the Java VMs on which you want to run the
-Java benchmark:
-
--   JAVA_HOME_GRAAL: the top-level GraalVM directory
-
--   JAVA_HOME_HOTSPOT8: the top-level HotSpot 8 directory
-
--   JAVA_HOME_HOTSPOT11: the top-level HotSpot 11 directory
-
->   (If none are set, the Java benchmark will not be run.)
-
-*Step 2b:* Use the *lath_exec_all.sh* script to run the benchmark:
+Use the *lath_exec_all_simple.sh* script to run the benchmark:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$LATH_HOME/sample_scripts/lath_exec_all.sh run_factorial run_Factorial.jar results/run1 > run1.out
+$LATH_HOME/sample_scripts/lath_exec_all_simple.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1 > run1.out
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This script will run the C++ executable (run_factorial) and it will execute the
-Java jar file (run_Factorial.jar) on each of the specified Java VMs. Once all of
-these have run once, the script will run each of them a second time (in a
-different order, just in case of any order-dependent performance behavior).
+Java jar file (run_Factorial.jar) on your local Java VM. Once all of these have
+run once, the script will run each of them a second time.
 
 The main results are written to stdout, which we have redirected here to file
 “run1.out”. Additional supplementary output files will be written to directory
@@ -361,23 +346,20 @@ The main results are written to stdout, which we have redirected here to file
 Here is an example of what the main results should look like:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$LATH_HOME/sample_scripts/lath_exec_all.sh run_factorial run_Factorial.jar results/run1
+$LATH_HOME/sample_scripts/lath_exec_all_simple.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1
 
 Running benchmarks:
   C++ benchmark run_factorial
-  Java benchmark run_Factorial.jar on platforms:
-    GraalVM
-    HotSpot 8
-    HotSpot 11
+  Java benchmark run_Factorial.jar
 
 Supplementary output files will be written to "results"
 
 Hostname: abcde001
 Start: Sun Jun  7 06:37:06 PDT 2020
 
-================================================================================
+=============================================================================
 Environment information:
-================================================================================
+=============================================================================
 
 Processor info:
 (from lscpu)
@@ -411,31 +393,31 @@ NUMA node1 CPU(s):     14-27,42-55
 Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch ida arat epb invpcid_single pln pts dtherm intel_pt spec_ctrl stipb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdseed adx smap xsaveopt cqm_llc cqm_occup_llc
 
 (from head of /proc/cpuinfo)
-processor	: 0
-vendor_id	: GenuineIntel
-cpu family	: 6
-model		: 79
-model name	: Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
-stepping	: 1
-microcode	: 0xb00002e
-cpu MHz		: 2372.601
-cache size	: 35840 KB
-physical id	: 0
-siblings	: 28
-core id		: 0
-cpu cores	: 14
-apicid		: 0
-initial apicid	: 0
-fpu		: yes
-fpu_exception	: yes
-cpuid level	: 20
-wp		: yes
-flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch ida arat epb invpcid_single pln pts dtherm intel_pt spec_ctrl stipb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdseed adx smap xsaveopt cqm_llc cqm_occup_llc
-bugs		: cpu_meltdown spectre_v2
-bogomips	: 5188.37
-clflush size	: 64
-cache_alignment	: 64
-address sizes	: 46 bits physical, 48 bits virtual
+processor   : 0
+vendor_id   : GenuineIntel
+cpu family  : 6
+model       : 79
+model name  : Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
+stepping    : 1
+microcode   : 0xb00002e
+cpu MHz     : 2372.601
+cache size  : 35840 KB
+physical id : 0
+siblings    : 28
+core id     : 0
+cpu cores   : 14
+apicid      : 0
+initial apicid  : 0
+fpu     : yes
+fpu_exception   : yes
+cpuid level : 20
+wp      : yes
+flags       : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch ida arat epb invpcid_single pln pts dtherm intel_pt spec_ctrl stipb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdseed adx smap xsaveopt cqm_llc cqm_occup_llc
+bugs        : cpu_meltdown spectre_v2
+bogomips    : 5188.37
+clflush size    : 64
+cache_alignment : 64
+address sizes   : 46 bits physical, 48 bits virtual
 power management:
 
 
@@ -486,11 +468,11 @@ KiB Swap: 12582908 total,  1127608 free, 11455300 used. 65390604+avail Mem
     8 root      20   0       0      0      0 S   1.6  0.0   1686:46 rcu_sched
 
 
-================================================================================
+=============================================================================
 Benchmark results:
-================================================================================
+=============================================================================
 
-================================================================================
+=============================================================================
 Run C++
 LATH version: 0.5.0
 Compiler version: g++ 7.3.0
@@ -553,8 +535,8 @@ Result for Benchmarks::factorialRecursive:
   49.7267 ±(99.9%) 2.22687 ns/op
   (min, avg, max) = (49.0048, 49.7267, 50.6852), stdev = 0.578332
 
-================================================================================
-Run java (GraalVM)
+=============================================================================
+Run java
 java version "1.8.0_72"
 Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
@@ -587,7 +569,6 @@ Result: 22.686 ±(99.9%) 5.911 ns/op [Average]
   Confidence interval (99.9%): [16.774, 28.597]
 
 
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
 # VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
 # VM options: <none>
 # Warmup: 5 iterations, 1 s each
@@ -622,141 +603,7 @@ Benchmark                              (number)  Mode  Samples   Score  Score er
 l.Factorial.JavaFactorialRecursive           25  avgt        5  22.686        5.911  ns/op
 l.Factorial.JavaFactorialRecursive           30  avgt        5  27.329        4.652  ns/op
 
-================================================================================
-Run java (Hotspot 11)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 39.297 ns/op
-# Warmup Iteration   2: 41.956 ns/op
-# Warmup Iteration   3: 50.330 ns/op
-# Warmup Iteration   4: 43.702 ns/op
-# Warmup Iteration   5: 39.810 ns/op
-Iteration   1: 39.759 ns/op
-Iteration   2: 40.382 ns/op
-Iteration   3: 38.340 ns/op
-Iteration   4: 39.129 ns/op
-Iteration   5: 43.391 ns/op
-
-
-Result: 40.200 ±(99.9%) 7.461 ns/op [Average]
-  Statistics: (min, avg, max) = (38.340, 40.200, 43.391), stdev = 1.937
-  Confidence interval (99.9%): [32.740, 47.661]
-
-
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:38
-# Fork: 1 of 1
-# Warmup Iteration   1: 47.228 ns/op
-# Warmup Iteration   2: 46.552 ns/op
-# Warmup Iteration   3: 49.739 ns/op
-# Warmup Iteration   4: 46.968 ns/op
-# Warmup Iteration   5: 47.937 ns/op
-Iteration   1: 45.372 ns/op
-Iteration   2: 48.738 ns/op
-Iteration   3: 50.462 ns/op
-Iteration   4: 45.152 ns/op
-Iteration   5: 46.771 ns/op
-
-
-Result: 47.299 ±(99.9%) 8.755 ns/op [Average]
-  Statistics: (min, avg, max) = (45.152, 47.299, 50.462), stdev = 2.274
-  Confidence interval (99.9%): [38.544, 56.054]
-
-
-# Run complete. Total time: 00:07:45
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  40.200        7.461  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  47.299        8.755  ns/op
-
-================================================================================
-Run java (Hotspot 8)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 37.712 ns/op
-# Warmup Iteration   2: 41.287 ns/op
-# Warmup Iteration   3: 40.713 ns/op
-# Warmup Iteration   4: 38.654 ns/op
-# Warmup Iteration   5: 38.840 ns/op
-Iteration   1: 39.162 ns/op
-Iteration   2: 36.829 ns/op
-Iteration   3: 37.179 ns/op
-Iteration   4: 36.388 ns/op
-Iteration   5: 38.337 ns/op
-
-
-Result: 37.579 ±(99.9%) 4.399 ns/op [Average]
-  Statistics: (min, avg, max) = (36.388, 37.579, 39.162), stdev = 1.142
-  Confidence interval (99.9%): [33.180, 41.978]
-
-
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:40
-# Fork: 1 of 1
-# Warmup Iteration   1: 46.634 ns/op
-# Warmup Iteration   2: 45.445 ns/op
-# Warmup Iteration   3: 46.493 ns/op
-# Warmup Iteration   4: 48.361 ns/op
-# Warmup Iteration   5: 52.535 ns/op
-Iteration   1: 46.035 ns/op
-Iteration   2: 44.797 ns/op
-Iteration   3: 47.316 ns/op
-Iteration   4: 47.143 ns/op
-Iteration   5: 46.613 ns/op
-
-
-Result: 46.381 ±(99.9%) 3.916 ns/op [Average]
-  Statistics: (min, avg, max) = (44.797, 46.381, 47.316), stdev = 1.017
-  Confidence interval (99.9%): [42.465, 50.297]
-
-
-# Run complete. Total time: 00:07:45
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  37.579        4.399  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  46.381        3.916  ns/op
-
-================================================================================
+=============================================================================
 Run C++
 LATH version: 0.5.0
 Compiler version: g++ 7.3.0
@@ -819,142 +666,8 @@ Result for Benchmarks::factorialRecursive:
   52.0417 ±(99.9%) 5.93109 ns/op
   (min, avg, max) = (50.8935, 52.0417, 54.9237), stdev = 1.54034
 
-================================================================================
-Run java (Hotspot 8)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 40.215 ns/op
-# Warmup Iteration   2: 37.469 ns/op
-# Warmup Iteration   3: 37.740 ns/op
-# Warmup Iteration   4: 37.411 ns/op
-# Warmup Iteration   5: 42.123 ns/op
-Iteration   1: 38.740 ns/op
-Iteration   2: 39.371 ns/op
-Iteration   3: 38.116 ns/op
-Iteration   4: 41.222 ns/op
-Iteration   5: 42.003 ns/op
-
-
-Result: 39.891 ±(99.9%) 6.378 ns/op [Average]
-  Statistics: (min, avg, max) = (38.116, 39.891, 42.003), stdev = 1.656
-  Confidence interval (99.9%): [33.512, 46.269]
-
-
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:39
-# Fork: 1 of 1
-# Warmup Iteration   1: 46.381 ns/op
-# Warmup Iteration   2: 50.122 ns/op
-# Warmup Iteration   3: 49.043 ns/op
-# Warmup Iteration   4: 43.991 ns/op
-# Warmup Iteration   5: 44.545 ns/op
-Iteration   1: 56.865 ns/op
-Iteration   2: 51.053 ns/op
-Iteration   3: 57.235 ns/op
-Iteration   4: 45.004 ns/op
-Iteration   5: 45.355 ns/op
-
-
-Result: 51.102 ±(99.9%) 22.865 ns/op [Average]
-  Statistics: (min, avg, max) = (45.004, 51.102, 57.235), stdev = 5.938
-  Confidence interval (99.9%): [28.237, 73.967]
-
-
-# Run complete. Total time: 00:07:45
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  39.891        6.378  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  51.102       22.865  ns/op
-
-================================================================================
-Run java (Hotspot 11)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 44.925 ns/op
-# Warmup Iteration   2: 43.260 ns/op
-# Warmup Iteration   3: 43.266 ns/op
-# Warmup Iteration   4: 40.241 ns/op
-# Warmup Iteration   5: 40.011 ns/op
-Iteration   1: 39.753 ns/op
-Iteration   2: 43.597 ns/op
-Iteration   3: 37.854 ns/op
-Iteration   4: 37.625 ns/op
-Iteration   5: 38.937 ns/op
-
-
-Result: 39.553 ±(99.9%) 9.308 ns/op [Average]
-  Statistics: (min, avg, max) = (37.625, 39.553, 43.597), stdev = 2.417
-  Confidence interval (99.9%): [30.245, 48.861]
-
-
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:38
-# Fork: 1 of 1
-# Warmup Iteration   1: 47.496 ns/op
-# Warmup Iteration   2: 50.214 ns/op
-# Warmup Iteration   3: 70.361 ns/op
-# Warmup Iteration   4: 46.668 ns/op
-# Warmup Iteration   5: 46.593 ns/op
-Iteration   1: 44.167 ns/op
-Iteration   2: 43.880 ns/op
-Iteration   3: 45.575 ns/op
-Iteration   4: 49.530 ns/op
-Iteration   5: 46.676 ns/op
-
-
-Result: 45.966 ±(99.9%) 8.812 ns/op [Average]
-  Statistics: (min, avg, max) = (43.880, 45.966, 49.530), stdev = 2.288
-  Confidence interval (99.9%): [37.154, 54.777]
-
-
-# Run complete. Total time: 00:07:46
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  39.553        9.308  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  45.966        8.812  ns/op
-
-================================================================================
-Run java (GraalVM)
+=============================================================================
+Run java
 java version "1.8.0_72"
 Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
@@ -987,7 +700,6 @@ Result: 22.446 ±(99.9%) 4.600 ns/op [Average]
   Confidence interval (99.9%): [17.845, 27.046]
 
 
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
 # VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
 # VM options: <none>
 # Warmup: 5 iterations, 1 s each
@@ -1035,8 +747,6 @@ Test Harness Wrapper
 The wrapper generator extracts the annotations from the benchmark code and use
 them to generate the wrapper code. The wrapper code is designed to facilitate
 safe, robust, and accurate benchmark measurements.
-
-![](media/19a9059c4b41f9db7e2961f211c755ee.png)
 
 Figure 2 Test harness wrapper code
 
@@ -2067,7 +1777,7 @@ echo $JAVA_HOME
 -   which mvn  
     mvn -v
 
-    **ASIDE**: Having an incompatible version of maven will cause the build to
+-   **ASIDE**: Having an incompatible version of maven will cause the build to
     act like it has a corrupted maven repository, which it stores in your home
     directory under \~.m2
 
@@ -2082,7 +1792,7 @@ echo $JAVA_HOME
 -   cd jmh/  
     mvn clean install -DskipTests
 
-    Note that at this point, maven will download the repo onto your machine in
+-   Note that at this point, maven will download the repo onto your machine in
     \~/.m2
 
 -   If you wish, you can attempt to also build the standard jmh benchmarks,
@@ -3054,9 +2764,7 @@ that allow direct use of such enums in user code.
     \@OutputTimeUnit(TimeUnit.HOURS)  
     \@OutputTimeUnit(TimeUnit.DAYS)
 
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @Setup(scope)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-   \@Setup(scope)
 
     Setup will be called before your benchmark has been called and allows you to
     initialize the state object for the benchmark. (Your setup function should

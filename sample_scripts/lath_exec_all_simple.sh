@@ -36,12 +36,6 @@
 # DEALINGS IN THE SOFTWARE.
 
 
-# Environment variables for Java benchmarks:
-# (if one or more of these is not defined, no Java benchmarks will be run)
-# JAVA_HOME_GRAAL: the top-level GraalVM directory
-# JAVA_HOME_HOTSPOT8: the top-level HotSpot 8 directory
-# JAVA_HOME_HOTSPOT11: the top-level HotSpot 11 directory
-#
 # Script options:
 #
 # --cpp=<C++ executable>
@@ -56,12 +50,6 @@ print_usage() {
     echo "Usage:"
     echo "${0##*/} -h"
     echo "${0##*/} [--cpp=<C++ executable>] [--java=<Java jar file>] -o <output directory/file base name>"
-  echo ""
-  echo "Environment variables for Java benchmarks:"
-  echo "One or more must be defined to run Java benchmarks."
-  echo "  JAVA_HOME_GRAAL: the top-level GraalVM directory"
-  echo "  JAVA_HOME_HOTSPOT8: the top-level HotSpot 8 directory"
-  echo "  JAVA_HOME_HOTSPOT11: the top-level HotSpot 11 directory"
 }
 die() { echo "$*" >&2; print_usage; exit 2; }  # complain to STDERR and exit with error
 needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
@@ -101,16 +89,11 @@ if ! [[ "${cpp_exe}" == "" || "${cpp_exe}" == "-" ]] ; then
   echo "  C++ benchmark ${cpp_exe}"
 fi
 if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
-  echo "  Java benchmark ${java_jar} on platforms:"
-  if ! [[ "$JAVA_HOME_GRAAL" == "" ]] ; then
-    echo "    GraalVM"
-  fi
-  if ! [[ "$JAVA_HOME_HOTSPOT8" == "" ]] ; then
-    echo "    HotSpot 8"
-  fi
-  if ! [[ "$JAVA_HOME_HOTSPOT11" == "" ]] ; then
-    echo "    HotSpot 11"
-  fi
+    if type java &> /dev/null; then
+        echo "  Java benchmark ${java_jar}"
+    else
+        echo "  Warning: java not available; Java benchmark ${java_jar} will not be run"
+    fi
 fi
 echo ""
 
@@ -190,34 +173,12 @@ if ! [[ "${cpp_exe}" == "" || "${cpp_exe}" == "-" ]] ; then
 fi
 
 if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
-  if ! [[ "$JAVA_HOME_GRAAL" == "" ]] ; then
-    #echo "================================================================================"
-    #echo "Run java (GraalVM), vectorization disabled"
-    #export JAVA_HOME=$JAVA_HOME_GRAAL
-    #${JAVA_HOME}/bin/java -version
-    #${JAVA_HOME}/bin/java -Dgraal.Vectorization=false -jar ${java_jar} -wi 50 -rf json -rff ${obase}_graal_1.json
-    #echo ""
+  if type java &> /dev/null; then
     echo "================================================================================"
-    echo "Run java (GraalVM)"
-    export JAVA_HOME=$JAVA_HOME_GRAAL
-    ${JAVA_HOME}/bin/java -version
-    ${JAVA_HOME}/bin/java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_graal_1.json
-    echo ""
-  fi
-  if ! [[ "$JAVA_HOME_HOTSPOT11" == "" ]] ; then
-    echo "================================================================================"
-    echo "Run java (Hotspot 11)"
-    export JAVA_HOME=$JAVA_HOME_HOTSPOT11
-    ${JAVA_HOME}/bin/java -version
-    ${JAVA_HOME}/bin/java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_hotspot11_1.json
-    echo ""
-  fi
-  if ! [[ "$JAVA_HOME_HOTSPOT8" == "" ]] ; then
-    echo "================================================================================"
-    echo "Run java (Hotspot 8)"
-    export JAVA_HOME=$JAVA_HOME_HOTSPOT8
-    ${JAVA_HOME}/bin/java -version
-    ${JAVA_HOME}/bin/java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_hotspot8_1.json
+    echo "Run java"
+    which java
+    java -version
+    java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_graal_1.json
     echo ""
   fi
 fi
@@ -229,35 +190,13 @@ if ! [[ "${cpp_exe}" == "" || "${cpp_exe}" == "-" ]] ; then
   echo ""
 fi
 if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
-  if ! [[ "$JAVA_HOME_HOTSPOT8" == "" ]] ; then
+  if type java &> /dev/null; then
     echo "================================================================================"
-    echo "Run java (Hotspot 8)"
-    export JAVA_HOME=$JAVA_HOME_HOTSPOT8
-    ${JAVA_HOME}/bin/java -version
-    ${JAVA_HOME}/bin/java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_hotspot8_2.json
+    echo "Run java"
+    which java
+    java -version
+    java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_hotspot8_2.json
     echo ""
-  fi
-  if ! [[ "$JAVA_HOME_HOTSPOT11" == "" ]] ; then
-    echo "================================================================================"
-    echo "Run java (Hotspot 11)"
-    export JAVA_HOME=$JAVA_HOME_HOTSPOT11
-    ${JAVA_HOME}/bin/java -version
-    ${JAVA_HOME}/bin/java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_hotspot11_2.json
-    echo ""
-  fi
-  if ! [[ "$JAVA_HOME_GRAAL" == "" ]] ; then
-    echo "================================================================================"
-    echo "Run java (GraalVM)"
-    export JAVA_HOME=$JAVA_HOME_GRAAL
-    ${JAVA_HOME}/bin/java -version
-    ${JAVA_HOME}/bin/java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_graal_1.json
-    echo ""
-    #echo "================================================================================"
-    #echo "Run java (GraalVM), vectorization disabled"
-    #export JAVA_HOME=$JAVA_HOME_GRAAL
-    #${JAVA_HOME}/bin/java -version
-    #${JAVA_HOME}/bin/java -Dgraal.Vectorization=false -jar ${java_jar} -wi 50 -rf json -rff ${obase}_graal_2.json
-    #echo ""
   fi
 fi
 echo ""
