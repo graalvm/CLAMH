@@ -142,6 +142,56 @@ echo "Environment information:"
 echo "================================================================================"
 echo ""
 
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux (probably)
+    echo "OS:  Linux ($OSTYPE)"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    # Mac OSX
+    echo "OS:  MacOS ($OSTYPE)"
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+    # POSIX compatibility layer and Linux environment emulation for Windows
+    echo "OS:  Cygwin ($OSTYPE)"
+elif [[ "$OSTYPE" == "msys" ]]; then
+    # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+    echo "OS:  MinGW ($OSTYPE)"
+elif [[ "$OSTYPE" == "win32" ]]; then
+    # I'm not sure this can happen.
+    echo "OS:  Windows32 ($OSTYPE)"
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    # FreeBSD
+    echo "OS:  FreeBSD ($OSTYPE)"
+elif [[ "$OSTYPE" == "openbsd"* ]]; then
+    # OpenBSD
+    echo "OS:  OpenBSD ($OSTYPE)"
+elif [[ "$OSTYPE" == "netbsd" ]]; then
+    # NetBSD
+    echo "OS:  NetBSD ($OSTYPE)"
+elif [[ "$OSTYPE" == "solaris"* ]]; then
+    # Solaris
+    echo "OS:  Solaris ($OSTYPE)"
+elif [[ "$OSTYPE" == "linux-android" ]]; then
+    # Android (termux)
+    echo "OS:  Android ($OSTYPE)"
+elif [[ "$OSTYPE" == "haiku" ]]; then
+    # Haiku OS
+    echo "OS:  Haiku OS ($OSTYPE)"
+else
+    # Unknown.
+    if [[ "$OSTYPE" == "" ]]; then
+        echo "OS:  unknown"
+    else
+        echo "OS:  $OSTYPE"
+    fi
+fi
+echo ""
+
+
+if type uname &> /dev/null; then
+echo "System info:"
+echo "(from uname)"
+uname -a
+echo ""
+fi
 
 if type lscpu &> /dev/null; then
 echo "Processor info:"
@@ -150,10 +200,12 @@ lscpu
 echo ""
 fi
 
+if [[ -f "/proc/cpuinfo" ]]; then
 echo "Processor info:"
 echo "(from head of /proc/cpuinfo)"
 cat /proc/cpuinfo | grep '.*' | grep -B 500 'processor[ ]*.[:] 1$' | grep -v 'processor[ ]*.[:] 1$'
 echo ""
+fi
 
 if type free &> /dev/null; then
 echo "Memory info:"
@@ -170,12 +222,17 @@ echo ""
 fi
 
 if type top &> /dev/null; then
-echo "Current activity:"
-top -ib -n 1
-echo ""
-echo ""
+#if ! top -ib -n 1; then echo "Failure"; fi
+top_out=`top -ib -n 1 2>&1`
+if [[ "$?" == "0" ]]; then
+    echo "Current activity:"
+    echo "(top -ib -n 1)"
+    echo "${top_out}"
+    echo ""
+fi
 fi
 
+echo ""
 echo "================================================================================"
 echo "Benchmark results:"
 echo "================================================================================"
