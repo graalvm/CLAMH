@@ -329,10 +329,10 @@ own scripts.
 Here, we’ll use one of the provided scripts, as that is the quickest and easiest
 method:
 
-Use the *lath_exec_all_simple.sh* script to run the benchmark:
+Use the *lath_exec_all.sh* script to run the benchmark:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$LATH_HOME/sample_scripts/lath_exec_all_simple.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1 > run1.out
+$LATH_HOME/sample_scripts/lath_exec_all.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1 > run1.out
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This script will run the C++ executable (run_factorial) and it will execute the
@@ -346,7 +346,7 @@ The main results are written to stdout, which we have redirected here to file
 Here is an example of what the main results should look like:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$LATH_HOME/sample_scripts/lath_exec_all_simple.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1
+$LATH_HOME/sample_scripts/lath_exec_all.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1
 
 Running benchmarks:
   C++ benchmark run_factorial
