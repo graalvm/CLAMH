@@ -57,22 +57,39 @@ needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
 echo "$0 $@"
 echo ""
 
-#LC_CTYPE=C printf 'First chars: %d 0x%x' "'$1" "'$1"
-#echo ""
-#echo "$1" | hexdump -C
-#echo "$1" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
-#echo ""
-
 cl_args="$@"
 
 #echo "Args = $cl_args"
 #echo ""
+#
+#echo "$@" | hexdump -C
+#echo "$@" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
+#echo ""
 
 # Replace any Unicode dash types (endash, emdash, etc.) with a normal hyphen:
-LC_ALL=en_US.UTF-8 dash_types=$(printf "%b" "\U2010\U2011\U2012\U2013\U2014\U2015")
-cl_args="${cl_args//[$dash_types]/-}"
+#LC_ALL=en_US.UTF-8 dash_types=$(printf "%b" "\U2010\U2011\U2012\U2013\U2014\U2015")
+#cl_args="${cl_args//[$dash_types]/-}"
+
+#endash=`echo -e "\xe2\x80\x93"`
+#echo "endash: [$endash]"
+#echo "$endash" | hexdump -C
+#endash=$(printf "%b" "\xe2\x80\x93")
+#echo "endash: [$endash]"
+#echo "$endash" | hexdump -C
+
+# Replace any Unicode dash types (endash, emdash, etc.) with a normal hyphen:
+cl_args="${cl_args//$(printf "%b" "\xe2\x80\x93")/-}"
+cl_args="${cl_args//$(printf "%b" "\xe2\x80\x94")/-}"
+cl_args="${cl_args//$(printf "%b" "\xe2\x80\x95")/-}"
+cl_args="${cl_args//$(printf "%b" "\xe2\x80\x96")/-}"
+cl_args="${cl_args//$(printf "%b" "\xe2\x80\x97")/-}"
+cl_args="${cl_args//$(printf "%b" "\xe2\x80\x98")/-}"
 
 #echo "Args (fixed) = $cl_args"
+#echo ""
+#
+#echo "$cl_args" | hexdump -C
+#echo "$cl_args" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
 #echo ""
 
 while getopts ho:-: OPT $cl_args; do
