@@ -115,7 +115,6 @@ shift $((OPTIND-1)) # remove parsed options and args from $@ list
 if [[ "${obase}" == "" ]] ; then
   echo "Error: The output directory/file base name must be specified (for supplementary output)."
   print_usage
-  #echo "Usage:  ${0##*/} <c++_executable_filename | - > <java_jar_filename | - > [path/]output_files_basename"
   exit 2;
 fi
 
@@ -159,7 +158,6 @@ echo "==========================================================================
 echo "Environment information:"
 echo "================================================================================"
 echo ""
-
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux (probably)
@@ -271,7 +269,7 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     echo "Run java"
     which java
     java -version
-    java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_graal_1.json
+    java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_java_1.json
     echo ""
   fi
 fi
@@ -288,7 +286,7 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     echo "Run java"
     which java
     java -version
-    java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_hotspot8_2.json
+    java -jar ${java_jar} -wi 50 -rf json -rff ${obase}_java_2.json
     echo ""
   fi
 fi
