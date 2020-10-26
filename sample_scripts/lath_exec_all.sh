@@ -64,16 +64,27 @@ print_usage() {
 die() { echo "$*" >&2; print_usage; exit 2; }  # complain to STDERR and exit with error
 needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
 
-echo "$0 $@"
+cl_args=("$@")
+
+#echo "$0 $@"
+#echo "$0 ${cl_args[*]}"
+cl_str="$0"
+for arg in "${cl_args[@]}"; do
+    if [[ "${arg}" == *" "* ]] ; then
+        arg="\"$arg\""
+    fi
+    cl_str="$cl_str $arg"
+done
+echo "$cl_str"
 echo ""
 
-cl_args="$@"
+#for foo in "${cl_args[@]}"; do echo "$foo" ; done
 
-#echo "Args = $cl_args"
+#echo "Args = ${cl_args[*]}"
 #echo ""
 #
-#echo "$@" | hexdump -C
-#echo "$@" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
+#echo "$*" | hexdump -C
+#echo "$*" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
 #echo ""
 
 # Replace any Unicode dash types (endash, emdash, etc.) with a normal hyphen:
@@ -82,28 +93,32 @@ cl_args="$@"
 
 # Replace any Unicode dash types (endash, emdash, etc.) with a normal hyphen:
 # (this seems to be more portable than the version above)
-cl_args="${cl_args//$(printf "%b" "\xe2\x80\x93")/-}"
-cl_args="${cl_args//$(printf "%b" "\xe2\x80\x94")/-}"
-cl_args="${cl_args//$(printf "%b" "\xe2\x80\x95")/-}"
-cl_args="${cl_args//$(printf "%b" "\xe2\x80\x96")/-}"
-cl_args="${cl_args//$(printf "%b" "\xe2\x80\x97")/-}"
-cl_args="${cl_args//$(printf "%b" "\xe2\x80\x98")/-}"
+for i in "${!cl_args[@]}"; do
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x93")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x94")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x95")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x96")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x97")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x98")/-}"
+done
 
-#echo "Args (fixed) = $cl_args"
+#echo "Args (fixed) = ${cl_args[*]}"
 #echo ""
 #
-#echo "$cl_args" | hexdump -C
-#echo "$cl_args" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
+#echo "${cl_args[*]}" | hexdump -C
+#echo "${cl_args[*]}" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
 #echo ""
 
-while getopts ho:-: OPT $cl_args; do
+#exit 0
+
+while getopts ho:-: OPT "${cl_args[@]}"; do
   # Command line processing based on Adam Katz's answer to
   # https://stackoverflow.com/questions/402377/using-getopts-to-process-long-and-short-command-line-options/7948533
   # support long options: https://stackoverflow.com/a/28466267/519360
   if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
     OPT="${OPTARG%%=*}"      # extract long option name
     OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
-    OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
+    OPTARG="${OPTARG#=}"      # if long option argument, remove assigning '='
   fi
   case "$OPT" in
     cpp )    needs_arg; cpp_exe="$OPTARG" ;;
@@ -134,7 +149,7 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
       if type java &> /dev/null; then
           plain_java=true
           echo "  Java benchmark ${java_jar}"
-          echo "    will run on Java VM at `which java`"
+          echo "    will run on Java VM at $(which java)"
       else
           echo "  Warning: java not available; Java benchmark ${java_jar} will not be run"
       fi
@@ -172,8 +187,8 @@ if ! [[ "${cpp_exe}" == "" || "${cpp_exe}" == "-" ]] ; then
   fi
 fi
 
-echo "Hostname: `hostname`"
-echo "Start: `date`"
+echo "Hostname: $(hostname)"
+echo "Start: $(date)"
 echo ""
 
 echo "================================================================================"
@@ -262,7 +277,7 @@ fi
 
 if type top &> /dev/null; then
 #if ! top -ib -n 1; then echo "Failure"; fi
-top_out=`top -ib -n 1 2>&1`
+top_out="$(top -ib -n 1 2>&1)"
 if [[ "$?" == "0" ]]; then
     echo "Current activity:"
     echo "(top -ib -n 1)"
@@ -384,4 +399,4 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     fi
 fi
 echo ""
-echo "End: `date`"
+echo "End: $(date)"
