@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright (c) 2019 Oracle
 # 
@@ -39,8 +39,32 @@
 # XALAN_DIR: the top-level xalan directory
 
 # Arguments:
-# $1: path to directory lath-cpp
+# $1: (optional) path to directory lath-cpp
 
-$1/cpp_parser xalantest.cpp >& run_xalantest.cpp
-g++ -std=c++11 -O3 -I$1 -I${XALAN_DIR}/include -L${XALAN_DIR}/lib -lxalan-c -lxalanMsg -lxerces-c -o run_xalantest run_xalantest.cpp
+if [[ "$1" == "" ]] ; then
+  if [[ "$LATH_HOME" == "" ]] ; then
+    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
+    echo "        or specify the path to lath-cpp as an argument."
+    exit 1
+  else
+    LATH_CPP_DIR=$LATH_HOME/lath-cpp
+  fi
+else
+  LATH_CPP_DIR=$1
+fi
+
+if ! [[ -d $LATH_CPP_DIR ]] ; then
+  echo "ERROR:  LATH-C++ directory \"$LATH_CPP_DIR\" does not exist or is not a directory."
+  exit 1
+fi
+
+gen_file="run_xalantest.cpp"
+
+echo "Generating test harness ($gen_file)..."
+"$LATH_CPP_DIR/cpp_parser" xalantest.cpp > "$gen_file"
+
+echo "Building executable..."
+g++ -std=c++11 -O3 "-I$LATH_CPP_DIR" "-I${XALAN_DIR}/include" "-L${XALAN_DIR}/lib" -lxalan-c -lxalanMsg -lxerces-c -o run_xalantest "$gen_file" || exit 1
+
+echo "Done. run_xalantest built."
 
