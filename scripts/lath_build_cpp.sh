@@ -59,19 +59,29 @@ else
 fi
 
 if ! [[ -d $LATH_CPP_DIR ]] ; then
-  echo "ERROR:  JMH benchmark project directory \"$LATH_CPP_DIR\" does not exist or is not a directory."
+  echo "ERROR:  LATH-cpp directory \"$LATH_CPP_DIR\" does not exist or is not a directory."
   exit 1
 fi
 
 
-base_name=`echo $1 | sed 's/\.cpp$//'`
-gen_file=run_$1
+#base_name=$(echo $1 | sed 's/\.cpp$//')
+#base_name="${1//\.cpp$/}"
+if [[ "$1" == *"/"* ]] ; then
+    base_dir="${1%/*}/"
+    base_fname="${1##*/}"
+else
+    base_dir=""
+    base_fname="$1"
+fi
+base_fname="${base_fname%.cpp}"
+
+gen_file="${base_dir}run_${base_fname}.cpp"
 
 echo "Generating test harness ($gen_file)..."
-$LATH_CPP_DIR/cpp_parser $1 > $gen_file
+"$LATH_CPP_DIR/cpp_parser" "$1" > "$gen_file"
 
 echo "Building executable..."
-g++ -std=c++11 -O3 -I$LATH_CPP_DIR -o run_${base_name} $gen_file
+g++ -std=c++11 -O3 "-I$LATH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
 
-echo "Done. run_${base_name} built."
+echo "Done. ${base_dir}run_${base_fname} built."
 
