@@ -38,14 +38,9 @@
 
 # Arguments:
 # Optional first argument: JMH benchmark project directory ($LATH_HOME/jmh/lath_bm by default)
-# Remaining arguments:  Java source files
+# Remaining argument(s):  Java source files
 
 
-#if [[ "$1" == "" ]] ; then
-#  echo "Usage:  ${0##*/} <java source filename> [(optional) path to JMH project directory]"
-#  exit 1
-#fi
-#
 #if [[ "$2" == "" ]] ; then
 #  if [[ "$LATH_HOME" == "" ]] ; then
 #    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
@@ -106,6 +101,10 @@ do
         rm -rf "$jmh_bm_dir/src/main/java/*"
     fi
 
+    if ! [[ -f "$arg" ]] ; then
+        echo "ERROR:  File \"$arg\" does not exist."
+        exit 1
+    fi
     package_path=$(grep '^package' "$arg" | cut '-d ' -f2,2 | cut '-d;' -f1,1 | sed 's|\.|/|g')
     mkdir -p "$jmh_bm_dir/src/main/java/$package_path"
     cp "$arg" "$jmh_bm_dir/src/main/java/$package_path"
@@ -133,6 +132,11 @@ done
 
 
 #echo ${base_dir} ${base_fname} $package_path
+
+if [[ "$base_fname" == "" ]] ; then
+  echo "Usage:  ${0##*/} [(optional) path to JMH project directory] <java source filenames>..."
+  exit 1
+fi
 
 echo "Building jar file..."
 cd "$jmh_bm_dir" || exit 2
