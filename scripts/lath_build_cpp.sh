@@ -37,48 +37,69 @@
 
 
 # Arguments:
-# $1: C++ source file
-# $2: (optional) path to directory lath-cpp ($LATH_HOME/lath-cpp by default)
+# Optional first argument: path to directory lath-cpp ($LATH_HOME/lath-cpp by default)
+# Remaining argument: C++ source file
 
 
 if [[ "$1" == "" ]] ; then
-  echo "Usage:  ${0##*/} <c++ source filename> [(optional) path to lath-cpp]"
+  echo "Usage:  ${0##*/} [(optional) path to lath-cpp] <c++ source filename>"
   exit 1
 fi
 
-if [[ "$2" == "" ]] ; then
-  if [[ "$LATH_HOME" == "" ]] ; then
-    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
-    echo "        or specify the path to lath-cpp in the second argument."
-    exit 1
-  else
-    LATH_CPP_DIR=$LATH_HOME/lath-cpp
-  fi
+if [ -d "$1" ] ; then
+    LATH_CPP_DIR="$1"
+    source_file="$2"
 else
-  LATH_CPP_DIR=$2
+    source_file="$1"
 fi
 
-if ! [[ -d $LATH_CPP_DIR ]] ; then
+if [[ "$LATH_CPP_DIR" == "" ]] ; then
+  if [[ "$LATH_HOME" == "" ]] ; then
+    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
+    echo "        or specify the path to lath-cpp in the first argument."
+    exit 1
+  else
+    LATH_CPP_DIR="$LATH_HOME/lath-cpp"
+  fi
+fi
+
+if [[ "$source_file" == "" ]] ; then
+    echo "ERROR:  No source file specified."
+    echo "Usage:  ${0##*/} [(optional) path to lath-cpp] <c++ source filename>"
+    exit 1
+fi
+
+if ! [[ -d "$LATH_CPP_DIR" ]] ; then
   echo "ERROR:  LATH-cpp directory \"$LATH_CPP_DIR\" does not exist or is not a directory."
   exit 1
 fi
 
+if ! [[ -f "$source_file" ]] ; then
+    echo "ERROR:  File \"$source_file\" does not exist."
+    exit 1
+fi
 
-#base_name=$(echo $1 | sed 's/\.cpp$//')
-#base_name="${1//\.cpp$/}"
-if [[ "$1" == *"/"* ]] ; then
-    base_dir="${1%/*}/"
-    base_fname="${1##*/}"
+if ! [[ -f "$LATH_CPP_DIR/cpp_parser" ]] ; then
+    echo "ERROR:  \"$LATH_CPP_DIR/cpp_parser\" does not exist."
+    echo "(You may need to run \"make\" in the top-level LATH directory or in $LATH_CPP_DIR)"
+    exit 1
+fi
+
+#base_name=$(echo $source_file | sed 's/\.cpp$//')
+#base_name="${source_file//\.cpp$/}"
+if [[ "$source_file" == *"/"* ]] ; then
+    base_dir="${source_file%/*}/"
+    base_fname="${source_file##*/}"
 else
     base_dir=""
-    base_fname="$1"
+    base_fname="$source_file"
 fi
 base_fname="${base_fname%.cpp}"
 
 gen_file="${base_dir}run_${base_fname}.cpp"
 
 echo "Generating test harness ($gen_file)..."
-"$LATH_CPP_DIR/cpp_parser" "$1" > "$gen_file"
+"$LATH_CPP_DIR/cpp_parser" "$source_file" > "$gen_file" || exit 1
 
 echo "Building executable..."
 g++ -std=c++11 -O3 "-I$LATH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
