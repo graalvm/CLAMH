@@ -53,7 +53,7 @@
 print_usage() {
   echo "Usage:"
   echo "${0##*/} -h"
-  echo "${0##*/} [--cpp=<C++ executable>] [--java=<Java jar file>] -o <output directory/file base name>"
+  echo "${0##*/} [--cpp=<C++ executable>] [--java=<Java jar file>] -o <supplementary output directory/file base name>"
   echo ""
   echo "For Java benchmarks, if any of these environment variables are defined, the benchmark will"
   echo "be run for each respective VM. If none are defined, it will just run using the installed 'java':"
@@ -108,8 +108,6 @@ done
 #echo "${cl_args[*]}" | hexdump -C
 #echo "${cl_args[*]}" | hexdump -e '"%07.7_ax  " 16/1 "%03d " "\n"'
 #echo ""
-
-#exit 0
 
 while getopts ho:-: OPT "${cl_args[@]}"; do
   # Command line processing based on Adam Katz's answer to
@@ -304,7 +302,7 @@ fi
 if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     if [ "$plain_java" = true ] ; then
         echo "================================================================================"
-        echo "Run java"
+        echo "Run Java"
         which java
         java -version
         java -jar "${java_jar}" -wi 50 -rf json -rff "${obase}_java_1.json"
@@ -312,14 +310,14 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     else
         if ! [[ "$JAVA_HOME_GRAALVM" == "" ]] ; then
             #echo "================================================================================"
-            #echo "Run java (GraalVM), vectorization disabled"
+            #echo "Run Java (GraalVM), vectorization disabled"
             #export JAVA_HOME=$JAVA_HOME_GRAALVM
             #echo "$JAVA_HOME"
             #"${JAVA_HOME}/bin/java" -version
             #"${JAVA_HOME}/bin/java" -Dgraal.Vectorization=false -jar "${java_jar}" -wi 50 -rf json -rff "${obase}_graalvm_novec_1.json"
             #echo ""
             echo "================================================================================"
-            echo "Run java (GraalVM)"
+            echo "Run Java (GraalVM)"
             export JAVA_HOME=$JAVA_HOME_GRAALVM
             echo "$JAVA_HOME"
             "${JAVA_HOME}/bin/java" -version
@@ -328,7 +326,7 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
         fi
         if ! [[ "$JAVA_HOME_HOTSPOT11" == "" ]] ; then
             echo "================================================================================"
-            echo "Run java (Hotspot 11)"
+            echo "Run Java (Hotspot 11)"
             export JAVA_HOME=$JAVA_HOME_HOTSPOT11
             echo "$JAVA_HOME"
             "${JAVA_HOME}/bin/java" -version
@@ -337,7 +335,7 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
         fi
         if ! [[ "$JAVA_HOME_HOTSPOT8" == "" ]] ; then
             echo "================================================================================"
-            echo "Run java (Hotspot 8)"
+            echo "Run Java (Hotspot 8)"
             export JAVA_HOME=$JAVA_HOME_HOTSPOT8
             echo "$JAVA_HOME"
             "${JAVA_HOME}/bin/java" -version
@@ -356,7 +354,7 @@ fi
 if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     if [ "$plain_java" = true ] ; then
         echo "================================================================================"
-        echo "Run java"
+        echo "Run Java"
         which java
         java -version
         java -jar "${java_jar}" -wi 50 -rf json -rff "${obase}_java_2.json"
@@ -364,7 +362,7 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     else
         if ! [[ "$JAVA_HOME_HOTSPOT8" == "" ]] ; then
             echo "================================================================================"
-            echo "Run java (Hotspot 8)"
+            echo "Run Java (Hotspot 8)"
             export JAVA_HOME=$JAVA_HOME_HOTSPOT8
             echo "$JAVA_HOME"
             "${JAVA_HOME}/bin/java" -version
@@ -373,7 +371,7 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
         fi
         if ! [[ "$JAVA_HOME_HOTSPOT11" == "" ]] ; then
             echo "================================================================================"
-            echo "Run java (Hotspot 11)"
+            echo "Run Java (Hotspot 11)"
             export JAVA_HOME=$JAVA_HOME_HOTSPOT11
             echo "$JAVA_HOME"
             "${JAVA_HOME}/bin/java" -version
@@ -382,14 +380,14 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
         fi
         if ! [[ "$JAVA_HOME_GRAALVM" == "" ]] ; then
             echo "================================================================================"
-            echo "Run java (GraalVM)"
+            echo "Run Java (GraalVM)"
             export JAVA_HOME=$JAVA_HOME_GRAALVM
             echo "$JAVA_HOME"
             "${JAVA_HOME}/bin/java" -version
             "${JAVA_HOME}/bin/java" -jar "${java_jar}" -wi 50 -rf json -rff "${obase}_graalvm_1.json"
             echo ""
             #echo "================================================================================"
-            #echo "Run java (GraalVM), vectorization disabled"
+            #echo "Run Java (GraalVM), vectorization disabled"
             #export JAVA_HOME=$JAVA_HOME_GRAALVM
             #echo "$JAVA_HOME"
             #"${JAVA_HOME}/bin/java" -version
