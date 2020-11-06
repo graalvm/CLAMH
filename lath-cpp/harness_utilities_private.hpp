@@ -47,8 +47,10 @@ DEALINGS IN THE SOFTWARE.
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <cstring>
 #include <type_traits>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <fstream>
 
@@ -57,6 +59,7 @@ DEALINGS IN THE SOFTWARE.
 //#include "Control.hpp"
 #include "CommandOptionHandler.h"
 #include "MakeStr.hpp"
+#include "string_utils.hpp"
 
 #include "include/rapidjson/document.h"
 #include "include/rapidjson/writer.h"
@@ -109,6 +112,28 @@ void printVersion() {
   cout << "[Unfamiliar compiler version]" << std::endl;
 #endif
   // Add others as needed...
+}
+
+// Print usage
+void usage(const std::string &exe_full_path) {
+   // Split off the path
+   std::vector<std::string> split_vec;
+   std::string exe_name = string_utils::splitString(exe_full_path, '/', split_vec).back();
+   std::cout << exe_name << " [-h] [-v] [-p <param>=<value,...>...]" << std::endl;
+   std::cout << std::setfill(' ') << std::setw(exe_name.size() + 1) << ' '
+             << "[-rf <report_format>] [-rff <report_file>] [-trendfile <filename>]" << std::endl;
+   std::cout << std::endl;
+   std::cout << "  -h                      Print usage (what you're reading now)" << std::endl;
+   std::cout << "  -v                      Print version" << std::endl;
+   std::cout << "  -p <param>=<value,...>  Override the set of values for a parameter. This option" << std::endl;
+   std::cout << "                          may be specified multiple times for different parameters." << std::endl;
+   std::cout << "                          (Example: -p some_parm=3,4,5)" << std::endl;
+   std::cout << "  -rf <report_format>     Specify the optional supplementary report format" << std::endl;
+   std::cout << "                          (currently, the only valid option is 'json')" << std::endl;
+   std::cout << "  -rff <filename>         Report file name. If specified, a supplementary report" << std::endl;
+   std::cout << "                          will be generated." << std::endl;
+   std::cout << "  -trendfile <filename>   If specified, generates detailed trend information for" << std::endl;
+   std::cout << "                          warmup and CPU speed changes." << std::endl;
 }
 
 // Volatile sink to prevent unwanted "dead code" optimization:
@@ -277,15 +302,148 @@ void testSetVarFromString() {
    }
 }
 
+struct ParamOverride {
+   std::string param;
+   std::vector<std::string> val_vec;
+
+   ParamOverride(std::string &par, std::vector<std::string> &vv) :
+      param(std::move(par)),
+      val_vec(std::move(vv))
+   {}
+};
+
+struct ParamOverrides {
+   std::vector<ParamOverride> param_override_vec;
+   
+   void AddOverride(const std::string &param_str) {
+      std::string param;
+      std::string vals;
+      std::vector<std::string> val_vec;
+      string_utils::splitStringOnFirst(param_str, '=', param, vals);
+      if (param == "") {
+         std::cerr << "Error: '-p' option: the parameter name must be specified." << std::endl;
+         std::cerr << "       (e.g., '-p some_parm=3,4,5')" << std::endl;
+         abort();
+      }
+      if (vals == "") {
+         std::cerr << "Error: '-p' option: at least one parameter value must be specified." << std::endl;
+         std::cerr << "       (e.g., '-p some_parm=3,4,5')" << std::endl;
+         abort();
+      }
+      string_utils::splitString(vals, ',', val_vec);
+      param_override_vec.emplace_back(param, val_vec);
+   }
+};
+
+struct ParamInfo {
+   std::string name;      // Short name of parameter (e.g., "number")
+   std::string long_name; // Fully qualified name of parameter (e.g., "MyState::number")
+   std::vector<std::string> val_vec; // The parameter values
+
+   ParamInfo(const std::string &nm, const std::string &lnm, const std::vector<std::string> &vv) :
+      name(std::move(nm)),
+      long_name(std::move(lnm)),
+      val_vec(std::move(vv))
+   {}
+};
+
+struct ParamHandler {
+   std::vector<ParamInfo> params;
+   
+   void addParam(const std::string &name, const std::string &long_name,
+                 const std::vector<std::string> &val_vec)
+   {
+      params.emplace_back(name, long_name, val_vec);
+   }
+
+   // Update params with override values (e.g., from the command line)
+   void setOverrides(const ParamOverrides &pos) {
+      // Loop over the overrides
+      for (const auto &over : pos.param_override_vec) {
+         // For each, find a matching parameter (but verify that there is only one match)
+         ParamInfo *match = nullptr;
+         for (auto &param : params) {
+            if ((over.param == param.name) || (over.param == param.long_name)) {
+               if (match != nullptr) {
+                  std::cerr << "Error: parameter override '" << over.param
+                            << "' is ambiguous. The fully qualified parameter name is required here." << std::endl;
+                  std::cerr << "       (e.g., replace '" << over.param << "' with '" << match->long_name
+                            << "', '" << param.long_name << "', etc.)" << std::endl;
+                  abort();
+               }
+               match = &param;
+            }
+         }
+         if (match == nullptr) {
+            std::cerr << "Error: parameter override '" << over.param
+                      << "' is not a recognized parameter." << std::endl;
+            abort();
+         }
+         // Overwrite the values for the matching parameter
+         match->val_vec = over.val_vec;
+      }
+   }
+
+   const std::vector<std::string> &getParamVals(const std::string &long_nm) {
+      for (const auto &param : params) {
+         if (long_nm == param.long_name) {
+            return param.val_vec;
+         }
+      }
+      // Not found - we should not get here!
+      assert(0);
+   }
+
+   void printParams() {
+      if (params.size() > 0) {
+         std::cout << std::endl;
+         std::cout << "Parameter sets:" << std::endl;
+         for (const auto &param : params) {
+            std::cout << "    " << param.long_name << ": (";
+            bool first = true;
+            for (const auto &val : param.val_vec) {
+               if (first) { first = false; }
+               else       { std::cout << ", "; }
+               std::cout << "\"" << val << "\"";
+            }
+            std::cout << ")" << std::endl;
+         }
+      }
+   }
+};
+
 // Info from the command-line options
 struct CLOptions {
+   bool no_run{false};
+   
    double winnow_thresh{1.0};
+
+   ParamOverrides param_overrides;
 
    std::ofstream trendfile_stream;
    std::ostream *postream_trends{nullptr};
 
   std::ofstream jsonfile_stream;
   std::ostream *postream_json{nullptr};
+};
+
+class LATHOptionHandler : public CommandOptionHandler {
+   CLOptions &cl_options_;
+public:
+   LATHOptionHandler(const char *opdef,     ///< Option definition string
+                     CLOptions &cl_options) ///< Parsed command-line option data
+      : CommandOptionHandler(opdef),
+        cl_options_(cl_options)
+   {}
+   
+   //! command-line option handler to pick up multiple argument overrides
+   virtual void handleOption(const char *op, const char *value)
+   {
+      // Handle param override, e.g. "-p arg=41,42"
+      if (strcmp(op,"p") == 0) {
+         cl_options_.param_overrides.AddOverride(value);
+      }
+   }
 };
 
 // Parse the command-line options for the generated test harness code:
@@ -295,11 +453,12 @@ void parseCommandLine(CLOptions &cl_options, int argc, char **argv) {
    std::cout << "\n" << std::endl;
 
    // Create a command option handler
-   const char *validOptions = "winnow-thresh:, trendfile:, rf:, rff:";
+   const char *validOptions = "winnow-thresh:, trendfile:, rf:, rff:, p:, h, v";
    // const char *validOptions = "v, h, help";
    //  v = version     h, help = usage information
 
-   OptionAndFilenameHandler COH(validOptions, 0);
+   //OptionAndFilenameHandler COH(validOptions, 0);
+   LATHOptionHandler COH(validOptions, cl_options);
    
    try
    {
@@ -309,26 +468,28 @@ void parseCommandLine(CLOptions &cl_options, int argc, char **argv) {
    catch (CommandOptionHandler::UnknownOption uO)
    {
       cerr << "Don't understand option \"-" << uO.option << "\"" << endl;
-      /* usage(); */
+      usage(argv[0]);
       assert(0);
    }
    catch (CommandOptionHandler::UnknownArg uA)
    {
-      cerr << "Too many filename arguments" << endl;
-      /* usage(); */
+      cerr << "Unknown argument \"" << uA.arg << "\"" << endl;
+      usage(argv[0]);
       assert(0);
    }
 
-   //if (COH.opCheck("v"))
-   //{
-   //   version();
-   //}
-   //
-   //if ((COH.opCheck("h")) || (COH.opCheck("help")))
-   //{
-   //   usage();
-   //   assert(0);
-   //}
+   if (COH.opCheck("v")) {
+      printVersion();
+      cl_options.no_run = true;
+   }
+
+   if (COH.opCheck("h")) {
+      if (COH.opCheck("v")) {
+         std::cout << std::endl;
+      }
+      usage(argv[0]);
+      cl_options.no_run = true;
+   }
 
    if (COH.opCheck("winnow-thresh")) {
       std::string thresh_str = COH.opValue("winnow-thresh");

@@ -2,7 +2,7 @@
 title: Language-Agnostic Test Harness (LATH) User’s Guide
 ---
 
-November 4, 2020
+November 6, 2020
 
 What is LATH?
 =============
@@ -75,7 +75,7 @@ These are some terms that will be used throughout this document.
 Execution Flow
 ==============
 
-The execution flow is shown in .
+The execution flow is shown in Figure 1.
 
 ![](media/3bdbeeff2fda87ae3eef12fa5b5d237a.png)
 
@@ -1341,7 +1341,7 @@ determine the cause of some observed behavior.
     feature. For example, your benchmark could output a *seed* value that could
     be used as input to exactly reproduce the data used in the run. When
     reproducing an earlier run, an annotated Param can be used to specify the
-    seed on the command line (and where, if a seed is not specified, the default
+    seed on the command line (and, if a seed is not specified, the default
     behavior would be to generate a random seed). Note that the value of the
     generated seed should be output as part of a teardown method so that the
     outputting of the value does not contribute to the benchmark timing.
@@ -1873,6 +1873,15 @@ Benchmark runtime options
 -------------------------
 
 The generated test executable has some pre-defined command-line options:
+
+>   \-h Prints the usage.
+
+>   \-v Prints the version information.
+
+>   \-p Parameter override: overrides the set of values for a given parameter,
+>   specified by either the unqualified name or the fully qualified name. This
+>   option may be used more than once on the command line for different
+>   parameters. (Examples: “-p some_parm=3,4,5”
 
 >   \-rf Specifies the report format (currently, the only valid option is
 >   “json”)
