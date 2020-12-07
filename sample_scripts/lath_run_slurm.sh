@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # Copyright (c) 2019 Oracle
 # 
@@ -36,36 +36,135 @@
 # DEALINGS IN THE SOFTWARE.
 
 
-# Environment variables required:
+# If lath_exec_all.sh is used for the script,
+# then one or more of these environment variables may be defined
+# (if none of these are defined, then the installed 'java' will be used):
 # JAVA_HOME_GRAAL: the top-level GraalVM directory
 # JAVA_HOME_HOTSPOT8: the top-level HotSpot 8 directory
 # JAVA_HOME_HOTSPOT11: the top-level HotSpot 11 directory
 
-# Arguments:
-# $1: C++ executable
-# $2: Java jar file
-# $3: Slurm queue (Use 'sinfo' to see the available queues)
-# $4: Output directory basename for test results
-# $5: script to execute (e.g., lath_exec_all.sh)
 
-Queue="$3"
-resultdir="`pwd`/$4_$3"
+print_usage() {
+    echo "Usage:"
+    echo "${0##*/} -h"
+    echo "${0##*/} [--cpp=<C++ executable>] [--java=<Java jar file>] --exec=<script to execute>"
+    echo "                  -q <queue name> -o <output directory base name> [-t <time_limit ('00:15:00' by default)>]"
+    echo "                  [--reps=<number of repetitions (3 by default)>]"
+    echo "[The -q option may be specified multiple times. The script will be run for each specified queue.]"
+    echo ""
+    echo "For Java benchmarks, if any of these environment variables are defined, the benchmark will"
+    echo "be run on each of the respective VMs. If none are defined, it will just run using the installed 'java':"
+    echo "  JAVA_HOME_GRAALVM: the top-level GraalVM directory"
+    echo "  JAVA_HOME_HOTSPOT8: the top-level HotSpot 8 directory"
+    echo "  JAVA_HOME_HOTSPOT11: the top-level HotSpot 11 directory"
+}
+die() { echo "$*" >&2; print_usage; exit 2; }  # complain to STDERR and exit with error
+needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
 
-mkdir -p ${resultdir}
+cl_args=("$@")
 
+#echo "$0 $@"
+#echo "$0 ${cl_args[*]}"
+cl_str="$0"
+for arg in "${cl_args[@]}"; do
+    if [[ "${arg}" == *" "* ]] ; then
+        arg="\"$arg\""
+    fi
+    cl_str="$cl_str $arg"
+done
+echo "$cl_str"
+echo ""
 
-#for rep in 1
-for rep in 1 2 3
+# Replace any Unicode dash types (endash, emdash, etc.) with a normal hyphen:
+#LC_ALL=en_US.UTF-8 dash_types=$(printf "%b" "\U2010\U2011\U2012\U2013\U2014\U2015")
+#cl_args="${cl_args//[$dash_types]/-}"
+
+# Replace any Unicode dash types (endash, emdash, etc.) with a normal hyphen:
+# (this seems to be more portable than the version above)
+for i in "${!cl_args[@]}"; do
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x93")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x94")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x95")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x96")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x97")/-}"
+    cl_args[$i]="${cl_args[$i]//$(printf "%b" "\xe2\x80\x98")/-}"
+done
+
+time_limit="00:15:00"
+reps=3
+while getopts ho:q:t:-: OPT "${cl_args[@]}"; do
+  # support long options: https://stackoverflow.com/a/28466267/519360
+  if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
+    OPT="${OPTARG%%=*}"      # extract long option name
+    OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
+    OPTARG="${OPTARG#=}"      # if long option argument, remove assigning `=`
+  fi
+  case "$OPT" in
+    cpp )    needs_arg; cpp_exe="$OPTARG" ;;
+    java )   needs_arg; java_jar="$OPTARG" ;;
+    exec )   needs_arg; exec_script="$OPTARG" ;;
+    reps )   needs_arg; reps="$OPTARG" ;;
+    q )      needs_arg; queues="$queues $OPTARG" ;;
+    o )      needs_arg; obasedir="$OPTARG" ;;
+    t )      needs_arg; time_limit="$OPTARG" ;;
+    h )      print_usage; exit 0 ;;
+    ??* )    die "Illegal option --$OPT" ;;  # bad long option
+    ? )      print_usage; exit 2 ;;  # bad short option (error reported via getopts)
+  esac
+done
+shift $((OPTIND-1)) # remove parsed options and args from $@ list
+
+if [[ "${exec_script}" == "" ]] ; then
+    die "Error: the script to execute must be specified (e.g., '--exec=lath_exec_all.sh')"
+fi
+if [[ "${queues}" == "" ]] ; then
+    die "Error: at least one slurm queue must be specified (Use 'sinfo' to see the available queues)"
+fi
+
+if [[ "${obasedir}" == "" ]] ; then
+    die "Error: The output directory base name must be specified"
+fi
+
+if ! [[ "${cpp_exe}" == "" ]] ; then
+    # strip off the ".exe" if running in a Windows environment, e.g., cygwin:
+    label="${cpp_exe%%.exe}"
+else
+    if ! [[ "${java_jar}" == "" ]] ; then
+        label="${java_jar%%.jar}"
+    else
+        die "Error: a benchmark to run must be specified (via --cpp or --java)"
+    fi
+fi
+
+if ! [[ "${cpp_exe}" == "" ]] ; then
+    exec_options="${exec_options} --cpp=./${cpp_exe}"
+fi
+if ! [[ "${java_jar}" == "" ]] ; then
+    exec_options="${exec_options} --java=${java_jar}"
+fi
+
+for queue in ${queues}
 do
 
-FileBase="$1_test_rep${rep}"
-sbatch -p ${Queue} -t 00:45:00 --comment=benchmark:${FileBase} \
+resultdir="${obasedir}_${queue}"
+if ! [[ ${obasedir:0:1} == "/" ]] ; then
+    resultdir="$(pwd)/${resultdir}"
+fi
+
+mkdir -p "${resultdir}"
+
+
+
+#for rep in 1 2 3
+for ((rep=1;rep<=reps;rep++))
+do
+
+FileBase="${label}_test_rep${rep}"
+sbatch -p ${queue} -t ${time_limit} "--comment=benchmark:${FileBase}" \
     --exclusive \
-    -e ${resultdir}/${FileBase}.err -o ${resultdir}/${FileBase}.result \
-    --wrap="$5 ./$1 $2 ${resultdir}/${FileBase}"
+    -e "${resultdir}/${FileBase}.err" -o "${resultdir}/${FileBase}.result" \
+    --wrap="${exec_script}${exec_options} -o \"${resultdir}/${FileBase}\""
 
 done
 
-
-
-
+done

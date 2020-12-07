@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 
 namespace harness_utils_private {
 
-const std::string LATH_VERSION="0.5.0";
+const std::string LATH_VERSION="1.0.0";
 
 } // namespace harness_utils_private
 

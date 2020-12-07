@@ -2,7 +2,7 @@
 title: Language-Agnostic Test Harness (LATH) User’s Guide
 ---
 
-June 22, 2020
+November 6, 2020
 
 What is LATH?
 =============
@@ -41,10 +41,8 @@ micro-benchmarking that can result in inaccurate or unreliable results.
 However, note that while a well-designed test harness can take much of the
 burden off of the shoulders of the micro-benchmark developer, the test harness
 cannot remove *all* of the potential hazards which can trap the unwary
-developer. Guidelines and practices to avoid these can be found in Section 6.4,
+developer. Guidelines and practices to avoid these can be found in Section 7.3,
 Benchmark guidelines.
-
-*(XXX add references for further reading)*
 
 Definitions
 ===========
@@ -64,7 +62,8 @@ These are some terms that will be used throughout this document.
 
 -   An *iteration* is one set of successive operations. This is the smallest
     quantity of work for which measurements are reported. The definition of an
-    iteration depends on the benchmark *mode* that is specified.
+    iteration depends on the benchmark *mode* that is specified (See Section
+    7.2.2, The Benchmark Mode, for more details).
 
 -   *Warmup iterations* are initial iterations that are performed in order to
     warm up the target platform. Measurement associated with these iterations
@@ -76,7 +75,7 @@ These are some terms that will be used throughout this document.
 Execution Flow
 ==============
 
-The execution flow is shown in .
+The execution flow is shown in Figure 1.
 
 ![](media/3bdbeeff2fda87ae3eef12fa5b5d237a.png)
 
@@ -97,7 +96,7 @@ In order to provide the optimal testing environment for accurate benchmark
 measurement, LATH first scans the benchmark source code and generates the
 appropriate test harness code for that benchmark. The benchmark developer uses
 annotations within the benchmark code to provide meta-information that indicates
-how LATH should run the benchmark (see Section 6.6, Annotations).
+how LATH should run the benchmark (see Section 7.5, Annotations).
 
 Quick Start
 ===========
@@ -111,24 +110,26 @@ to get started using LATH. They include the steps necessary to:
 
 For further information, consult:
 
--   Section 6, Benchmark Construction and Design, for guidance on writing your
+-   Section 6, LATH Components, for details on the LATH structure and
+    organization.
+
+-   Section 7, Benchmark Construction and Design, for guidance on writing your
     own benchmarks.
 
--   Section 7, LATH C++, for more details on running C++ benchmarks.
+-   Section 8, LATH C++, for more details on running C++ benchmarks.
 
--   Section 8, JMH (for Java benchmarks), for more details on running Java
+-   Section 9, JMH (for Java benchmarks), for more details on running Java
     benchmarks.
 
--   Section 10, Advanced, for advanced topics.
+-   Section 12, Advanced Topics, for a deeper dive into some advanced topics.
 
 Build LATH (and other libraries)
 --------------------------------
 
-**Step 1**: Clone LATH from the GitHub repository (**XXX add GitHub link
-here**):
+**Step 1**: Clone LATH from the GitHub repository:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-git clone <XXX add github specification here>
+git clone <GitHub link>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Step 2**: Install other libraries and utilities, if needed:
@@ -237,6 +238,8 @@ Here, we will build and run the factorial benchmarks as an example.
 
 *Step 1*: Generate and build the test harness executables
 
+(In these examples, we’re going to use the Factorial Benchmark tests.)
+
 First, navigate to the benchmark directory:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -331,44 +334,28 @@ own scripts.
 Here, we’ll use one of the provided scripts, as that is the quickest and easiest
 method:
 
-*Step 2a:* This script uses environment variables. Set one or more of the
-following environment variables to the Java VMs on which you want to run the
-Java benchmark:
-
--   JAVA_HOME_GRAAL: the top-level GraalVM directory
-
--   JAVA_HOME_HOTSPOT8: the top-level HotSpot 8 directory
-
--   JAVA_HOME_HOTSPOT11: the top-level HotSpot 11 directory
-
->   (If none are set, the Java benchmark will not be run.)
-
-*Step 2b:* Use the *lath_exec_all.sh* script to run the benchmark:
+Use the *lath_exec_all.sh* script to run the benchmark:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$LATH_HOME/sample_scripts/lath_exec_all.sh run_factorial run_Factorial.jar results/run1 > run1.out
+$LATH_HOME/sample_scripts/lath_exec_all.sh –-cpp=run_factorial –-java=run_Factorial.jar –o results/run1 > run1.out
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This script will run the C++ executable (run_factorial) and it will execute the
-Java jar file (run_Factorial.jar) on each of the specified Java VMs. Once all of
-these have run once, the script will run each of them a second time (in a
-different order, just in case of any order-dependent performance behavior).
+Java jar file (run_Factorial.jar) on your local Java VM. Once all of these have
+run once, the script will run each of them a second time.
 
-The main results are written to stdout, which we have redirected here to file
-“run1.out”. Additional supplementary output files will be written to directory
-“results” with base file name “run1”.
+The primary results in text format are written to stdout, which we have
+redirected here to file “run1.out”. Additional supplementary output files will
+be written to directory “results” with base file name “run1”.
 
-Here is an example of what the main results should look like:
+Here is an example of what the primary results should look like:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$LATH_HOME/sample_scripts/lath_exec_all.sh run_factorial run_Factorial.jar results/run1
+$LATH_HOME/sample_scripts/lath_exec_all.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1
 
 Running benchmarks:
   C++ benchmark run_factorial
-  Java benchmark run_Factorial.jar on platforms:
-    GraalVM
-    HotSpot 8
-    HotSpot 11
+  Java benchmark run_Factorial.jar
 
 Supplementary output files will be written to "results"
 
@@ -554,7 +541,7 @@ Result for Benchmarks::factorialRecursive:
   (min, avg, max) = (49.0048, 49.7267, 50.6852), stdev = 0.578332
 
 ================================================================================
-Run java (GraalVM)
+Run Java
 java version "1.8.0_72"
 Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
@@ -587,7 +574,6 @@ Result: 22.686 ±(99.9%) 5.911 ns/op [Average]
   Confidence interval (99.9%): [16.774, 28.597]
 
 
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
 # VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
 # VM options: <none>
 # Warmup: 5 iterations, 1 s each
@@ -621,140 +607,6 @@ Result: 27.329 ±(99.9%) 4.652 ns/op [Average]
 Benchmark                              (number)  Mode  Samples   Score  Score error  Units
 l.Factorial.JavaFactorialRecursive           25  avgt        5  22.686        5.911  ns/op
 l.Factorial.JavaFactorialRecursive           30  avgt        5  27.329        4.652  ns/op
-
-================================================================================
-Run java (Hotspot 11)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 39.297 ns/op
-# Warmup Iteration   2: 41.956 ns/op
-# Warmup Iteration   3: 50.330 ns/op
-# Warmup Iteration   4: 43.702 ns/op
-# Warmup Iteration   5: 39.810 ns/op
-Iteration   1: 39.759 ns/op
-Iteration   2: 40.382 ns/op
-Iteration   3: 38.340 ns/op
-Iteration   4: 39.129 ns/op
-Iteration   5: 43.391 ns/op
-
-
-Result: 40.200 ±(99.9%) 7.461 ns/op [Average]
-  Statistics: (min, avg, max) = (38.340, 40.200, 43.391), stdev = 1.937
-  Confidence interval (99.9%): [32.740, 47.661]
-
-
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:38
-# Fork: 1 of 1
-# Warmup Iteration   1: 47.228 ns/op
-# Warmup Iteration   2: 46.552 ns/op
-# Warmup Iteration   3: 49.739 ns/op
-# Warmup Iteration   4: 46.968 ns/op
-# Warmup Iteration   5: 47.937 ns/op
-Iteration   1: 45.372 ns/op
-Iteration   2: 48.738 ns/op
-Iteration   3: 50.462 ns/op
-Iteration   4: 45.152 ns/op
-Iteration   5: 46.771 ns/op
-
-
-Result: 47.299 ±(99.9%) 8.755 ns/op [Average]
-  Statistics: (min, avg, max) = (45.152, 47.299, 50.462), stdev = 2.274
-  Confidence interval (99.9%): [38.544, 56.054]
-
-
-# Run complete. Total time: 00:07:45
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  40.200        7.461  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  47.299        8.755  ns/op
-
-================================================================================
-Run java (Hotspot 8)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 37.712 ns/op
-# Warmup Iteration   2: 41.287 ns/op
-# Warmup Iteration   3: 40.713 ns/op
-# Warmup Iteration   4: 38.654 ns/op
-# Warmup Iteration   5: 38.840 ns/op
-Iteration   1: 39.162 ns/op
-Iteration   2: 36.829 ns/op
-Iteration   3: 37.179 ns/op
-Iteration   4: 36.388 ns/op
-Iteration   5: 38.337 ns/op
-
-
-Result: 37.579 ±(99.9%) 4.399 ns/op [Average]
-  Statistics: (min, avg, max) = (36.388, 37.579, 39.162), stdev = 1.142
-  Confidence interval (99.9%): [33.180, 41.978]
-
-
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:40
-# Fork: 1 of 1
-# Warmup Iteration   1: 46.634 ns/op
-# Warmup Iteration   2: 45.445 ns/op
-# Warmup Iteration   3: 46.493 ns/op
-# Warmup Iteration   4: 48.361 ns/op
-# Warmup Iteration   5: 52.535 ns/op
-Iteration   1: 46.035 ns/op
-Iteration   2: 44.797 ns/op
-Iteration   3: 47.316 ns/op
-Iteration   4: 47.143 ns/op
-Iteration   5: 46.613 ns/op
-
-
-Result: 46.381 ±(99.9%) 3.916 ns/op [Average]
-  Statistics: (min, avg, max) = (44.797, 46.381, 47.316), stdev = 1.017
-  Confidence interval (99.9%): [42.465, 50.297]
-
-
-# Run complete. Total time: 00:07:45
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  37.579        4.399  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  46.381        3.916  ns/op
 
 ================================================================================
 Run C++
@@ -820,141 +672,7 @@ Result for Benchmarks::factorialRecursive:
   (min, avg, max) = (50.8935, 52.0417, 54.9237), stdev = 1.54034
 
 ================================================================================
-Run java (Hotspot 8)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 40.215 ns/op
-# Warmup Iteration   2: 37.469 ns/op
-# Warmup Iteration   3: 37.740 ns/op
-# Warmup Iteration   4: 37.411 ns/op
-# Warmup Iteration   5: 42.123 ns/op
-Iteration   1: 38.740 ns/op
-Iteration   2: 39.371 ns/op
-Iteration   3: 38.116 ns/op
-Iteration   4: 41.222 ns/op
-Iteration   5: 42.003 ns/op
-
-
-Result: 39.891 ±(99.9%) 6.378 ns/op [Average]
-  Statistics: (min, avg, max) = (38.116, 39.891, 42.003), stdev = 1.656
-  Confidence interval (99.9%): [33.512, 46.269]
-
-
-# VM invoker: your_path_to_Java_8/jre1.8.0_72/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:39
-# Fork: 1 of 1
-# Warmup Iteration   1: 46.381 ns/op
-# Warmup Iteration   2: 50.122 ns/op
-# Warmup Iteration   3: 49.043 ns/op
-# Warmup Iteration   4: 43.991 ns/op
-# Warmup Iteration   5: 44.545 ns/op
-Iteration   1: 56.865 ns/op
-Iteration   2: 51.053 ns/op
-Iteration   3: 57.235 ns/op
-Iteration   4: 45.004 ns/op
-Iteration   5: 45.355 ns/op
-
-
-Result: 51.102 ±(99.9%) 22.865 ns/op [Average]
-  Statistics: (min, avg, max) = (45.004, 51.102, 57.235), stdev = 5.938
-  Confidence interval (99.9%): [28.237, 73.967]
-
-
-# Run complete. Total time: 00:07:45
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  39.891        6.378  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  51.102       22.865  ns/op
-
-================================================================================
-Run java (Hotspot 11)
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 44.925 ns/op
-# Warmup Iteration   2: 43.260 ns/op
-# Warmup Iteration   3: 43.266 ns/op
-# Warmup Iteration   4: 40.241 ns/op
-# Warmup Iteration   5: 40.011 ns/op
-Iteration   1: 39.753 ns/op
-Iteration   2: 43.597 ns/op
-Iteration   3: 37.854 ns/op
-Iteration   4: 37.625 ns/op
-Iteration   5: 38.937 ns/op
-
-
-Result: 39.553 ±(99.9%) 9.308 ns/op [Average]
-  Statistics: (min, avg, max) = (37.625, 39.553, 43.597), stdev = 2.417
-  Confidence interval (99.9%): [30.245, 48.861]
-
-
-# VM invoker: your_path_to_Java_11/jdk-11.0.1/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: lath.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:38
-# Fork: 1 of 1
-# Warmup Iteration   1: 47.496 ns/op
-# Warmup Iteration   2: 50.214 ns/op
-# Warmup Iteration   3: 70.361 ns/op
-# Warmup Iteration   4: 46.668 ns/op
-# Warmup Iteration   5: 46.593 ns/op
-Iteration   1: 44.167 ns/op
-Iteration   2: 43.880 ns/op
-Iteration   3: 45.575 ns/op
-Iteration   4: 49.530 ns/op
-Iteration   5: 46.676 ns/op
-
-
-Result: 45.966 ±(99.9%) 8.812 ns/op [Average]
-  Statistics: (min, avg, max) = (43.880, 45.966, 49.530), stdev = 2.288
-  Confidence interval (99.9%): [37.154, 54.777]
-
-
-# Run complete. Total time: 00:07:46
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  39.553        9.308  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  45.966        8.812  ns/op
-
-================================================================================
-Run java (GraalVM)
+Run Java
 java version "1.8.0_72"
 Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
@@ -987,7 +705,6 @@ Result: 22.446 ±(99.9%) 4.600 ns/op [Average]
   Confidence interval (99.9%): [17.845, 27.046]
 
 
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
 # VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
 # VM options: <none>
 # Warmup: 5 iterations, 1 s each
@@ -1026,6 +743,289 @@ l.Factorial.JavaFactorialRecursive           30  avgt        5  26.268        5.
 End: Sun Jun  7 07:50:25 PDT 2020
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+LATH Components
+===============
+
+This section gives an overview of the components of LATH. The top-level LATH
+directory contains lath.rc, and has the following subdirectories: lath-cpp, jmh,
+scripts, sample_scripts, benchmarks, and documentation.
+
+To build the components and create the JMH project directory, run “make” from
+the top-level directory:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cd lath
+make
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+lath.rc
+-------
+
+lath.rc is a script file located in the top-level LATH directory that is
+provided as a convenience. Sourcing this file will correctly set the LATH_HOME
+environment variable and add the appropriate LATH directories your PATH.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+source <path_to_lath_directory>/lath.rc	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+lath-cpp
+--------
+
+\$LATH_HOME/lath-cpp/ contains the source code and build files for the C++
+implementation of LATH, including the test harness generator and the header
+files used by the generated test harness code.
+
+The typical user will interact with the tools in this file indirectly through
+the build scripts provided in lath/scripts.
+
+JMH project directory
+---------------------
+
+Running “make” from the top-level LATH directory or from \$LATH_HOME/jmh will
+build the default JMH project directory (\$LATH_HOME/jmh/lath_bm) that will be
+used to generate the test harness and compile Java benchmarks.
+
+The typical user will interact with this project file indirectly through the
+build scripts provided in lath/scripts.
+
+Scripts
+-------
+
+\$LATH_HOME/scripts/ contains scripts that streamline and normalize the build
+process. These scripts are detailed below.
+
+If you source lath.rc (see above), this directory will be included in your PATH.
+
+### Building Java benchmarks
+
+lath_build_java.sh [(optional) \<JMH project directory\>] \<java source
+filenames\>...
+
+This script takes one or more Java benchmark source files and uses the Java
+Microbenchmark Harness (JMH) to generate the corresponding test harness and
+compile them into a jar file. The script takes care of populating the project
+directory with the source files in the appropriate package directories and
+copies the resulting jar file back to your benchmark directory. The jar file
+name will be based on the name of the first source file on the command line with
+“run_” prepended.
+
+Unless the path to a JMH project directory is specified, then the JMH benchmark
+project directory at \$LATH_HOME/jmh/lath_bm will be used by default (run “make”
+from the top-level directory to create the project directory).
+
+*Examples:*
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+lath_build_java.sh MyBenchmark.java	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This uses the default JMH project directory to generate the test harness and
+build jar file “run_MyBenchmark.jar”.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+lath_build_java.sh Benchmark2.java NeededClass.java MyUtilities.java	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This uses the default JMH project directory to build the benchmark jar file from
+the three specified source files. The output jar file will be named
+“run_Benchmark2.jar”.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+lath_build_java.sh ../private/jmh/bm_project Benchmark3.java
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This uses a JMH project directory located at “../private/jmh/bm_project” to
+build benchmark jar file “run_Benchmark3.jar”.
+
+### Building C++ benchmarks
+
+lath_build_cpp.sh [(optional) \<path to lath-cpp\>] \<C++ source filename\>
+
+This script takes an annotated C++ source file and uses the generator in
+lath-cpp to build the test harness and compile the test harness and benchmark
+into an executable. The executable name will be based on the source file name
+with “run_” prepended.
+
+Unless a path to lath-cpp is specified, \$LATH_HOME/lath-cpp will be used by
+default.
+
+*Example:*
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+lath_build_cpp.sh my_benchmark.cpp	
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+will generate the test harness and build executable “run_my_benchmark”.
+
+Sample_scripts
+--------------
+
+\$LATH_HOME/sample_scripts contains some examples of runtime scripts that can be
+used to run your benchmarks. You can either use these scripts as written,
+customize them for your environment, or use them as templates to write your own.
+
+### lath_exec_all.sh
+
+lath_exec_all.sh -h
+
+lath_exec_all.sh [--cpp=\<C++ executable\>] [--java=\<Java jar file\>]
+
+\-o \<supplementary output directory/file base name\>
+
+This script is intended for use in running one or more versions of a benchmark
+written in different languages in order to compare their performance. This will
+run each of the specified benchmarks twice.
+
+In addition, if a Java benchmark (jar file) is specified, and one or more of the
+following environment variables is defined, it will run the Java benchmark on
+each of the specified VMs:
+
+JAVA_HOME_GRAALVM the top-level GraalVM directory
+
+JAVA_HOME_HOTSPOT8 the top-level HotSpot 8 directory
+
+JAVA_HOME_HOTSPOT11 the top-level HotSpot 11 directory
+
+[On the second time that the benchmark is run, the order will be varied in case
+there exists any order-dependent performance bias.]
+
+If none of these environment variables is defined, then any specified Java
+benchmark will just run using the installed “java” runtime.
+
+The primary results will be written to stdout in text format. Additional data
+formats and supplementary data will also be written to a number of output files.
+The names of these supplementary output files and their location is determined
+by the “output directory/file base name” argument.
+
+*Example:*
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$LATH_HOME/sample_scripts/lath_exec_all.sh --cpp=run_my_benchmark 
+--java=run_MyBenchmark –o my_benchmark_results/test1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+will execute the C++ and Java versions of the specified benchmark,
+“run_my_benchmark” and “run_MyBenchmark” (previously built using the
+lath_build_\*.sh scripts). Each version will be run twice (additionally, if one
+or more of the environment variables described above is set, then the Java
+version of the benchmark will be run twice on each of the specified VMs). Any
+supplementary data files created will be of the form
+“my_benchmark_results/test1\*”.
+
+### lath_run_slurm.sh
+
+lath_run_slurm.sh -h
+
+lath_run_slurm.sh [--cpp=\<C++ executable\>] [--java=\<Java jar file\>]
+
+\--exec=\<script to execute\>
+
+\-q \<queue name (may be repeated)\>
+
+\-o \<output directory base name\>
+
+[-t \<time limit (“00:15:00” by default)\>]
+
+[--reps=\<number of repetitions (3 by default)\>]
+
+This is an example of a script that could be used to run comparisons of one or
+more different language versions of a given benchmark in batch mode using a
+Slurm queue. This sample script is specific to the Slurm environment, but the
+user can copy and modify it for their own environment or use it as an example to
+write their own.
+
+*Required arguments:*
+
+-   One or more benchmarks must be specified, either as a jar file (for Java) or
+    as an executable (for other languages).
+
+-   A script to execute must be specified. lath_run_slurm.sh is written to
+    accept any script whose argument signature conforms to that defined for
+    lath_exec_all.sh (see above).
+
+-   One or more Slurm queues must be specified. The “-q” argument may be
+    specified multiple times on the command line, once for each queue. Multiple
+    job requests will be submitted to each queue, determined by the specified
+    number of repetitions (from "--reps"); each job will run the specified
+    script (from “--exec").
+
+*Optional arguments:*
+
+-   The time limit for each Slurm job, in “HH:MM:SS” format (“00:15:00” by
+    default)
+
+-   The number of repetitions. This determines how many times the script will be
+    submitted to each queue.
+
+The output for all of the jobs on each of the queues will be captured in
+directory
+
+\<output directory base name\>_\<queue\>.
+
+The primary output for each job will be written to a file in that directory
+called \<label\>_test_rep\<N\>.result, where the \<label\> is obtained from the
+benchmark name, and \<N\> is from 1 to the number of repetitions. (Likewise,
+stderr for each job will be directed to \<label\>_test_rep\<N\>.err.)
+Supplementary data files for the job will also be of the form
+“\<label\>_test_rep\<N\>\*”.
+
+*Example:*
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$LATH_HOME/sample_scripts/lath_run_slurm.sh --cpp=run_my_benchmark
+--java=run_MyBenchmark –exec=$LATH_HOME/sample_scripts/lath_exec_all.sh
+-q x86_q –q foo_q –o batch_results1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This will submit 3 jobs each (the default) to Slurm queues “x86_q” and “foo_q”.
+Each job will run the following command:
+
+\$LATH_HOME/sample_scripts/lath_exec_all.sh --cpp=run_my_benchmark
+
+\--java=run_MyBenchmark –o
+batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>
+
+where \<queue\> is either “x86_q” or “foo_q”, and \<N\> is 1, 2, or 3.
+
+The primary results for each job will be written to file:
+batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>.result
+
+(and stderr will be captured in
+batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>.err).
+
+Benchmarks
+----------
+
+This contains some provided benchmarks implemented in multiple languages.
+
+-   array2d_tests: compares row-wise and column-wise walks through 2-dimensional
+    arrays
+
+-   autobox_tests: tests Java autoboxing (and unboxing) performance, with
+    equivalent execution in C++ as a comparative baseline
+
+-   fac_tests: compares iterative and recursive implementations of factorial
+    computations
+
+-   fibo_tests: tests Fibonacci series computations using local and nonlocal
+    variables, with two hand-optimized algorithms for comparison
+
+-   memory_tests: stresses the memory hierarchy
+
+-   xml_transform_tests: tests the performance of an XML transform, compared to
+    a copy operation (as a baseline)
+
+These benchmarks are provided both to provide some “out of the box” examples of
+how LATH can be used, as well as guidelines for creating your own multi-language
+benchmarks.
+
+Documentation
+-------------
+
+This directory contains the LATH User’s Guide in markdown and PDF formats (one
+of which you are reading now).
+
 Benchmark Construction and Design
 =================================
 
@@ -1049,7 +1049,7 @@ too cluttered). However, it shows some of the more common cases.]
 Form of a LATH/JMH Benchmark (Single threaded)
 ----------------------------------------------
 
-LATH and JMH are different from other benchmarking frameworks, as it was
+LATH and JMH are different from other benchmarking frameworks, as they were
 designed for *micro*-benchmarks which tend to be smaller, faster, and more
 self-contained than larger benchmarks. As such, instead of defining timing
 intervals in a program, LATH and JMH are entirely **function based**. Each
@@ -1072,11 +1072,12 @@ refactored into the following five key parts:
     all the data needed by your benchmark, and all the *parameters* to this
     benchmark.
 
-5.  LATH and JMH provide a **BlackHole object** that you use to consume values
+5.  LATH and JMH provide a **Blackhole object** that you use to consume values
     that are produced by your benchmark (either explicitly or implicitly).
 
 >   Tip: When writing your own microbenchmark, it’s often easiest to take a
->   ready made LATH/JMH class and just replace the parts above with your own.
+>   ready made LATH/JMH benchmark file and just replace the parts above with
+>   your own.
 
 Note that Multithreaded benchmarks, especially ones with functional parallelism,
 are even trickier in LATH/JMH. Because parallelism adds complexity to
@@ -1089,22 +1090,18 @@ implemented for JMH/LATH.
 
 ### The \@Benchmark Function
 
--   Additional Benchmark Annotations
-
--   The \@State Object
-
--   The Blackhole object…
-
--   The \@Setup and \@Teardown Methods…
-
--   Working with parallel benchmarks
+The \@Benchmark annotation is at the heart of the LATH/JMH paradigm. This
+annotation denotes the benchmark functions or methods whose performance the test
+harness will be measuring.
 
 This function can (but is not required to) take one or more \@**State object**
 and (optionally) a **Blackhole** object as its inputs, and is the only function
 that is timed. (If you have more than one benchmark function, they will be
 considered independent benchmarks that will be run sequentially, EXCEPT in the
-case of a functionally parallel benchmark, but that will be described in the
-parallel benchmark section.)
+case of a functionally parallel benchmark, but that is described in the parallel
+benchmark section.)
+
+### The Benchmark Mode
 
 The *benchmark mode* effects how performance is computed:
 
@@ -1118,7 +1115,7 @@ The *benchmark mode* effects how performance is computed:
 -   Single shot: measures the time for a single operation
 
 The benchmark mode is specified by the \@BenchmarkMode annotation. (See Section
-6.6, Annotations, for more information)
+7.5, Annotations, for more information)
 
 >   Warning! Sample time and Single shot modes attempt to measure the time for a
 >   single operation. For many microbenchmarks, a single invocation of the
@@ -1129,25 +1126,24 @@ The benchmark mode is specified by the \@BenchmarkMode annotation. (See Section
 
 **Important note:**
 
-Benchmarking issues can occur with the notion of *iteration*. Because
-microbenchmarks are typically very small, the default assumption of LATH/JMH is
-to repeatedly invoke a benchmark function repeatedly for a specified amount of
-*time* (for the *average time*, *throughput*, and *sample time* modes). However,
-this can lead to a misleading comparison between two platforms if the benchmark
-function run time changes over repeated invocations, whether because of the
-benchmark code itself, the state of memory, or in the case of Java, the case of
-dynamic compilations.
-
-It’s also impractical for benchmarks with longer run times, and once again,
-changes the nature of the work when the number of iterations differ. (XXX ?? –
-consider removing)
+Performance measurement errors and biases can be introduced due to way an
+*iteration* is defined. Because microbenchmarks are typically very small, the
+default assumption of LATH/JMH is to repeatedly invoke a benchmark function for
+a specified amount of *time* (for the *average time*, *throughput*, and *sample
+time* modes). However, this can lead to a misleading comparison between two
+languages (or even different platforms for the same language) if the benchmark
+function run time for a given language and/or platform can change over repeated
+invocations, whether because of the benchmark code itself, the state of memory,
+hardware warmup, or (as we see with Java), the case of dynamic compilation and
+optimization.
 
 This problem can be avoided by specifying that the test harness run for a
 specified number of *invocations* rather than a specified amount of time.
-Currently, however, the only way to do this in LATH/JMH is by using the *single
-shot* benchmark mode, which measures the time taken by a single *operation*. You
-can use the *batchSize* argument of the \@Measurement annotation to specify the
-number of invocations for each operation.
+Currently, however, the only way to do this in LATH/JMH is by using the
+*batchSize* argument combined with the *single shot* benchmark mode. The single
+shot mode measures the time taken by a single *operation*, and the *batchSize*
+argument of the \@Measurement and \@Warmup annotations specifies the number of
+invocations for each operation.
 
 ### \@State Objects
 
@@ -1156,10 +1152,6 @@ annotation), but they are *instantiated* by the test harness. A State object can
 be passed to any of the other LATH/JMH functions (benchmark, setup, or teardown)
 as an argument. The State objects are allocated by LATH/JMH in order to control
 memory alignment and (for multithreaded benchmarks) false sharing issues.
-
-, but this currently only applies to the static portion of the benchmark’s
-state. (We hope in the future to provide benchmark support for dynamic
-allocation.) (XXX ?? – ask Jeff)
 
 The values contained within State objects are protected against constant
 folding.
@@ -1176,14 +1168,22 @@ computation that created it must be protected. This can be done implicitly, by
 returning the value from your Benchmark function and letting the test harness
 take care of it, or explicitly by using a Blackhole object.
 
-The Blackhole object has a key method called consume(any variable).
+The Blackhole object has a key method called consume(any variable). By consuming
+a value, the Blackhole protects the computations that produced that value from
+dead code elimination.
 
 ### \@Setup and \@Teardown
 
-These methods are used to initialize and finalize your benchmark, this is most
-often used to initialize and clean up your State objects. The methods take as
-input one or more State objects. The parameter to their annotation defines the
-Level:
+These methods are used to initialize and finalize your benchmark. Some common
+uses for Setup and Teardown methods include:
+
+-   Initializing and cleaning up the State objects.
+
+-   Outputting additional information specific to the benchmark (in Teardown).
+
+The methods take as input one or more State objects. The parameter to the
+\@State annotation defines the “Level”, which determines when and how often they
+will be called:
 
 -   \@Setup(Level.Trial). = called once per Trial, i.e., Setup before any of the
     warmup and benchmark iterations, and Teardown after all iterations have been
@@ -1191,54 +1191,11 @@ Level:
 
 -   \@Setup(Level.Iteration) = called once per iteration.
 
--   Setup(Level.Invocation) = called before every call to each Benchmark method.
-    Warning: this can only be used with sufficiently long-running Benchmark
-    functions, since timing will be interrupted for each invocation. This is
-    commonly used in combination with Single Shot or Sample Time benchmark
-    modes.
-
-Parallel (multi-threaded) benchmarks
-------------------------------------
-
-**TBD**
-
-State is given the parameter of scope:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-@State(Scope.benchmark)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Where scope can be:
-
--   Thread - each thread has its own instance.
-
--   Benchmark - all threads share this one state object.
-
--   Group - each group of threads running a parallel benchmark will use its own
-    instance. See the parallel benchmark section for details.
-
-Note that Setup will we called once for every state object, to allow all state
-objects to be initialized correctly. In order to give each thread its own work
-ID, a static value can be set to zero in the TearDown method and incremented in
-the Setup Method. This gets trickier with parallel benchmarks. [CHECK THIS IS
-TRUE]
-
-### Homogeneous Parallelism (TLP)
-
-### Heterogeneous (functional/producer-consumer) parallelism:
-
-In this more complex case, different groups of threads work on different
-functions simultaneously, and each single function might itself be scalar or
-parallel. This is enabled in JMH in two steps:
-
-1.  Declare more than one function a \@benchmark function. This indicates the
-    heterogeneous (functional) parallelism. For example, one function might
-    produce data while another might consume it, and a third monitor the entire
-    benchmark process. For each function, you can declare the number of threads
-    and state objects as in the homogeneous case.
-
-2.  Set fork to zero. This is a special case value that tells JMH to run all the
-    individual \@benchmark functions simultaneously.
+-   \@Setup(Level.Invocation) = called before every call to each Benchmark
+    method. Warning: this can only be used with sufficiently long-running
+    Benchmark functions, since timing will be interrupted for each invocation.
+    This is commonly used in combination with Single Shot or Sample Time
+    benchmark modes.
 
 Benchmark guidelines
 --------------------
@@ -1321,7 +1278,7 @@ play (such as inlining). Assignment to a volatile value can circumvent this,
 but, if done incorrectly, may skew the results by forcing a cache miss during
 timed execution.
 
--   Each implementation of the test harness provides a BlackHole class which is
+-   Each implementation of the test harness provides a Blackhole class which is
     guaranteed to correctly consume the results in a manner that is as
     lightweight as possible. The benchmark developer is responsible for assuring
     that the result of every computation is either returned by the benchmark
@@ -1384,7 +1341,7 @@ determine the cause of some observed behavior.
     feature. For example, your benchmark could output a *seed* value that could
     be used as input to exactly reproduce the data used in the run. When
     reproducing an earlier run, an annotated Param can be used to specify the
-    seed on the command line (and where, if a seed is not specified, the default
+    seed on the command line (and, if a seed is not specified, the default
     behavior would be to generate a random seed). Note that the value of the
     generated seed should be output as part of a teardown method so that the
     outputting of the value does not contribute to the benchmark timing.
@@ -1429,11 +1386,12 @@ This section provides additional guidelines for multi-threaded benchmarks.
 
 #### False sharing
 
-One source of performance loss that can artificially reduce your benchmark
-results is false sharing, where the private data for two or more threads happens
-to reside in the same cache line (or, equivalently, when private data resides on
-the same cache line with shared data). This can result in repeated cache line
-invalidation, and has the potential to severely degrade performance.
+For multi-threaded benchmarks, one source of performance loss that can
+artificially reduce your benchmark results is false sharing, where the private
+data for two or more threads happens to reside in the same cache line (or,
+equivalently, when private data resides on the same cache line with shared
+data). This can result in repeated cache line invalidation, and has the
+potential to severely degrade performance.
 
 It is thus necessary to ensure that thread-private data is not falsely shared
 with other data.
@@ -1496,9 +1454,9 @@ the best algorithmic choice for that language.
 Support Classes
 ---------------
 
-### BlackHole
+### Blackhole
 
-Each implementation provides a BlackHole class that allows values and results to
+Each implementation provides a Blackhole class that allows values and results to
 be safely and robustly consumed with minimal overhead. This allows the benchmark
 code to avoid pitfalls such as *dead code elimination*.
 
@@ -1676,6 +1634,48 @@ annotations to multiple functions.
 |-----------------------------------------|
 
 
+Parallel (multi-threaded) benchmarks
+------------------------------------
+
+**TBD**
+
+State is given the parameter of scope:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@State(Scope.benchmark)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Where scope can be:
+
+-   Thread - each thread has its own instance.
+
+-   Benchmark - all threads share this one state object.
+
+-   Group - each group of threads running a parallel benchmark will use its own
+    instance. See the parallel benchmark section for details.
+
+Note that Setup will be called once for every state object, to allow all state
+objects to be initialized correctly. (For example) In order to give each thread
+its own work ID, a static value can be set to zero in the TearDown method and
+incremented in the Setup Method. This gets trickier with parallel benchmarks.
+
+1.  Homogeneous Parallelism (TLP)
+
+2.  Heterogeneous (functional/producer-consumer) parallelism:
+
+In this more complex case, different groups of threads work on different
+functions simultaneously, and each single function might itself be scalar or
+parallel. This is enabled in JMH in two steps:
+
+1.  Declare more than one function a \@benchmark function. This indicates the
+    heterogeneous (functional) parallelism. For example, one function might
+    produce data while another might consume it, and a third monitor the entire
+    benchmark process. For each function, you can declare the number of threads
+    and state objects as in the homogeneous case.
+
+2.  Set fork to zero. This is a special case value that tells JMH to run all the
+    individual \@benchmark functions simultaneously.
+
 These annotations describe the way the benchmark process occurs:
 
 -   \@Param - you can automatically parameterize and value in the benchmark to
@@ -1721,12 +1721,12 @@ This enables conditional code to be included within the benchmark code when
 running either within or outside the LATH environment.
 
 -   LATH C++ also provides an alternative notation for annotations (“//\@\@”).
-    See 7.3, Annotations.
+    See 8.3, LATH C++ Annotations.
 
 Example of the former:
 
 An open question is how you test/develop this outside of the test harness? One
-way is to add a null definition of a black hole into your project.
+way is to add a null definition of a Blackhole into your project.
 
 Example of a null Blackhole place holder:
 
@@ -1815,7 +1815,7 @@ LATH C++ Annotations
 
 LATH C++ provides an alternate notation for annotations, where “\@” is replaced
 by “//\@\@”. This enables benchmark code to compile outside of LATH, which can
-be useful for code development outside of LATH. See 7.1.1, Compiling outside of
+be useful for code development outside of LATH. See 8.1.1, Compiling outside of
 LATH.
 
 ### Supported annotations
@@ -1842,7 +1842,7 @@ The following annotations are currently supported by LATH C++:
 
 -   Warmup
 
-See 6.6, Annotations, for general annotation details.
+See 7.5, Annotations, for general annotation details.
 
 Building the benchmark runtime
 ------------------------------
@@ -1874,6 +1874,15 @@ Benchmark runtime options
 
 The generated test executable has some pre-defined command-line options:
 
+>   \-h Prints the usage.
+
+>   \-v Prints the version information.
+
+>   \-p Parameter override: overrides the set of values for a given parameter,
+>   specified by either the unqualified name or the fully qualified name. This
+>   option may be used more than once on the command line for different
+>   parameters. (Examples: “-p some_parm=3,4,5”
+
 >   \-rf Specifies the report format (currently, the only valid option is
 >   “json”)
 
@@ -1884,7 +1893,7 @@ The generated test executable has some pre-defined command-line options:
 >   \-trendfile \<filename\> If specified, the generated file will contain the
 >   detailed trend information for warmup and for relative CPU speed
 >   measurements at runtime. [Note: this can generate a lot of data,
->   particularly for long-running benchmarks!] See Section 10.3, CPU frequency
+>   particularly for long-running benchmarks!] See Section 12.3, CPU frequency
 >   monitoring, for more details.
 
 For parameters, you can override what’s in the code, by invoking no command line
@@ -1905,9 +1914,9 @@ JMH Setup
 
 -   STEP 3. Installing maven (mvn)
 
--   STEP 4. Installing jmh and creating your first jmh Java project….
+-   STEP 4. Installing JMH and creating your first JMH Java project….
 
--   STEP 5. Building and running your jmh project…
+-   STEP 5. Building and running your JMH project…
 
 (Building from source is NOT recommended due to dependencies on other projects.)
 It is easy to download and install a ready made binary package from the Oracle
@@ -1954,7 +1963,7 @@ brew install maven
 
 **WARNING** - if you do "brew install mvn", it will install “mvnvm” which stands
 for “maven version manager”. Unfortunately, this is a version of Maven from
-2010, and it’s incompatible with modern jmh! Instead, make sure you say brew
+2010, and it’s incompatible with modern JMH! Instead, make sure you say brew
 install maven or brew upgrade maven.
 
 Note that if you use brew, you’ll probably already have the needed paths in your
@@ -1972,7 +1981,7 @@ Note that for java 13, we need maven version 3.6.2
 (If you do NOT plan on doing a JMH java project, you can focus on just the C/C++
 project.)
 
-Maven can be used to install jmh as a project dependency by creating a JMH
+Maven can be used to install JMH as a project dependency by creating a JMH
 project, which you’ll presumably need anyway.
 
 Here are the inputs you give to maven to generate a new JMH project: Create a
@@ -2031,15 +2040,15 @@ you can execute it by running:
 java -jar target/benchmarks.jar
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The goal of LAFF is to support a subset of the JMH framework for
-C/C++benchmarks. This means that if you understand JMH, you will understand most
-of what you need to know to port benchmarks to both JMH and LAFF. There is a
-wealth of detailed, yet incomplete explanations of JMH on the web (some links
-below), but unfortunately, none just come out and define the things you need to
-know to use JMH. So we will define the key elements of JMH here, and you can
-learn JMH in more depth online…. You might want to read our summary first. :)
-Here we assume you know why you want to use JMH for java benchmarking, and we’ll
-give you a solid reference of terms on HOW to use it.
+LATH is intentionally designed to be compatible with the JMH framework. This
+means that if you understand JMH, you will understand most of what you need to
+know to port benchmarks to both JMH and LATH. There is a wealth of detailed, yet
+incomplete explanations of JMH on the web, but unfortunately, none just come out
+and define the things you need to know to use JMH. So we will define the key
+elements of JMH here, and you can learn JMH in more depth online…. You might
+want to read our summary first. :) Here we assume you know why you want to use
+JMH for java benchmarking, and we’ll give you a solid reference of terms on HOW
+to use it.
 
 Getting the JMH source code and building it to create the API JavaDocs…
 -----------------------------------------------------------------------
@@ -2076,7 +2085,7 @@ echo $JAVA_HOME
 
 -   hg clone http://hg.openjdk.java.net/code-tools/jmh/ jmh
 
--   Then build jmh. You should skip the tests, because it will not pass all of
+-   Then build JMH. You should skip the tests, because it will not pass all of
     them. It will also not compile without some errors and a lot of warnings:
 
 -   cd jmh/  
@@ -2085,7 +2094,7 @@ echo $JAVA_HOME
     Note that at this point, maven will download the repo onto your machine in
     \~/.m2
 
--   If you wish, you can attempt to also build the standard jmh benchmarks,
+-   If you wish, you can attempt to also build the standard JMH benchmarks,
     although this is not needed to get the java docs.
 
 -   mvn clean install  
@@ -2116,7 +2125,10 @@ Benchmark runtime options
 LATH JS
 =======
 
-**TBD**
+LATH for Javascript will be available soon.
+
+Limitations, Future Growth, and Reporting Issues
+================================================
 
 Advanced Topics
 ===============
@@ -2228,7 +2240,7 @@ the results are being used. However, some ad hoc methods used to do this (such
 as returning a computed value) can still fail, particularly when other
 optimizations come into play (such as inlining).
 
-Thus, the test harness provides the BlackHole class which is guaranteed to
+Thus, the test harness provides the Blackhole class which is guaranteed to
 correctly consume the results in a manner that is as lightweight as possible.
 This frees the developer from the burden of knowing how to correctly apply one
 of the ad hoc methods.
@@ -2433,8 +2445,8 @@ The generated wrapper code will implement code that will do the following:
 >   output that can be used to reconstruct the memory layout in a subsequent
 >   run.]
 
--   Instantiate a BlackHole object that will be used to consume values returned
-    by the benchmark methods. Instantiate any additional BlackHole objects as
+-   Instantiate a Blackhole object that will be used to consume values returned
+    by the benchmark methods. Instantiate any additional Blackhole objects as
     required to be passed as arguments to benchmark, setup, or teardown methods,
     if specified.
 
@@ -2482,7 +2494,7 @@ The generated wrapper code will implement code that will do the following:
     optimizations, depending on the capabilities of the target language.
 
 -   If a benchmark method returns a value, that value should be consumed by a
-    BlackHole object.
+    Blackhole object.
 
 -   Make calls to the appropriate system timing facility to collect timing
     information, depending on the measurement mode indicated. The placement and
@@ -2629,7 +2641,7 @@ start the port. (In testing, we found for this benchmark the slowdown is around
 
 Because current JMH/LATH support for parallel benchmarks are incomplete, we'll
 also wrap the parallel version of our benchmark the same way, and just use the
-built in parallelism instead of jmh at the moment...
+built in parallelism instead of JMH at the moment...
 
 We will also preserve the internal app timing in the wrapper. This will also add
 overhead, but will provide a valuable check to make sure the timing reported by
@@ -2876,21 +2888,21 @@ It works!
 
 In this example, we clearly use the return value of the benchmark function - to
 print out performance in the TearDown method. So in principle, we don't need to
-use a Black Hole object. 0n fact, both lath and JMH will automatically use a
-black hole object for the value returned by a benchmark function.0 The problem
-is there is a risk that someone else will see that and say, "we don't need to
-print out this result - so let's just comment this out." And all of a sudden,
-the benchmark will run much faster because the entire thing was dead code
-eliminated. So just to be safe, we'll use a black hole object on the result.
+use a Blackhole object. In fact, both LATH and JMH will automatically use a
+Blackhole object for the value returned by a benchmark function. The problem is
+there is a risk that someone else will see that and say, "we don't need to print
+out this result - so let's just comment this out." And all of a sudden, the
+benchmark will run much faster because the entire thing was dead code
+eliminated. So just to be safe, we'll use a Blackhole object on the result.
 
-Of course, you initially won't want to use a real black hole object until you're
+Of course, you initially won't want to use a real Blackhole object until you're
 ready to port to LATH. SO we've provided a simple compatibility header to fake
-the availability of lath functionality in your pre-transformed program for
+the availability of LATH functionality in your pre-transformed program for
 testing. At the top of your program, just include "lath.h". Now we can add a few
-things from lath/jmh:
+things from LATH/JMH:
 
 Let's use the java Threads.Max in our Setup function. (In the future, we will
-add to lath a C compatible format for the enums.)
+add to LATH a C compatible format for the enums.)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //@@Setup(Level.Invocation)
@@ -2902,7 +2914,7 @@ void Setup(MyState_t &state) {
 [...]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now let's black hole consume our result in the teardown function... The way this
+Now let's Blackhole consume our result in the teardown function... The way this
 works in JMH is you specify a Blackhole as a function argument, and it will be
 allocated and passed. Unfortunately, for us, this means allocating one and using
 it with our driver functions...
@@ -2912,26 +2924,26 @@ it with our driver functions...
 void Teardown(MyState_t &state, Blackhole &bh)
   {
   // Consume the most important return value - the operation count:
-  bh.consume(state.brots_per_second); // STEP 6 - add black hole support
+  bh.consume(state.brots_per_second); // STEP 6 - add Blackhole support
 [...]
 
 void DriveBenchmark()
   {
   const int tot_runs = 3; // best time of 3
   MyState_t state;
-  Blackhole bh; // STEP 6 - add black hole support
+  Blackhole bh; // STEP 6 - add Blackhole support
     
   for (int run = 0; run < tot_runs; run++)
     {
     Setup(state);
     ComputeMandelImageState(state);
-    Teardown(state, bh); // STEP 6 - add black hole support
+    Teardown(state, bh); // STEP 6 - add Blackhole support
     }
   for (int run = 0; run < tot_runs; run++)
     {
     Setup(state);
     ComputeMandelImageMTState(state);
-    Teardown(state, bh); // STEP 6 - add black hole support
+    Teardown(state, bh); // STEP 6 - add Blackhole support
     }
   }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

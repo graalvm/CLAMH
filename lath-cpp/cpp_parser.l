@@ -1299,8 +1299,12 @@ void gen_benchmark_calls(const std::string &indent) {
 
       if (params.size() > 0) {
          std::cout << indent << "   std::cout << \"Parameters: (\";" << std::endl;
+         bool first = true;
          for (auto &param : params) {
-            std::cout << indent << "   std::cout << \"" << param.full_name << " = \" << "
+            std::cout << indent << "   std::cout << \"";
+            if (first) { first = false; }
+            else       { std::cout << ",\\n             "; }
+            std::cout << param.full_name << " = \" << "
                       << param.full_name << ";" << std::endl;
          }
          std::cout << indent << "   std::cout << \")\" << std::endl;" << std::endl;
@@ -1700,10 +1704,12 @@ void gen_benchmark_calls(const std::string &indent) {
       std::cout << indent << "   if (cl_options.postream_trends) {" << std::endl;
       std::cout << indent << "      (*cl_options.postream_trends) << \"Warmup and CPU speed trends\" << std::endl;" << std::endl;
       std::cout << indent << "      (*cl_options.postream_trends) << \"benchmark: \" << benchmark_name << std::endl;" << std::endl;
-      std::cout << indent << "      (*cl_options.postream_trends) << \"Parameters:\" << std::endl;" << std::endl;
-      for (auto &param : params) {
-         std::cout << indent << "      (*cl_options.postream_trends) << \"    " << param.full_name
-                   << " = \" << " << param.full_name << " << std::endl;" << std::endl;
+      if (params.size() > 0) {
+         std::cout << indent << "      (*cl_options.postream_trends) << \"Parameters:\" << std::endl;" << std::endl;
+         for (auto &param : params) {
+            std::cout << indent << "      (*cl_options.postream_trends) << \"    " << param.full_name
+                      << " = \" << " << param.full_name << " << std::endl;" << std::endl;
+         }
       }
       std::cout << indent << "      " << std::endl;
       std::cout << indent << "      (*cl_options.postream_trends) << \"Warmup:\" << std::endl;" << std::endl;
@@ -1798,16 +1804,28 @@ void gen_param_loops(const std::string &indent, int param_idx) {
    if (params.size() > param_idx) {
       if (param_idx == 0) {
          // Before the first loop, generate the parameter value vectors
-         std::cout << indent << "// Parameter value vectors:" << std::endl;
+         std::cout << indent << "// Default parameter value vectors:" << std::endl;
+         std::cout << indent << "harness_utils_private::ParamHandler param_handler;" << std::endl;
          int pidx = 0;
          for (auto &param : params) {
             std::stringstream ss;
             ss << "pvec" << (pidx+1) << "__" << param.name << "_";
             param.pvec_name = ss.str();
-            std::cout << indent << "std::vector<std::string> " << param.pvec_name << " = "
-                      << param.pval_list_str << ";" << std::endl;
+
+            std::cout << indent << "param_handler.addParam(\"" << param.name << "\", \""
+                      << param.full_name << "\", " << param.pval_list_str << ");" << std::endl;
+            
+            //std::cout << indent << "std::vector<std::string> " << param.pvec_name << " = "
+            //          << param.pval_list_str << ";" << std::endl;
             ++pidx;
          }
+         std::cout << indent << std::endl;
+         std::cout << indent << "// Check for parameter overrides:" << std::endl;
+         std::cout << indent << "param_handler.setOverrides(cl_options.param_overrides);" << std::endl;
+         std::cout << indent << std::endl;
+         std::cout << indent << "// Print out the parameter sets:" << std::endl;
+         std::cout << indent << "param_handler.printParams();" << std::endl;
+         std::cout << indent << std::endl;
       }
       // Generate the next parameter loop
       auto &param = params[param_idx];
@@ -1815,6 +1833,7 @@ void gen_param_loops(const std::string &indent, int param_idx) {
       ss << (param_idx+1);
       std::string num_str = ss.str();
       std::string val_str = "param" + num_str + "__" + param.name + "_valstr";
+      std::cout << indent << "const auto &" << param.pvec_name << " = param_handler.getParamVals(\"" << param.full_name << "\");" << std::endl;
       std::cout << indent << "for (auto &" << val_str << " : " << param.pvec_name << ") {" << std::endl;
       std::cout << indent << "   if (harness_utils_private::setParam(" << param.full_name << ", " << val_str << ") == false) {" << std::endl;
       std::cout << indent << "      std::cerr << \"Error: invalid value specified for parameter " << param.full_name
@@ -1832,7 +1851,7 @@ void gen_param_loops(const std::string &indent, int param_idx) {
       } else {
          // Dump the current parameter values
          std::cout << indent << "std::cout << std::endl;" << std::endl;
-         std::cout << indent << "std::cout << \"Parameter values:\" << std::endl;" << std::endl;
+         std::cout << indent << "std::cout << \"-----\\nUsing parameter values:\" << std::endl;" << std::endl;
          for (auto &param : params) {
             std::cout << indent << "std::cout << \"    " << param.full_name
                       << " = \" << " << param.full_name << " << std::endl;" << std::endl;
@@ -1971,12 +1990,13 @@ void gen_main_body(const std::string &indent) {
    std::cout << indent << "" << std::endl;
    // main:
    std::cout << indent << "int main(int argc, char **argv) {" << std::endl;
-   std::cout << indent << "   harness_utils_private::printVersion();" << std::endl;
-   std::cout << indent << std::endl;
    std::cout << indent << "   harness_utils_private::CLOptions cl_options;" << std::endl;
-   std::cout << indent << std::endl;
    std::cout << indent << "   harness_utils_private::parseCommandLine(cl_options, argc, argv);" << std::endl;
-   std::cout << indent << "   harness_gen_code::runEverything(cl_options);" << std::endl;
+   std::cout << indent << std::endl;
+   std::cout << indent << "   if (cl_options.no_run == false) {" << std::endl;
+   std::cout << indent << "      harness_utils_private::printVersion();" << std::endl;
+   std::cout << indent << "      harness_gen_code::runEverything(cl_options);" << std::endl;
+   std::cout << indent << "   }" << std::endl;
    std::cout << indent << std::endl;
    std::cout << indent << "   return 0;" << std::endl;
    std::cout << indent << "}" << std::endl;

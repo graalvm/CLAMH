@@ -37,52 +37,116 @@
 
 
 # Arguments:
-# $1: Java source file
-# $2: (optional) JMH benchmark project directory ($LATH_HOME/jmh/lath_bm by default)
+# Optional first argument: JMH benchmark project directory ($LATH_HOME/jmh/lath_bm by default)
+# Remaining argument(s):  Java source files
 
 
-if [[ "$1" == "" ]] ; then
-  echo "Usage:  ${0##*/} <java source filename> [(optional) path to JMH project directory]"
-  exit 1
+#if [[ "$2" == "" ]] ; then
+#  if [[ "$LATH_HOME" == "" ]] ; then
+#    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
+#    echo "        or specify a JMH benchmark project directory in the second argument."
+#    exit 1
+#  else
+#    jmh_bm_dir=$LATH_HOME/jmh/lath_bm
+#  fi
+#else
+#  jmh_bm_dir=$2
+#fi
+#
+#if ! [[ -d "$jmh_bm_dir" ]] ; then
+#  echo "ERROR:  JMH benchmark project directory \"$jmh_bm_dir\" does not exist or is not a directory."
+#  exit 1
+#fi
+
+
+jmh_bm_dir=""
+#base_name=""
+base_dir=""
+base_fname=""
+if [[ "$LATH_HOME" != "" ]] ; then
+  jmh_bm_dir=$LATH_HOME/jmh/lath_bm
 fi
 
-if [[ "$2" == "" ]] ; then
-  if [[ "$LATH_HOME" == "" ]] ; then
-    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
-    echo "        or specify a JMH benchmark project directory in the second argument."
-    exit 1
+FIRST_ARG=1
+for arg in "$@"
+do
+  if [ -d "$arg" ] ; then
+    if [[ $FIRST_ARG == 1 ]] ; then
+      jmh_bm_dir=$arg
+    else
+      echo "ERROR:  $arg is not a source file"
+      exit 1
+    fi
   else
-    JMH_BM_DIR=$LATH_HOME/jmh/lath_bm
-  fi
-else
-  JMH_BM_DIR=$2
-fi
+    if [[ "$jmh_bm_dir" == "" ]] ; then
+      echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
+      echo "        or specify a JMH benchmark project directory as the first argument."
+      exit 1
+    fi
+    if ! [[ -d "$jmh_bm_dir" ]] ; then
+      echo "ERROR:  JMH benchmark project directory \"$jmh_bm_dir\" does not exist or is not a directory."
+      exit 1
+    fi
+    if [[ "$base_fname" == "" ]] ; then
+        #base_name=`echo $arg | sed 's/\.java$//'`
+        if [[ "$arg" == *"/"* ]] ; then
+            base_dir="${arg%/*}/"
+            base_fname="${arg##*/}"
+        else
+            base_dir=""
+            base_fname="$arg"
+        fi
+        base_fname="${base_fname%.java}"
+        echo "Preparing benchmark project directory..."
+        rm -rf "$jmh_bm_dir/src/main/java/*"
+    fi
 
-if ! [[ -d $JMH_BM_DIR ]] ; then
-  echo "ERROR:  JMH benchmark project directory \"$JMH_BM_DIR\" does not exist or is not a directory."
+    if ! [[ -f "$arg" ]] ; then
+        echo "ERROR:  File \"$arg\" does not exist."
+        exit 1
+    fi
+    package_path=$(grep '^package' "$arg" | cut '-d ' -f2,2 | cut '-d;' -f1,1 | sed 's|\.|/|g')
+    mkdir -p "$jmh_bm_dir/src/main/java/$package_path"
+    cp "$arg" "$jmh_bm_dir/src/main/java/$package_path"
+  fi
+  FIRST_ARG=0
+done
+
+
+#package_path=$(grep '^package' "$1" | cut '-d ' -f2,2 | cut '-d;' -f1,1 | sed 's|\.|/|g')
+
+##base_name=$(echo $1 | sed 's/\.java$//')
+#if [[ "$1" == *"/"* ]] ; then
+#    base_dir="${1%/*}/"
+#    base_fname="${1##*/}"
+#else
+#    base_dir=""
+#    base_fname="$1"
+#fi
+#base_fname="${base_fname%.java}"
+
+#echo "Preparing benchmark project directory..."
+#rm -rf "$jmh_bm_dir/src/main/java/*"
+#mkdir -p "$jmh_bm_dir/src/main/java/$package_path"
+#cp "$1" "$jmh_bm_dir/src/main/java/$package_path"
+
+
+#echo ${base_dir} ${base_fname} $package_path
+
+if [[ "$base_fname" == "" ]] ; then
+  echo "Usage:  ${0##*/} [(optional) path to JMH project directory] <java source filenames>..."
   exit 1
 fi
-
-
-package_path=`grep '^package' $1 | cut '-d ' -f2,2 | cut '-d;' -f1,1 | sed 's|\.|/|g'`
-
-base_name=`echo $1 | sed 's/\.java$//'`
-
-
-#echo $base_name $package_path
-
-echo "Preparing benchmark project directory..."
-rm -rf $JMH_BM_DIR/src/main/java/*
-mkdir -p $JMH_BM_DIR/src/main/java/$package_path
-cp $1 $JMH_BM_DIR/src/main/java/$package_path
 
 echo "Building jar file..."
-cd $JMH_BM_DIR
+cd "$jmh_bm_dir" || exit 2
 rm -f target/benchmarks.jar
 mvn clean install
-cd -
+cd - || exit 2
 
-cp $JMH_BM_DIR/target/benchmarks.jar run_${base_name}.jar
+jarfilename="${base_dir}run_${base_fname}.jar"
 
-echo "Done. run_${base_name}.jar built."
+cp "$jmh_bm_dir/target/benchmarks.jar" "$jarfilename"
+
+echo "Done. $jarfilename built."
 
