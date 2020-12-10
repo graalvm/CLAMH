@@ -146,7 +146,9 @@ cd - || exit 2
 
 jarfilename="${base_dir}run_${base_fname}.jar"
 
-cp "$jmh_bm_dir/target/benchmarks.jar" "$jarfilename"
-
-echo "Done. $jarfilename built."
-
+if [[ -f "$jmh_bm_dir/target/benchmarks.jar" ]] ; then
+    cp "$jmh_bm_dir/target/benchmarks.jar" "$jarfilename"
+    echo "Done. $jarfilename built."
+else
+    echo "Build failed"
+fi
