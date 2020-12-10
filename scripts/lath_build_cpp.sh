@@ -104,5 +104,8 @@ echo "Generating test harness ($gen_file)..."
 echo "Building executable..."
 g++ -std=c++11 -O3 "-I$LATH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
 
-echo "Done. ${base_dir}run_${base_fname} built."
-
+if [[ -f "${base_dir}run_${base_fname}" ]] ; then
+    echo "Done. ${base_dir}run_${base_fname} built."
+else
+    echo "Build failed"
+fi
