@@ -40,10 +40,20 @@
 # Optional first argument: path to directory lath-cpp ($LATH_HOME/lath-cpp by default)
 # Remaining argument: C++ source file
 
+print_usage() {
+    echo "Usage:  ${0##*/} [(optional) path to lath-cpp] <c++ source filename>"
+    echo "        Note: will use the compiler specified in environment variable CPP."
+    echo "        [If CPP is not set, will use g++ by default.]"
+}
+
+if [[ "$CPP" == "" ]] ; then
+    # g++ by default
+    CPP=g++
+fi
 
 if [[ "$1" == "" ]] ; then
-  echo "Usage:  ${0##*/} [(optional) path to lath-cpp] <c++ source filename>"
-  exit 1
+    print_usage
+    exit 1
 fi
 
 if [ -d "$1" ] ; then
@@ -65,7 +75,7 @@ fi
 
 if [[ "$source_file" == "" ]] ; then
     echo "ERROR:  No source file specified."
-    echo "Usage:  ${0##*/} [(optional) path to lath-cpp] <c++ source filename>"
+    print_usage
     exit 1
 fi
 
@@ -102,7 +112,8 @@ echo "Generating test harness ($gen_file)..."
 "$LATH_CPP_DIR/cpp_parser" "$source_file" > "$gen_file" || exit 1
 
 echo "Building executable..."
-g++ -std=c++11 -O3 "-I$LATH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
+echo "Using compiler:  $CPP"
+"$CPP" -std=c++11 -O3 "-I$LATH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
 
 if [[ -f "${base_dir}run_${base_fname}" ]] ; then
     echo "Done. ${base_dir}run_${base_fname} built."
