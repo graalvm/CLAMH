@@ -24,7 +24,7 @@
  */
 
 //package org.graalvm.benchmarks;
-package leick;
+package clamh;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
