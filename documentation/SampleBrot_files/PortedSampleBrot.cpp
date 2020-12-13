@@ -221,7 +221,7 @@ void Teardown(MyState_t &state, Blackhole &bh)
 	}
 
 //-----------------------------------------------------
-// STEP 5: Create a driver loop to mimic the test harness.
+// STEP 5: Create a driver loop to mimic the benchmark harness.
 //-----------------------------------------------------
 void DriveBenchmark()
 	{
