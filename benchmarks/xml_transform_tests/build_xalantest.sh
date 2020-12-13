@@ -39,32 +39,32 @@
 # XALAN_DIR: the top-level xalan directory
 
 # Arguments:
-# $1: (optional) path to directory lath-cpp
+# $1: (optional) path to directory clamh-cpp
 
 if [[ "$1" == "" ]] ; then
-  if [[ "$LATH_HOME" == "" ]] ; then
-    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
-    echo "        or specify the path to lath-cpp as an argument."
+  if [[ "$CLAMH_HOME" == "" ]] ; then
+    echo "ERROR:  CLAMH_HOME not set. You must set environment variable CLAMH_HOME "
+    echo "        or specify the path to clamh-cpp as an argument."
     exit 1
   else
-    LATH_CPP_DIR=$LATH_HOME/lath-cpp
+    CLAMH_CPP_DIR=$CLAMH_HOME/clamh-cpp
   fi
 else
-  LATH_CPP_DIR=$1
+  CLAMH_CPP_DIR=$1
 fi
 
-if ! [[ -d $LATH_CPP_DIR ]] ; then
-  echo "ERROR:  LATH-C++ directory \"$LATH_CPP_DIR\" does not exist or is not a directory."
+if ! [[ -d $CLAMH_CPP_DIR ]] ; then
+  echo "ERROR:  CLAMH-C++ directory \"$CLAMH_CPP_DIR\" does not exist or is not a directory."
   exit 1
 fi
 
 gen_file="run_xalantest.cpp"
 
 echo "Generating test harness ($gen_file)..."
-"$LATH_CPP_DIR/cpp_parser" xalantest.cpp > "$gen_file"
+"$CLAMH_CPP_DIR/cpp_parser" xalantest.cpp > "$gen_file"
 
 echo "Building executable..."
-g++ -std=c++11 -O3 "-I$LATH_CPP_DIR" "-I${XALAN_DIR}/include" "-L${XALAN_DIR}/lib" -lxalan-c -lxalanMsg -lxerces-c -o run_xalantest "$gen_file" || exit 1
+g++ -std=c++11 -O3 "-I$CLAMH_CPP_DIR" "-I${XALAN_DIR}/include" "-L${XALAN_DIR}/lib" -lxalan-c -lxalanMsg -lxerces-c -o run_xalantest "$gen_file" || exit 1
 
 echo "Done. run_xalantest built."
 

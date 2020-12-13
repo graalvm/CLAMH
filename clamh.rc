@@ -39,20 +39,20 @@ if type realpath &> /dev/null; then
 
    # Use realpath if it exists to get the actual path with no soft links
    if [[ -n "$BASH_VERSION" ]] ; then
-      export LATH_HOME=$(dirname $(realpath $(which ${BASH_SOURCE[0]})))
+      export CLAMH_HOME=$(dirname $(realpath $(which ${BASH_SOURCE[0]})))
    else
-      export LATH_HOME=$(dirname $(realpath $(which $0)))
+      export CLAMH_HOME=$(dirname $(realpath $(which $0)))
    fi
 
 else
 
    # Otherwise, this should work on any system, but the path might include soft links
    if [[ -n "$BASH_VERSION" ]] ; then
-      export LATH_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+      export CLAMH_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
    else
-      export LATH_HOME="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
+      export CLAMH_HOME="$( cd "$( dirname "$0" )" >/dev/null 2>&1 && pwd )"
    fi
 
 fi
 
-export PATH=$PATH:$LATH_HOME/scripts
+export PATH=$PATH:$CLAMH_HOME/scripts

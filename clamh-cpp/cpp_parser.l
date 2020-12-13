@@ -2889,7 +2889,7 @@ int main(int argc, char **argv)
 
 
    // Output the stripped benchmark file:
-   std::cout << "\n#define LATH" << std::endl;
+   std::cout << "\n#define CLAMH" << std::endl;
    std::cout << "\n// ========== Stripped file ===========\n" << std::endl;
 
    for (auto &file_line : file_lines) {

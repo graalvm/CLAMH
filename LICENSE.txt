@@ -1,5 +1,5 @@
 
-All LATH code and all benchmarks, with the exception of the Java benchmarks, are
+All CLAMH code and all benchmarks, with the exception of the Java benchmarks, are
 distributed under the Universal Permissive License (UPL), v1.0.
 
 --------------------
@@ -42,7 +42,7 @@ DEALINGS IN THE SOFTWARE.
 
 --------------------
 
-All Java benchmark source files, as separate programs aggregated with the LATH
+All Java benchmark source files, as separate programs aggregated with the CLAMH
 distribution, due to their dependence on JMH, are distributed under the GNU
 Public License (GPL), v2.0, with Classpath Exception.
 

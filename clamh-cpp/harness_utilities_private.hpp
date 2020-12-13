@@ -55,7 +55,7 @@ DEALINGS IN THE SOFTWARE.
 #include <fstream>
 #include <initializer_list>
 
-#include "lath_version.hpp"
+#include "clamh_version.hpp"
 #include "Blackhole.hpp"
 //#include "Control.hpp"
 #include "CommandOptionHandler.h"
@@ -92,9 +92,9 @@ typedef std::chrono::nanoseconds::rep IntTimeNS;
 #define STRINGIFY(x) #x
 #define VER_STRING(major, minor, patch) STRINGIFY(major) "." STRINGIFY(minor) "." STRINGIFY(patch)
 
-// Print LATH version and the compiler version
+// Print CLAMH version and the compiler version
 void printVersion() {
-  cout << "LATH version: " << LATH_VERSION << std::endl;
+  cout << "CLAMH version: " << CLAMH_VERSION << std::endl;
 
 // This should work for g++ and clang (and possibly other compilers):
 #if defined(__clang__)
@@ -585,10 +585,10 @@ struct CLOptions {
   std::ostream *postream_json{nullptr};
 };
 
-class LATHOptionHandler : public CommandOptionHandler {
+class CLAMHOptionHandler : public CommandOptionHandler {
    CLOptions &cl_options_;
 public:
-   LATHOptionHandler(const char *opdef,     ///< Option definition string
+   CLAMHOptionHandler(const char *opdef,     ///< Option definition string
                      CLOptions &cl_options) ///< Parsed command-line option data
       : CommandOptionHandler(opdef),
         cl_options_(cl_options)
@@ -614,7 +614,7 @@ void parseCommandLine(CLOptions &cl_options, int argc, char **argv) {
    const char *validOptions = "winnow-thresh:, trendfile:, rf:, rff:, p:, i:, r:, wi:, w:, h, v";
 
    //OptionAndFilenameHandler COH(validOptions, 0);
-   LATHOptionHandler COH(validOptions, cl_options);
+   CLAMHOptionHandler COH(validOptions, cl_options);
    
    try
    {
@@ -1122,7 +1122,20 @@ struct ResultOutputInfo {
     dom.SetArray();
     //rapidjson::Value bm_template;
     bm_template.SetObject();
-    bm_template.AddMember("jmhVersion", "LATH 0.1", dom.GetAllocator());
+
+    // We have to do these machinations with const_cast and such to get around some very
+    // unfortunate limitations in the rapidjson API
+    std::string ver_str("CLAMH " + CLAMH_VERSION);
+    const size_t ver_str_max = 30;
+    const char ver_cstr[ver_str_max] = "CLAMH X.X.X";
+    assert(ver_str.size() < ver_str_max);
+    strncpy(const_cast<char *>(ver_cstr), ver_str.c_str(), (ver_str_max-1));
+
+    //std::cout << "*************************************************************************" << std::endl;
+    //std::cout << "ver_cstr = " << ver_cstr << std::endl;
+    //std::cout << "*************************************************************************" << std::endl;
+    
+    bm_template.AddMember("jmhVersion", ver_cstr, dom.GetAllocator());
     bm_template.AddMember("benchmark", "", dom.GetAllocator());
     bm_template.AddMember("mode", "", dom.GetAllocator());
     bm_template.AddMember("threads", 0, dom.GetAllocator());
