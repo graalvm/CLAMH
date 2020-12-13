@@ -472,8 +472,8 @@ The Apache Software Foundation License, Version 2.0
    END OF TERMS AND CONDITIONS
 
 
---------------------
-JMH Test Harness
+---------------------
+JMH Benchmark Harness
 
 The GNU General Public License (GPL) with Classpath Exception
 

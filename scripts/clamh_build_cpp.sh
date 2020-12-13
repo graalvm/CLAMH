@@ -111,7 +111,7 @@ base_fname="${base_fname%.cpp}"
 
 gen_file="${base_dir}run_${base_fname}.cpp"
 
-echo "Generating test harness ($gen_file)..."
+echo "Generating benchmark harness ($gen_file)..."
 "$CLAMH_CPP_DIR/cpp_parser" "$source_file" > "$gen_file" || exit 1
 
 echo "Building executable..."

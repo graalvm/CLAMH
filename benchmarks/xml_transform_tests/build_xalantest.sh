@@ -60,7 +60,7 @@ fi
 
 gen_file="run_xalantest.cpp"
 
-echo "Generating test harness ($gen_file)..."
+echo "Generating benchmark harness ($gen_file)..."
 "$CLAMH_CPP_DIR/cpp_parser" xalantest.cpp > "$gen_file"
 
 echo "Building executable..."

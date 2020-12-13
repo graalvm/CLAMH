@@ -39,7 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #define __TEST_HARNESS_UTILITIES_PRIVATE__
 
 
-// Utility functions used only by the test harness and its generated code (hence "private")
+// Utility functions used only by the benchmark harness and its generated code (hence "private")
 
 #include <chrono>
 #include <inttypes.h>
@@ -604,7 +604,7 @@ public:
    }
 };
 
-// Parse the command-line options for the generated test harness code:
+// Parse the command-line options for the generated benchmark harness code:
 void parseCommandLine(CLOptions &cl_options, int argc, char **argv) {
    // Print the command line:
    for (int i=0; i<argc; ++i) { std::cout << argv[i] << " "; }
