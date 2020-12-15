@@ -121,10 +121,27 @@ void usage(const std::string &exe_full_path) {
    std::string exe_name = string_utils::splitString(exe_full_path, '/', split_vec).back();
    std::cout << exe_name << " [-h] [-v] [-p <param>=<value,...>...]" << std::endl;
    std::cout << std::setfill(' ') << std::setw(exe_name.size() + 1) << ' '
+             << "[-i <int>] [-wi <int>] [-r <time>] [-w <time>]" << std::endl;
+   std::cout << std::setfill(' ') << std::setw(exe_name.size() + 1) << ' '
              << "[-rf <report_format>] [-rff <report_file>] [-trendfile <filename>]" << std::endl;
    std::cout << std::endl;
    std::cout << "  -h                      Print usage (what you're reading now)" << std::endl;
    std::cout << "  -v                      Print version" << std::endl;
+   std::cout << "  -i <int>                Number of measurement iterations to do. Overrides annotations." << std::endl;
+   std::cout << "  -r <time>               Run time for each iteration. Overrides annotations." << std::endl;
+   std::cout << "                          Time is specified as an integer followed by the units." << std::endl;
+   std::cout << "                          (e.g., -r 500ms)" << std::endl;
+   std::cout << "                            Units:" << std::endl;
+   std::cout << "                            ns = nanoseconds" << std::endl;
+   std::cout << "                            us = microseconds" << std::endl;
+   std::cout << "                            ms = milliseconds" << std::endl;
+   std::cout << "                            s = seconds" << std::endl;
+   std::cout << "                            m = minutes" << std::endl;
+   std::cout << "                            h = hours" << std::endl;
+   std::cout << "                            d = days" << std::endl;
+   std::cout << "  -w <time>               Run time for each warmup iteration. Overrides annotations." << std::endl;
+   std::cout << "                          See \"-r\" for time formatting details." << std::endl;
+   std::cout << "  -wi <int>               Number of warmup iterations to do. Overrides annotations." << std::endl;
    std::cout << "  -p <param>=<value,...>  Override the set of values for a parameter. This option" << std::endl;
    std::cout << "                          may be specified multiple times for different parameters." << std::endl;
    std::cout << "                          (Example: -p some_parm=3,4,5)" << std::endl;
@@ -302,6 +319,46 @@ void testSetVarFromString() {
    }
 }
 
+
+// Time representation (interval and units)
+struct Time {
+   int value {-1};
+   std::string unit_str;
+   uint64_t time_nsec;
+};
+
+inline bool setTimeFromString(Time &var, const std::string &val_str) {
+   // We'll use sscanf to split the value from the units:
+   int value;
+   char unit_str_buf[22];
+   if (sscanf(val_str.c_str(), "%i%20s", &value, unit_str_buf) != 2) { return false; }
+   std::string unit_str(unit_str_buf);
+
+   if (unit_str == "ns") {
+      var.time_nsec = value;
+   } else if (unit_str == "us") {
+      var.time_nsec = ((uint64_t)value)*1000ull;
+   } else if (unit_str == "ms") {
+      var.time_nsec = ((uint64_t)value)*1000ull*1000ull;
+   } else if (unit_str == "s") {
+      var.time_nsec = ((uint64_t)value)*1000ull*1000ull*1000ull;
+   } else if (unit_str == "m") {
+      var.time_nsec = ((uint64_t)value)*60ull*1000ull*1000ull*1000ull;
+   } else if (unit_str == "h") {
+      var.time_nsec = ((uint64_t)value)*60ull*60ull*1000ull*1000ull*1000ull;
+   } else if (unit_str == "d") {
+      var.time_nsec = ((uint64_t)value)*24ull*60ull*60ull*1000ull*1000ull*1000ull;
+   } else {
+      return false;
+   }
+   
+   var.value = value;
+   var.unit_str = unit_str;
+
+   return true;
+}
+
+
 struct ParamOverride {
    std::string param;
    std::vector<std::string> val_vec;
@@ -420,6 +477,11 @@ struct CLOptions {
 
    ParamOverrides param_overrides;
 
+   int bm_it {-1};  // Number of iterations (override)
+   int warmup_it {-1};  // Number of warmup iterations (override)
+   Time bm_time;  // Time per iteration (override)
+   Time warmup_time; // Time per warmup iteration (override)
+
    std::ofstream trendfile_stream;
    std::ostream *postream_trends{nullptr};
 
@@ -453,9 +515,7 @@ void parseCommandLine(CLOptions &cl_options, int argc, char **argv) {
    std::cout << "\n" << std::endl;
 
    // Create a command option handler
-   const char *validOptions = "winnow-thresh:, trendfile:, rf:, rff:, p:, h, v";
-   // const char *validOptions = "v, h, help";
-   //  v = version     h, help = usage information
+   const char *validOptions = "winnow-thresh:, trendfile:, rf:, rff:, p:, i:, r:, wi:, w:, h, v";
 
    //OptionAndFilenameHandler COH(validOptions, 0);
    LATHOptionHandler COH(validOptions, cl_options);
@@ -489,6 +549,34 @@ void parseCommandLine(CLOptions &cl_options, int argc, char **argv) {
       }
       usage(argv[0]);
       cl_options.no_run = true;
+   }
+
+   if (COH.opCheck("i")) {
+      if (setVarFromString(cl_options.bm_it, std::string(COH.opValue("i"))) == false) {
+         std::cerr << "Error: invalid value specified for option '-i': " << COH.opValue("i") << std::endl;
+         abort();
+      }
+   }
+
+   if (COH.opCheck("r")) {
+      if (setTimeFromString(cl_options.bm_time, std::string(COH.opValue("r"))) == false) {
+         std::cerr << "Error: invalid time format specified for option '-r': " << COH.opValue("r") << std::endl;
+         abort();
+      }
+   }
+
+   if (COH.opCheck("wi")) {
+      if (setVarFromString(cl_options.warmup_it, std::string(COH.opValue("wi"))) == false) {
+         std::cerr << "Error: invalid value specified for option '-wi': " << COH.opValue("wi") << std::endl;
+         abort();
+      }
+   }
+
+   if (COH.opCheck("w")) {
+      if (setTimeFromString(cl_options.warmup_time, std::string(COH.opValue("w"))) == false) {
+         std::cerr << "Error: invalid time format specified for option '-w': " << COH.opValue("w") << std::endl;
+         abort();
+      }
    }
 
    if (COH.opCheck("winnow-thresh")) {
