@@ -163,9 +163,7 @@ This will:
 -   Add \$CLAMH_HOME/scripts to your path.
 
 **Step 4**: Build the CLAMH-C++ benchmark harness generator and the JMH benchmark
-project directory used by
-
-CLAMH (for Java benchmarks):
+project directory used by CLAMH (for Java benchmarks):
 
 CLAMH provides a Makefile that will do this for you:
 
@@ -850,6 +848,9 @@ file name with “run_” prepended.
 Unless a path to clamh-cpp is specified, \$CLAMH_HOME/clamh-cpp will be used by
 default.
 
+The C++ compiler specified in environment variable "CPP" will be used for
+compilation. If CPP is not set, g++ will be used by default.
+
 *Example:*
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1483,7 +1484,7 @@ the specific section for that language.]
 | \@Measurement             | Provides details of how the measurements will be carried out for the accompanying Benchmark function. *Optional* arguments:                                                                                                                                                                                                                                                                                                                                                                                     |
 | \@OperationsPerInvocation | Number of operations per invocation for the accompanying Benchmark function. *Optional* argument: \<int\> (default 1) Number of operations per method call.                                                                                                                                                                                                                                                                                                                                                     |
 | \@OutputTimeUnit          | The time units in which to specify the results for the accompanying Benchmark function. *Required* argument. Available values:                                                                                                                                                                                                                                                                                                                                                                                  |
-| \@Param                   | Defines the values to which the following State data member should be set (in the given order). The benchmarks will be run for each parameter setting (if multiple parameters are specified, it will be run for each combination of parameter values). *Required* argument: a list of quoted values Example: \@Param({"25", "30"})                                                                                                                                                                              |
+| \@Param                   | Defines the values to which the following State data member should be set (in the given order). The benchmarks will be run for each parameter setting (if multiple parameters are specified, it will be run for each combination of parameter values). *Required* argument: a list of quoted values. Example: \@Param({"25", "30"})  [Integer parameter values may be specified in decimal or hexadecimal (with a leading "0x").]                                                                                                                                                                              |
 | \@Setup                   | Marks the following function or method as a Setup method. These will be invoked by the benchmark harness but are not timed. *Required* argument: specify when this method is to be run. Available values:                                                                                                                                                                                                                                                                                                            |
 | \@State                   | Marks the following class or struct definition as a State object. The benchmark harness will have the responsibility to safely instantiate the State objects and pass them as arguments to the setup, teardown, and benchmark methods (as needed). The data members of the State objects will be protected from constant folding by the benchmark harness. *Required* argument: for multithreaded benchmarks, specify how each State object will be shared (and how many will need to be instantiated). Available values: |
 | \@Teardown                | Marks the following function or method as a Teardown method. These will be invoked by the benchmark harness but are not timed. *Required* argument: specify when this method is to be run. Available values:                                                                                                                                                                                                                                                                                                         |
@@ -1881,10 +1882,32 @@ The generated test executable has some pre-defined command-line options:
 
 >   \-v Prints the version information.
 
+>   \-i <int> Number of measurement iterations to do. Overrides annotations.
+
+>   \-r <time> Run time for each iteration. Overrides annotations.
+>   Time is specified as an integer followed by the units (e.g., -r 500ms).
+>     Units:
+>     ns = nanoseconds
+>     us = microseconds
+>     ms = milliseconds
+>     s = seconds
+>     m = minutes
+>     h = hours
+>     d = days
+
+>   \-w <time> Run time for each warmup iteration. Overrides annotations.  See
+>   "-r" for time formatting details.
+
+>   \-wi <int> Number of warmup iterations to do. Overrides annotations.
+
 >   \-p Parameter override: overrides the set of values for a given parameter,
 >   specified by either the unqualified name or the fully qualified name. This
 >   option may be used more than once on the command line for different
->   parameters. (Examples: “-p some_parm=3,4,5”
+>   parameters. (Examples: “-p some_parm=3,4,5”)
+
+>   [Integer parameter values may be specified in decimal or hexadecimal (with a
+    leading "0x").]
+
 
 >   \-rf Specifies the report format (currently, the only valid option is
 >   “json”)
