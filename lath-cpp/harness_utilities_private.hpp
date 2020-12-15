@@ -53,6 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include <iomanip>
 #include <sstream>
 #include <fstream>
+#include <initializer_list>
 
 #include "lath_version.hpp"
 #include "Blackhole.hpp"
@@ -198,33 +199,94 @@ inline auto noInline(FuncType func_ptr) -> FuncType {
 }
 
 
+// Helper class for setVarFromString
+template <typename T, typename Enable = void>
+class SetVarFromString_Helper {
+public:
+   static inline bool SVFS(T &var, const std::string &val_str) {
+      std::istringstream iss(val_str);
+      
+      typedef typename std::remove_volatile<T>::type nv_T;
+      nv_T nv_var;
+      
+      if (!(iss >> nv_var)) {
+         return false;
+      }
+      
+      var = nv_var;
+      
+      return true;
+   }
+};
+
+template <typename T>
+using enable_if_bool_t = typename std::enable_if<std::is_same<T,bool>::value>::type;
+
+template <typename T>
+using is_char_type = typename std::integral_constant<bool, std::is_same<T,char>::value ||
+                                                           std::is_same<T,signed char>::value ||
+                                                           std::is_same<T,unsigned char>::value>;
+
+//template <typename T>
+//using enable_if_char_t = typename std::enable_if<is_char_type<T>::value>::type;
+
+//template <typename T>
+//using enable_if_integral_t = typename std::enable_if<std::is_integral<T>::value>::type;
+
+template <typename T>
+using enable_if_integral_not_char_or_bool_t =
+                typename std::enable_if<std::is_integral<T>::value &&
+                                        ! is_char_type<T>::value &&
+                                        ! is_same<T,bool>::value>::type;
+
+// Helper class for setVarFromString
+// Specialization for bool types
+template <typename T>
+class SetVarFromString_Helper<T, enable_if_bool_t<T>> {
+public:
+   static inline bool SVFS(T &var, const std::string &val_str) {
+      std::istringstream iss(val_str);
+      
+      typedef typename std::remove_volatile<T>::type nv_T;
+      nv_T nv_var;
+      
+      if (!(iss >> nv_var)) {
+         // This may have been an attempt to read an alpha boolean expression.
+         // Try again with the boolalpha flag
+         std::istringstream iss2(val_str);
+         if (!(iss2 >> std::boolalpha >> nv_var)) {
+            return false;
+         }
+      }
+      
+      var = nv_var;
+      
+      return true;
+   }
+};
+
+// Helper class for setVarFromString
+// Specialization for integer (but not char or bool) types
+template <typename T>
+class SetVarFromString_Helper<T, enable_if_integral_not_char_or_bool_t<T>> {
+public:
+   static inline bool SVFS(T &var, const std::string &val_str) {
+      // We need to use sscanf so that we can read both decimal and hexadecimal values
+      // We'll read everything as "intmax_t" first and then convert
+      intmax_t im_val = 0;
+      if (sscanf(val_str.c_str(), "%ji", &im_val) != 1) { return false; }
+
+      var = static_cast<T>(im_val);
+      
+      return true;
+   }
+};
+
 // Set a value from a string (will work even if the variable is volatile)
 // (Returns false if the attempt was unsuccessful)
 template <typename T>
 inline bool setVarFromString(T &var, const std::string &val_str) {
-   std::istringstream iss(val_str);
-
-   typedef typename std::remove_volatile<T>::type nv_T;
-   nv_T nv_var;
-
-   //iss >> nv_var;
-   //iss >> std::boolalpha >> nv_var;
-   //if (!(iss >> std::boolalpha >> nv_var)) {
-   //   return false;
-   //}
-
-   if (!(iss >> nv_var)) {
-      // This may have been an attempt to read an alpha boolean expression.
-      // Try again with the boolalpha flag
-      std::istringstream iss2(val_str);
-      if (!(iss2 >> std::boolalpha >> nv_var)) {
-         return false;
-      }
-   }
-
-   var = nv_var;
-
-   return true;
+   return SetVarFromString_Helper<T>::SVFS(var, val_str);
 }
 
 
@@ -395,11 +457,14 @@ struct ParamOverrides {
 struct ParamInfo {
    std::string name;      // Short name of parameter (e.g., "number")
    std::string long_name; // Fully qualified name of parameter (e.g., "MyState::number")
+   std::string unique_name;
    std::vector<std::string> val_vec; // The parameter values
 
-   ParamInfo(const std::string &nm, const std::string &lnm, const std::vector<std::string> &vv) :
-      name(std::move(nm)),
+   ParamInfo(const std::string &nm, const std::string &lnm, const std::string &unm,
+             const std::vector<std::string> &vv) :
+      name(nm),
       long_name(std::move(lnm)),
+      unique_name(unm),
       val_vec(std::move(vv))
    {}
 };
@@ -410,7 +475,38 @@ struct ParamHandler {
    void addParam(const std::string &name, const std::string &long_name,
                  const std::vector<std::string> &val_vec)
    {
-      params.emplace_back(name, long_name, val_vec);
+      // Check the unique name
+      std::vector<std::string> parts;
+      string_utils::splitString(long_name, ':', parts);
+      std::string u_name = name;
+      for (auto &other_param : params) {
+         if (other_param.name == name) {
+            // The name is not unique, so we need to figure out the smallest unique name
+            std::vector<std::string> other_parts;
+            string_utils::splitString(other_param.long_name, ':', other_parts);
+            int cnt = std::min(parts.size(), other_parts.size());
+            std::string u_str = parts.back();
+            std::string other_u_str = other_parts.back();
+            for (int i = 1; i < cnt; ++i) {
+               int idx = parts.size() - i - 1;
+               int other_idx = other_parts.size() - i - 1;
+               u_str = parts[idx] + ":" + u_str;
+               other_u_str = other_parts[idx] + ":" + other_u_str;
+               if (parts[idx] != other_parts[idx]) {
+                  // OK, we've found the unique part
+                  break;
+               }
+            }
+            // If this is longer than the existing unique name, replace it (for both)
+            if (u_str.size() > u_name.size()) {
+               u_name = u_str;
+            }
+            if (other_u_str.size() > other_param.unique_name.size()) {
+               other_param.unique_name = other_u_str;
+            }
+         }
+      }
+      params.emplace_back(name, long_name, u_name, val_vec);
    }
 
    // Update params with override values (e.g., from the command line)
@@ -921,6 +1017,99 @@ struct CPUAndTimingTrend {
 };
 
 
+// One line of master summary data:
+struct SummaryLineInfo {
+   std::string benchmark_name;
+   std::string mode;
+   int count;
+   double score;
+   double error;
+   std::string units;
+   std::vector<std::string> param_vals;
+   
+   // Constructor
+   SummaryLineInfo(const std::string &bn, const std::string &m, int cnt,
+                   double sc, double err,
+                   const std::string &u, std::initializer_list<std::string> pv) :
+      benchmark_name(bn),
+      mode(m),
+      count(cnt),
+      score(sc),
+      error(err),
+      units(u),
+      param_vals(pv)
+   {}
+};
+
+
+// Class used to dump out the master summary at the end:
+struct MasterSummary {
+   ParamHandler &param_handler;
+   std::vector<SummaryLineInfo> info;
+
+   static ParamHandler &getDummyPH() {
+      static ParamHandler dummy_ph;
+      return dummy_ph;
+   }
+   
+   // Constructor
+   MasterSummary(ParamHandler &ph = getDummyPH()) :
+      param_handler(ph)
+   {}
+
+   
+   // add data
+   void add(const std::string &benchmark_name, const std::string &mode, int count, double score, double error,
+            const std::string &units, std::initializer_list<std::string> params = {})
+   {
+      info.emplace_back(benchmark_name, mode, count, score, error, units, params);
+   }
+
+   // print out the master summary
+   void print() {
+      // First, determine the column widths...
+      int name_width = 0;
+      std::vector<int> param_widths;
+      for (const auto &param : param_handler.params) {
+         param_widths.push_back(param.unique_name.size() + 2); // Extra 2 for the "()"
+      }
+      for (const auto &line : info) {
+         name_width = std::max(name_width, (int)(line.benchmark_name.size()));
+         assert(param_widths.size() == line.param_vals.size());
+         for (int i = 0; i < param_widths.size(); ++i) {
+            param_widths[i] = std::max(param_widths[i], (int)(line.param_vals[i].size()));
+         }
+      }
+
+      std::cout << std::endl;
+      
+      // Print the header
+      std::cout << std::setw(name_width) << std::left << "Benchmark" << std::right;
+      assert(param_widths.size() == param_handler.params.size());
+      for (int i = 0; i < param_widths.size(); ++i) {
+         std::string par_hdr = "(" + param_handler.params[i].unique_name + ")";
+         std::cout << " " << std::setw(param_widths[i]) << par_hdr;
+      }
+      std::cout << "   Mode    Cnt     Score         Error   Units" << std::endl;
+      // Cycle through the lines of summary and print each
+      for (const auto &line : info) {
+         std::cout << std::setw(name_width) << std::left << line.benchmark_name << std::right;
+         for (int i = 0; i < param_widths.size(); ++i) {
+            std::cout << " " << std::setw(param_widths[i]) << line.param_vals[i];
+         }
+         std::cout << " " << std::setw(6) << line.mode << " " << std::setw(6);
+         if (line.count >= 0) { std::cout << line.count; }
+         else                 { std::cout << " "; }
+         std::cout << " " << std::setw(10) << line.score;
+         if (line.error >= 0) { std::cout << " +/- " << std::setw(8) << line.error; }
+         else                 { std::cout << "     " << std::setw(8) << " "; }
+         std::cout << " " << std::setw(7) << line.units << std::endl;
+      }
+   }
+};
+
+
+// Container for saving data and dumping it in JSON format
 struct ResultOutputInfo {
   rapidjson::Document dom;
   rapidjson::Value bm_template;

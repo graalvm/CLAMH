@@ -177,6 +177,9 @@ enum BenchmarkMode {
    SAMPLE_TIME
 };
 
+// This is a "fat" class that includes info for all types of annotation targets
+// (since we don't necessarily know what kind of target we have until the annotations have been
+// fully parsed and processed)
 struct TargetInfo {
    std::string name;
    std::string full_name; // Fully qualified name
@@ -203,6 +206,7 @@ struct TargetInfo {
    std::string ob_str; // object for non-static method targets
    
    // Used by param targets
+   std::string pval_str;
    std::string pval_list_str;
    std::vector<std::string> pvals;
 
@@ -229,6 +233,26 @@ struct TargetInfo {
    std::string output_timeunit_short_str{"s"}; // TimeUnit.SECONDS by default
 
    BenchmarkMode mode{AVERAGE_TIME};
+   std::string mode_str{"avgt"};
+
+   std::string units_str{"s/op"};
+
+   void updateStrings() {
+      // Set the units string
+      switch(mode) {
+      case AVERAGE_TIME:
+      case SINGLE_SHOT_TIME:
+      case SAMPLE_TIME:
+         units_str = output_timeunit_short_str + "/op";
+         break;
+      case THROUGHPUT:
+         units_str = "ops/" + output_timeunit_short_str;
+         break;
+      default:
+         // We should never get here
+         abort();
+      };
+   }
 
    void setName(const std::string &nm, const std::vector<ParentNSOrClass> &ns_cl_st) {
       name = nm;
@@ -250,6 +274,29 @@ struct TargetInfo {
       }
    }
 
+   void setMode(BenchmarkMode md) {
+      mode = md;
+      switch(md) {
+      case AVERAGE_TIME:
+         mode_str = "avgt";
+         break;
+      case THROUGHPUT:
+         mode_str = "thrpt";
+         break;
+      case SINGLE_SHOT_TIME:
+         mode_str = "ss";
+         break;
+      case SAMPLE_TIME:
+         mode_str = "sample";
+         break;
+      default:
+         // We should never get here
+         abort();
+      };
+      
+      updateStrings();
+   }
+
    // Constructor
    TargetInfo(const std::string &nm, bool targ_is_class, bool targ_type_is_void, bool targ_is_static,
               const std::vector<AnnotationInfo> &anns, const std::vector<ParentNSOrClass> &ns_cl_st) :
@@ -265,6 +312,8 @@ struct TargetInfo {
       if ((ns_cl_st.size() > 0) && (ns_cl_st.back().is_class) && (is_static == false)) {
          may_be_object_method = true;
       }
+
+      updateStrings();
    }
 };
 
@@ -1195,7 +1244,7 @@ void gen_bm_loop(const std::string &indent, TargetInfo &benchmark, bool warmup=f
 const bool WARMUP = true;
 
 void gen_benchmark_calls(const std::string &indent) {
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    if (benchmarks.size() == 1) {
       std::cout << indent << "// " << benchmarks.size() << " benchmark\n" << std::endl;
    } else {
@@ -1239,9 +1288,9 @@ void gen_benchmark_calls(const std::string &indent) {
          // We should never get here
          abort();
       };
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   int num_threads = 1;" << std::endl;
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
 
       std::cout << indent << "   // Check for command-line overrides" << std::endl;
       std::cout << indent << "   if (cl_options.warmup_it != -1) { warmup_iters = cl_options.warmup_it; }" << std::endl;
@@ -1337,7 +1386,7 @@ void gen_benchmark_calls(const std::string &indent) {
          }
          std::cout << indent << "   std::cout << \")\" << std::endl;" << std::endl;
       }
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   harness_utils_private::CPUAndTimingTrend warmup_cpu_and_timing_trend(cl_options.postream_trends," << std::endl;
       std::cout << indent << "                                                                        cl_options.winnow_thresh," << std::endl;
       std::cout << indent << "                                                                        cl_options.winnow_thresh);" << std::endl;
@@ -1345,17 +1394,17 @@ void gen_benchmark_calls(const std::string &indent) {
       std::cout << indent << "                                                                    cl_options.winnow_thresh," << std::endl;
       std::cout << indent << "                                                                    cl_options.winnow_thresh);" << std::endl;
 
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   uint64_t min_loop_count = batch_size;  // Minimum loop count for this benchmark to match the" << std::endl;
       std::cout << indent << "                                          // available clock precision (calibrated during warmup)" << std::endl;
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   // Get a non-inlinable pointer to the benchmark method/function:" << std::endl;
       std::cout << indent << "   auto noinline_bm_func = harness_utils_private::noInline(&" << benchmark.full_name << ");" << std::endl;
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   // Instantiate group/thread scope state:" << std::endl;
       std::cout << indent << "   // XXX With memory layout control, re-construct \"in-place\"" << std::endl;
       std::cout << indent << "   // (no group/thread scope state)" << std::endl;
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   // Iterations:" << std::endl;
       std::cout << indent << "   uint64_t grand_total_loop_count = 0; // Loop count total over all iterations" << std::endl;
       switch(benchmark.mode) {
@@ -1380,15 +1429,15 @@ void gen_benchmark_calls(const std::string &indent) {
          // We should never get here
          abort();
       };
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   std::cout << std::endl;" << std::endl;
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   // First, loop over warmup iterations" << std::endl;
       std::cout << indent << "   for (int iter = 0; iter < warmup_iters; ++iter) {" << std::endl;
       // Iteration-level setup:
       std::cout << indent << "      // Iteration-level setup:" << std::endl;
       gen_setup_teardown(indent + "      ", setups, ITERATION, "iteration-level setup");
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
 
       switch(benchmark.mode) {
       case AVERAGE_TIME:
@@ -1483,19 +1532,24 @@ void gen_benchmark_calls(const std::string &indent) {
          std::cout << indent << "      double avg_sq = sum_sq/N;" << std::endl;
          std::cout << indent << "      double std_dev = std::sqrt(avg_sq - avg*avg);" << std::endl;
          std::cout << std::endl;
-         std::cout << indent << "      double conf_int = std_dev * harness_utils_private::getT999(N-1) / std::sqrt(N);" << std::endl;
+         std::cout << indent << "      double conf_int;" << std::endl;
+         std::cout << indent << "      if (N > 1) {" << std::endl;
+         std::cout << indent << "         conf_int = std_dev * harness_utils_private::getT999(N-1) / std::sqrt(N);" << std::endl;
+         std::cout << indent << "      } else {" << std::endl;
+         std::cout << indent << "         conf_int = 483.9 * avg;  // Wall, Boen, and Tweedie, The American Statistician, vol. 55, no. 2 (May,2001)" << std::endl;
+         std::cout << indent << "      }" << std::endl;
       }
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "      std::cout << \"Benchmark \" << benchmark_name << \", warmup iteration \" << (iter + 1)" << std::endl;
       switch(benchmark.mode) {
       case AVERAGE_TIME:
          std::cout << indent << "                << \": \" << av_time_per_op_"
                    << benchmark.output_timeunit_str
-                   << " << \" " << benchmark.output_timeunit_short_str << "/op\" << std::endl;" << std::endl;
+                   << " << \" " << benchmark.units_str << "\" << std::endl;" << std::endl;
          break;
       case THROUGHPUT:
          std::cout << indent << "                << \": \" << throughput_" << benchmark.output_timeunit_str
-                   << " << \" ops/" << benchmark.output_timeunit_short_str << "\" << std::endl;" << std::endl;
+                   << " << \" " << benchmark.units_str << "\" << std::endl;" << std::endl;
          break;
       case SINGLE_SHOT_TIME:
          std::cout << indent << "                << \": \" << elapsed_time_"
@@ -1504,7 +1558,7 @@ void gen_benchmark_calls(const std::string &indent) {
          break;
       case SAMPLE_TIME:
          std::cout << indent << "                << \": \" << avg << \" ±(99.9%) \" << conf_int << \" "
-                   << benchmark.output_timeunit_short_str << "/op\" << std::endl;" << std::endl;
+                   << benchmark.units_str << "\" << std::endl;" << std::endl;
          break;
       default:
          // We should never get here
@@ -1519,7 +1573,7 @@ void gen_benchmark_calls(const std::string &indent) {
       // Iteration-level setup:
       std::cout << indent << "      // Iteration-level setup:" << std::endl;
       gen_setup_teardown(indent + "      ", setups, ITERATION, "iteration-level setup");
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
 
 
       switch(benchmark.mode) {
@@ -1624,19 +1678,24 @@ void gen_benchmark_calls(const std::string &indent) {
          std::cout << indent << "      double avg_sq = sum_sq/N;" << std::endl;
          std::cout << indent << "      double std_dev = std::sqrt(avg_sq - avg*avg);" << std::endl;
          std::cout << std::endl;
-         std::cout << indent << "      double conf_int = std_dev * harness_utils_private::getT999(N-1) / std::sqrt(N);" << std::endl;
+         std::cout << indent << "      double conf_int;" << std::endl;
+         std::cout << indent << "      if (N > 1) {" << std::endl;
+         std::cout << indent << "         conf_int = std_dev * harness_utils_private::getT999(N-1) / std::sqrt(N);" << std::endl;
+         std::cout << indent << "      } else {" << std::endl;
+         std::cout << indent << "         conf_int = 483.9 * avg;  // Wall, Boen, and Tweedie, The American Statistician, vol. 55, no. 2 (May,2001)" << std::endl;
+         std::cout << indent << "      }" << std::endl;
       }
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "      std::cout << \"Benchmark \" << benchmark_name << \", iteration \" << (iter + 1)" << std::endl;
       switch(benchmark.mode) {
       case AVERAGE_TIME:
          std::cout << indent << "                << \": \" << av_time_per_op_"
                    << benchmark.output_timeunit_str
-                   << " << \" " << benchmark.output_timeunit_short_str << "/op\" << std::endl;" << std::endl;
+                   << " << \" " << benchmark.units_str << "\" << std::endl;" << std::endl;
          break;
       case THROUGHPUT:
          std::cout << indent << "                << \": \" << throughput_" << benchmark.output_timeunit_str
-                   << " << \" ops/" << benchmark.output_timeunit_short_str << "\" << std::endl;" << std::endl;
+                   << " << \" " << benchmark.units_str << "\" << std::endl;" << std::endl;
          break;
       case SINGLE_SHOT_TIME:
          std::cout << indent << "                << \": \" << elapsed_time_"
@@ -1645,13 +1704,13 @@ void gen_benchmark_calls(const std::string &indent) {
          break;
       case SAMPLE_TIME:
          std::cout << indent << "                << \": \" << avg << \" ±(99.9%) \" << conf_int << \" "
-                   << benchmark.output_timeunit_short_str << "/op\" << std::endl;" << std::endl;
+                   << benchmark.units_str << "\" << std::endl;" << std::endl;
          std::cout << std::endl;
          std::cout << indent << "      // Compute quantiles for this iteration" << std::endl;
          std::cout << indent << "      harness_utils_private::HistQuant hist_quant(iter_sample_times);" << std::endl;
          std::cout << indent << "      for (auto &quant : hist_quant.getQuant()) {" << std::endl;
          std::cout << indent << "         std::cout << \"                 \" << benchmark_name << \": p\" << quant.q" << std::endl;
-         std::cout << indent << "                   << \":\\t\" << quant.val << \" " << benchmark.output_timeunit_short_str << "/op\" << std::endl;" << std::endl;
+         std::cout << indent << "                   << \":\\t\" << quant.val << \" " << benchmark.units_str << "\" << std::endl;" << std::endl;
          std::cout << indent << "      }" << std::endl;
          std::cout << std::endl;
          std::cout << indent << "      // Add the sample times for this iteration to the list for all iterations:" << std::endl;
@@ -1666,7 +1725,7 @@ void gen_benchmark_calls(const std::string &indent) {
       std::cout << indent << "   bm_cpu_and_timing_trend.finish();" << std::endl;
 
       // Stat computation
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   // Compute stats" << std::endl;
       std::cout << indent << "   //harness_utils_private::StatComputer stats(stats_data);" << std::endl;
       std::cout << indent << "   double sum = 0.0;" << std::endl;
@@ -1683,9 +1742,14 @@ void gen_benchmark_calls(const std::string &indent) {
       std::cout << indent << "   double avg = sum/N;" << std::endl;
       std::cout << indent << "   double avg_sq = sum_sq/N;" << std::endl;
       std::cout << indent << "   double std_dev = std::sqrt(avg_sq - avg*avg);" << std::endl;
-      std::cout << indent << "" << std::endl;
-      std::cout << indent << "   double conf_int = std_dev * harness_utils_private::getT999(N-1) / std::sqrt(N);" << std::endl;
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
+      std::cout << indent << "   double conf_int;" << std::endl;
+      std::cout << indent << "   if (N > 1) {" << std::endl;
+      std::cout << indent << "      conf_int = std_dev * harness_utils_private::getT999(N-1) / std::sqrt(N);" << std::endl;
+      std::cout << indent << "   } else {" << std::endl;
+      std::cout << indent << "      conf_int = 483.9 * avg;  // Wall, Boen, and Tweedie, The American Statistician, vol. 55, no. 2 (May,2001)" << std::endl;
+      std::cout << indent << "   }" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   std::cout << std::endl;" << std::endl;
       std::cout << indent << "   std::cout << \"Result for \" << benchmark_name << \":\" << std::endl;" << std::endl;
       
@@ -1694,32 +1758,27 @@ void gen_benchmark_calls(const std::string &indent) {
       case THROUGHPUT:
       case SINGLE_SHOT_TIME:
          std::cout << indent << "   std::cout << \"  \" << avg << \" ±(99.9%) \" << conf_int << \" ";
-         if (benchmark.mode == THROUGHPUT) {
-            std::cout << "ops/" << benchmark.output_timeunit_short_str;
-         } else {
-            std::cout << benchmark.output_timeunit_short_str << "/op";
-         }
-         std::cout << "\" << std::endl;" << std::endl;
+         std::cout << benchmark.units_str << "\" << std::endl;" << std::endl;
          std::cout << indent << "   std::cout << \"  (min, avg, max) = (\" << minval << \", \" << avg << \", \" << maxval" << std::endl;
          std::cout << indent << "             << \"), stdev = \" << std_dev << std::endl;" << std::endl;
-         std::cout << indent << "" << std::endl;
+         std::cout << indent << std::endl;
          break;
       case SAMPLE_TIME:
          std::cout << indent << "   std::cout << \"  N = \" << sample_times.size() << std::endl;" << std::endl;
-         std::cout << indent << "   std::cout << \"  mean = \" << avg << \" ±(99.9%) \" << conf_int << \" " << benchmark.output_timeunit_short_str << "/op\" << std::endl;" << std::endl;
-         std::cout << indent << "" << std::endl;
+         std::cout << indent << "   std::cout << \"  mean = \" << avg << \" ±(99.9%) \" << conf_int << \" " << benchmark.units_str << "\" << std::endl;" << std::endl;
+         std::cout << indent << std::endl;
          std::cout << indent << "   harness_utils_private::HistQuant hist_quant(sample_times);" << std::endl;
          std::cout << indent << "   std::cout << std::endl;" << std::endl;
-         std::cout << indent << "   std::cout << \"  Histogram, " << benchmark.output_timeunit_short_str << "/op:\" << std::endl;" << std::endl;
+         std::cout << indent << "   std::cout << \"  Histogram, " << benchmark.units_str << ":\" << std::endl;" << std::endl;
          std::cout << indent << "   for (auto &bin : hist_quant.getHist()) {" << std::endl;
          std::cout << indent << "      std::cout << \"    [\" << bin.bin_start << \", \" << bin.bin_end << \"] = \"" << std::endl;
          std::cout << indent << "                << bin.cnt << std::endl;" << std::endl;
          std::cout << indent << "   }" << std::endl;
          std::cout << indent << "   std::cout << std::endl;" << std::endl;
-         std::cout << indent << "   std::cout << \"  Percentiles, " << benchmark.output_timeunit_short_str << "/op:\" << std::endl;" << std::endl;
+         std::cout << indent << "   std::cout << \"  Percentiles, " << benchmark.units_str << ":\" << std::endl;" << std::endl;
          std::cout << indent << "   for (auto &quant : hist_quant.getQuant()) {" << std::endl;
          std::cout << indent << "      std::cout << \"    p(\" << 100.0*quant.q" << std::endl;
-         std::cout << indent << "                << \") = \\t\" << quant.val << \" " << benchmark.output_timeunit_short_str << "/op\" << std::endl;" << std::endl;
+         std::cout << indent << "                << \") = \\t\" << quant.val << \" " << benchmark.units_str << "\" << std::endl;" << std::endl;
          std::cout << indent << "   }" << std::endl;
          break;
       default:
@@ -1727,7 +1786,7 @@ void gen_benchmark_calls(const std::string &indent) {
          abort();
       };
 
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
       std::cout << indent << "   // Dump out information:" << std::endl;
       std::cout << indent << "   if (cl_options.postream_trends) {" << std::endl;
       std::cout << indent << "      (*cl_options.postream_trends) << \"Warmup and CPU speed trends\" << std::endl;" << std::endl;
@@ -1745,26 +1804,40 @@ void gen_benchmark_calls(const std::string &indent) {
       std::cout << indent << "      (*cl_options.postream_trends) << \"Timing runs:\" << std::endl;" << std::endl;
       std::cout << indent << "      bm_cpu_and_timing_trend.dumpOutput(\"T\", operations_per_loop_count);" << std::endl;
       std::cout << indent << "   }" << std::endl;
-      std::cout << indent << "" << std::endl;
+      
+      std::cout << indent << std::endl;
+      std::string cnt_str = "N";
+      if (benchmark.mode == SAMPLE_TIME) { cnt_str = "sample_times.size()"; }
+      std::cout << indent << "   // Save info for master summary:" << std::endl;
+      std::cout << indent << "   master_summary.add(benchmark_name, \"" << benchmark.mode_str
+                << "\", " << cnt_str << ", avg, conf_int, \"" << benchmark.units_str << "\"";
+      bool first = true;
+      for (auto &param : params) {
+         std::cout << ",\n" << indent << "                      ";
+         if (first) { std::cout << "{" << param.pval_str; first = false; }
+         else       { std::cout << " " << param.pval_str; }
+      }
+      if (params.size() > 0) { std::cout << "}"; }
+      std::cout << ");" << std::endl;
+      if (benchmark.mode == SAMPLE_TIME) {
+         std::cout << indent << "   for (auto &quant : hist_quant.getQuant()) {" << std::endl;
+         std::cout << indent << "      std::string name_str = (MakeStr() << benchmark_name << \"|p\" << std::setw(4) << std::left << quant.q);" << std::endl;
+         std::cout << indent << "      master_summary.add(name_str, \"" << benchmark.mode_str
+                   << "\", -1, quant.val, -1, \"" << benchmark.units_str << "\"";
+         bool first = true;
+         for (auto &param : params) {
+            std::cout << ",\n" << indent << "                         ";
+            if (first) { std::cout << "{" << param.pval_str; first = false; }
+            else       { std::cout << " " << param.pval_str; }
+         }
+         if (params.size() > 0) { std::cout << "}"; }
+         std::cout << ");" << std::endl;
+         std::cout << indent << "   }" << std::endl;
+      }
+
+      std::cout << indent << std::endl;
       std::cout << indent << "   // JSON stuff" << std::endl;
-      std::cout << indent << "   res_out_info.saveResults(benchmark_name, \"";
-      switch(benchmark.mode) {
-      case AVERAGE_TIME:
-         std::cout << "avgt";
-         break;
-      case THROUGHPUT:
-         std::cout << "thrpt";
-         break;
-      case SINGLE_SHOT_TIME:
-         std::cout << "ss";
-         break;
-      case SAMPLE_TIME:
-         std::cout << "sample";
-         break;
-      default:
-         // We should never get here
-         abort();
-      };
+      std::cout << indent << "   res_out_info.saveResults(benchmark_name, \"" << benchmark.mode_str;
       switch(benchmark.mode) {
       case AVERAGE_TIME:
       case THROUGHPUT:
@@ -1783,26 +1856,9 @@ void gen_benchmark_calls(const std::string &indent) {
          // We should never get here
          abort();
       };
-      switch(benchmark.mode) {
-      case AVERAGE_TIME:
-         std::cout << benchmark.output_timeunit_short_str << "/op";
-         break;
-      case THROUGHPUT:
-         std::cout << "ops/" << benchmark.output_timeunit_short_str;
-         break;
-      case SINGLE_SHOT_TIME:
-         std::cout << benchmark.output_timeunit_short_str << "/op";
-         break;
-      case SAMPLE_TIME:
-         std::cout << benchmark.output_timeunit_short_str << "/op";
-         break;
-      default:
-         // We should never get here
-         abort();
-      };
-      std::cout << "\");" << std::endl;
+      std::cout << benchmark.units_str << "\");" << std::endl;
       std::cout << indent << "}" << std::endl;
-      std::cout << indent << "" << std::endl;
+      std::cout << indent << std::endl;
    }
 }
 
@@ -1810,7 +1866,7 @@ void gen_instantiate_state(const std::string &indent) {
    std::cout << indent << "// Instantiate state objects:" << std::endl;
    std::cout << indent << "//" << std::endl;
    std::cout << indent << "// XXX For now, just instantiate on the stack (we'll implement the memory layout control later)" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    std::cout << indent << "// benchmark scope:" << std::endl;
 
    // std::cout << indent << "Benchmarks state_obj1__Benchmarks_;" << std::endl;
@@ -1818,7 +1874,7 @@ void gen_instantiate_state(const std::string &indent) {
       std::cout << indent << state.full_name << " " << state.instance_name << ";" << std::endl;
    }
 
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    std::cout << indent << "// XXX group/thread scope:" << std::endl;
    std::cout << indent << "// [Note: with memory layout control, these will be placeholders and will be re-constructed later]" << std::endl;
    // std::cout << indent << "Benchmarks::InputValue state_obj2__InputValue_;" << std::endl;
@@ -1848,6 +1904,9 @@ void gen_param_loops(const std::string &indent, int param_idx) {
          std::cout << indent << "// Check for parameter overrides:" << std::endl;
          std::cout << indent << "param_handler.setOverrides(cl_options.param_overrides);" << std::endl;
          std::cout << indent << std::endl;
+         std::cout << indent << "// Master summary object:" << std::endl;
+         std::cout << indent << "harness_utils_private::MasterSummary master_summary(param_handler);" << std::endl;
+         std::cout << indent << std::endl;
          std::cout << indent << "// Print out the parameter sets:" << std::endl;
          std::cout << indent << "param_handler.printParams();" << std::endl;
          std::cout << indent << std::endl;
@@ -1858,6 +1917,7 @@ void gen_param_loops(const std::string &indent, int param_idx) {
       ss << (param_idx+1);
       std::string num_str = ss.str();
       std::string val_str = "param" + num_str + "__" + param.name + "_valstr";
+      param.pval_str = val_str;
       std::cout << indent << "const auto &" << param.pvec_name << " = param_handler.getParamVals(\"" << param.full_name << "\");" << std::endl;
       std::cout << indent << "for (auto &" << val_str << " : " << param.pvec_name << ") {" << std::endl;
       std::cout << indent << "   if (harness_utils_private::setParam(" << param.full_name << ", " << val_str << ") == false) {" << std::endl;
@@ -1872,7 +1932,10 @@ void gen_param_loops(const std::string &indent, int param_idx) {
       // We've found the last loop...
       if (params.size() == 0) {
          std::cout << indent << "// No parameter(s) specified" << std::endl;
-         std::cout << indent << "" << std::endl;
+         std::cout << indent << std::endl;
+         std::cout << indent << "// Master summary object:" << std::endl;
+         std::cout << indent << "harness_utils_private::MasterSummary master_summary;" << std::endl;
+         std::cout << indent << std::endl;
       } else {
          // Dump the current parameter values
          std::cout << indent << "std::cout << std::endl;" << std::endl;
@@ -1897,10 +1960,11 @@ void gen_main_body(const std::string &indent) {
    std::cout << indent << "#include <cfloat>" << std::endl;
    //std::cout << indent << "#include <sstream>" << std::endl;
    std::cout << indent << "#include \"harness_utilities_private.hpp\"" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << "#include \"MakeStr.hpp\"" << std::endl;
+   std::cout << indent << std::endl;
    // Start namespace:
    std::cout << indent << "namespace harness_gen_code {" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    // runWithClock function:
    std::cout << indent << "// Run the benchmark with the selected clock" << std::endl;
    std::cout << indent << "template<class Clock>" << std::endl;
@@ -1908,50 +1972,54 @@ void gen_main_body(const std::string &indent) {
    std::cout << indent << "                  harness_utils_private::CLOptions &cl_options)" << std::endl;
    std::cout << indent << "{" << std::endl;
    std::cout << indent << "   uint64_t cutoff_time_nsec = clock_info.cutoff_time_nsec;" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    std::cout << indent << "   // Evaluate baseline cpu speed (and save)" << std::endl;
    std::cout << indent << "   double baseline_cpu_speed_metric = clock_info.getRelativeCPUSpeed<Clock>();" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    std::cout << indent << "   // Instantiate Control object:" << std::endl;
    std::cout << indent << "   // XXX harness_utils::Control control_;" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    std::cout << indent << "   // Instantiate Blackhole object(s):" << std::endl;
    std::cout << indent << "   harness_utils::Blackhole bh_return_;" << std::endl;
    std::cout << indent << "   harness_utils::Blackhole bh_arg1_;" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    // Trial-level state:
    gen_instantiate_state(indent + "   ");
-   std::cout << indent << "" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
+   std::cout << indent << std::endl;
 
    std::cout << indent << "   // Create JSON containers" << std::endl;
    std::cout << indent << "   harness_utils_private::ResultOutputInfo res_out_info(cl_options);" << std::endl;
-   std::cout << indent << "" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
+   std::cout << indent << std::endl;
 
    // Trial-level setup:
    std::cout << indent << "   // Trial-level setup:" << std::endl;
    gen_setup_teardown(indent + "   ", setups, TRIAL, "trial-level setup");
 
-   std::cout << indent << "" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
+   std::cout << indent << std::endl;
    // XXX Outer loops:
    std::cout << indent << "   // Outer loops:" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    // Params:
    gen_param_loops(indent + "   ", 0);
 
    std::cout << indent << "   // Output JSON file:" << std::endl;
    std::cout << indent << "   res_out_info.writeOutput();" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
+
+   std::cout << indent << "   // Print master summary:" << std::endl;
+   std::cout << indent << "   master_summary.print();" << std::endl;
+   std::cout << indent << std::endl;
 
    // Trial-level teardown:
    std::cout << indent << "   // Trial-level teardown:" << std::endl;
    gen_setup_teardown(indent + "   ", teardowns, TRIAL, "trial-level teardown");
 
    std::cout << indent << "}" << std::endl;
-   std::cout << indent << "" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
+   std::cout << indent << std::endl;
 
    // Generic start method and main:
    std::cout << indent << "// This is the starting point for running the benchmark." << std::endl;
@@ -2009,10 +2077,10 @@ void gen_main_body(const std::string &indent) {
    std::cout << indent << "      std::cout << \"All clocks were too unstable. Try to eliminate excess timing 'noise'.\" << std::endl;" << std::endl;
    std::cout << indent << "   }" << std::endl;
    std::cout << indent << "}" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
    std::cout << indent << "} // namespace harness_gen_code" << std::endl;
-   std::cout << indent << "" << std::endl;
-   std::cout << indent << "" << std::endl;
+   std::cout << indent << std::endl;
+   std::cout << indent << std::endl;
    // main:
    std::cout << indent << "int main(int argc, char **argv) {" << std::endl;
    std::cout << indent << "   harness_utils_private::CLOptions cl_options;" << std::endl;
@@ -2557,10 +2625,10 @@ public:
             //std::cout << "//        mode = " << arg.val << std::endl;
             //std::cout << "//        tgt.mode(before) = " << target.mode << std::endl;
 #endif
-            if (arg.val == "Mode.AverageTime") { target.mode = AVERAGE_TIME; }
-            else if (arg.val == "Mode.Throughput") { target.mode = THROUGHPUT; }
-            else if (arg.val == "Mode.SingleShotTime") { target.mode = SINGLE_SHOT_TIME; }
-            else if (arg.val == "Mode.SampleTime") { target.mode = SAMPLE_TIME; }
+            if (arg.val == "Mode.AverageTime") { target.setMode(AVERAGE_TIME); }
+            else if (arg.val == "Mode.Throughput") { target.setMode(THROUGHPUT); }
+            else if (arg.val == "Mode.SingleShotTime") { target.setMode(SINGLE_SHOT_TIME); }
+            else if (arg.val == "Mode.SampleTime") { target.setMode(SAMPLE_TIME); }
             else {
                std::cout << "Error: annotation " << get_name()
                          << ", unknown argument value: " << arg.val << std::endl;
@@ -2650,7 +2718,8 @@ public:
                          << ", unknown argument value: " << val << std::endl;
                abort(); // XXX
             }
-          }
+            target.updateStrings();
+         }
       }
       
       return match;
