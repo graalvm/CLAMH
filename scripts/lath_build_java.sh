@@ -98,7 +98,7 @@ do
         fi
         base_fname="${base_fname%.java}"
         echo "Preparing benchmark project directory..."
-        rm -rf "$jmh_bm_dir/src/main/java/*"
+        rm -rf "$jmh_bm_dir"/src/main/java/*
     fi
 
     if ! [[ -f "$arg" ]] ; then
@@ -126,7 +126,7 @@ done
 #base_fname="${base_fname%.java}"
 
 #echo "Preparing benchmark project directory..."
-#rm -rf "$jmh_bm_dir/src/main/java/*"
+#rm -rf "$jmh_bm_dir"/src/main/java/*
 #mkdir -p "$jmh_bm_dir/src/main/java/$package_path"
 #cp "$1" "$jmh_bm_dir/src/main/java/$package_path"
 
@@ -146,7 +146,9 @@ cd - || exit 2
 
 jarfilename="${base_dir}run_${base_fname}.jar"
 
-cp "$jmh_bm_dir/target/benchmarks.jar" "$jarfilename"
-
-echo "Done. $jarfilename built."
-
+if [[ -f "$jmh_bm_dir/target/benchmarks.jar" ]] ; then
+    cp "$jmh_bm_dir/target/benchmarks.jar" "$jarfilename"
+    echo "Done. $jarfilename built."
+else
+    echo "Build failed"
+fi
