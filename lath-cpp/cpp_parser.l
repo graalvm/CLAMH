@@ -1258,25 +1258,29 @@ void gen_benchmark_calls(const std::string &indent) {
       std::cout << indent << "   const int operations_per_loop_count = 1;" << std::endl;
       // XXX Need to get this from annotation
       std::cout << indent << "   const uint64_t batch_size = 1;" << std::endl;
-      std::cout << indent << "   const int warmup_iters = " << benchmark.warmup_iters << "; // How many times to run this benchmark for warmup" << std::endl;
-      std::cout << indent << "   const int bm_iters = " << benchmark.bm_iters << ";     // How many times to run this benchmark" << std::endl;
+      std::cout << indent << "   int warmup_iters = " << benchmark.warmup_iters << "; // How many times to run this benchmark for warmup" << std::endl;
+      std::cout << indent << "   int bm_iters = " << benchmark.bm_iters << ";     // How many times to run this benchmark" << std::endl;
       switch(benchmark.mode) {
       case AVERAGE_TIME:
       case THROUGHPUT:
       case SAMPLE_TIME:
-         std::cout << indent << "   const double warmup_time_" << benchmark.warmup_timeunit_str
-                   << " = " << benchmark.warmup_time << ";  // Time to run warmup (per iteration)" << std::endl;
-         std::cout << indent << "   const double bm_time_" << benchmark.bm_timeunit_str
-                   << " = " << benchmark.bm_time << ";  // Time to run the benchmark (per iteration)" << std::endl;
-         std::cout << indent << std::endl;
-         if (benchmark.warmup_timeunit_mult != 1) {
-            std::cout << indent << "   uint64_t warmup_time_nsec = " << benchmark.warmup_timeunit_mult << "ull * warmup_time_"
-                      << benchmark.warmup_timeunit_str << ";" << std::endl;
-         }
-         if (benchmark.bm_timeunit_mult != 1) {
-            std::cout << indent << "   uint64_t bm_time_nsec = " << benchmark.bm_timeunit_mult << "ull * bm_time_"
-                      << benchmark.bm_timeunit_str << ";" << std::endl;
-         }
+         std::cout << indent << "   double warmup_time_per_it = " << benchmark.warmup_time
+                   << ";  // Time to run warmup (per iteration)" << std::endl;
+         std::cout << indent << "   double bm_time_per_it = " << benchmark.bm_time
+                   << ";  // Time to run the benchmark (per iteration)" << std::endl;
+         std::cout << indent << "   std::string warmup_time_units(\""
+                   << benchmark.warmup_timeunit_short_str << "\");" << std::endl;
+         std::cout << indent << "   std::string bm_time_units(\""
+                   << benchmark.bm_timeunit_short_str << "\");" << std::endl;
+         std::cout << indent << "" << std::endl;
+         //if (benchmark.warmup_timeunit_mult != 1) {
+            std::cout << indent << "   uint64_t warmup_time_nsec = "
+                      << benchmark.warmup_timeunit_mult << "ull * warmup_time_per_it;" << std::endl;
+         //}
+         //if (benchmark.bm_timeunit_mult != 1) {
+            std::cout << indent << "   uint64_t bm_time_nsec = "
+                      << benchmark.bm_timeunit_mult << "ull * bm_time_per_it;" << std::endl;
+         //}
          break;
       case SINGLE_SHOT_TIME:
          break;
@@ -1288,6 +1292,30 @@ void gen_benchmark_calls(const std::string &indent) {
       std::cout << indent << "   int num_threads = 1;" << std::endl;
       std::cout << indent << std::endl;
 
+      std::cout << indent << "   // Check for command-line overrides" << std::endl;
+      std::cout << indent << "   if (cl_options.warmup_it != -1) { warmup_iters = cl_options.warmup_it; }" << std::endl;
+      std::cout << indent << "   if (cl_options.bm_it != -1) { bm_iters = cl_options.bm_it; }" << std::endl;
+      switch(benchmark.mode) {
+      case AVERAGE_TIME:
+      case THROUGHPUT:
+      case SAMPLE_TIME:
+         std::cout << indent << "   if (cl_options.warmup_time.value != -1) {" << std::endl;
+         std::cout << indent << "      warmup_time_per_it  = cl_options.warmup_time.value;" << std::endl;
+         std::cout << indent << "      warmup_time_units = cl_options.warmup_time.unit_str;" << std::endl;
+         std::cout << indent << "      warmup_time_nsec  = cl_options.warmup_time.time_nsec;" << std::endl;
+         std::cout << indent << "   }" << std::endl;
+         std::cout << indent << "   if (cl_options.bm_time.value != -1) {" << std::endl;
+         std::cout << indent << "      bm_time_per_it  = cl_options.bm_time.value;" << std::endl;
+         std::cout << indent << "      bm_time_units = cl_options.bm_time.unit_str;" << std::endl;
+         std::cout << indent << "      bm_time_nsec  = cl_options.bm_time.time_nsec;" << std::endl;
+         std::cout << indent << "   }" << std::endl;
+      case SINGLE_SHOT_TIME:
+         break;
+      default:
+         // We should never get here
+         abort();
+      };
+      std::cout << indent << "" << std::endl;
 
       std::cout << indent << "   std::cout << std::endl;" << std::endl;
       std::cout << indent << "   std::cout << \"Benchmark: \" << benchmark_name << std::endl;" << std::endl;
@@ -1319,8 +1347,8 @@ void gen_benchmark_calls(const std::string &indent) {
       case AVERAGE_TIME:
       case THROUGHPUT:
       case SAMPLE_TIME:
-         std::cout << ", \" << warmup_time_" << benchmark.warmup_timeunit_str << " << \" "
-                   << benchmark.warmup_timeunit_short_str << " each";
+         std::cout << ", \" << warmup_time_per_it << \" \"" << std::endl;
+         std::cout << indent << "             << warmup_time_units << \" each";
          break;
       case SINGLE_SHOT_TIME:
          break;
@@ -1335,8 +1363,8 @@ void gen_benchmark_calls(const std::string &indent) {
       case AVERAGE_TIME:
       case THROUGHPUT:
       case SAMPLE_TIME:
-         std::cout << ", \" << bm_time_" << benchmark.bm_timeunit_str << " << \" "
-                   << benchmark.bm_timeunit_short_str << " each";
+         std::cout << ", \" << bm_time_per_it << \" \"" << std::endl;
+         std::cout << indent << "             << bm_time_units << \" each";
          break;
       case SINGLE_SHOT_TIME:
          break;
@@ -1814,17 +1842,14 @@ void gen_benchmark_calls(const std::string &indent) {
       case AVERAGE_TIME:
       case THROUGHPUT:
       case SAMPLE_TIME:
-         std::cout << "\", num_threads, warmup_iters, warmup_time_"
-                   << benchmark.warmup_timeunit_str << ", "
-                   << "\"" << benchmark.warmup_timeunit_short_str << "\", " << std::endl;
-         std::cout << indent << "                            bm_iters, bm_time_"
-                   << benchmark.bm_timeunit_str << ", "
-                   << "\"" << benchmark.bm_timeunit_short_str << "\""
-                   << ", avg, std_dev, stats_data, \"";
+         std::cout << "\", num_threads," << std::endl;
+         std::cout << indent << "                            warmup_iters, warmup_time_per_it, warmup_time_units," << std::endl;
+         std::cout << indent << "                            bm_iters, bm_time_per_it, bm_time_units," << std::endl;
+         std::cout << indent << "                            avg, std_dev, stats_data, \"";
          break;
       case SINGLE_SHOT_TIME:
-         std::cout << "\", num_threads, warmup_iters, 0, " << "\"\", " << std::endl;
-         std::cout << indent << "                            bm_iters, 0, " << "\"\""
+         std::cout << "\", num_threads, warmup_iters, 0, \"\", " << std::endl;
+         std::cout << indent << "                            bm_iters, 0, \"\""
                    << ", avg, std_dev, stats_data, \"";
          break;
       default:
