@@ -35,16 +35,16 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef __LATH_VERSION__
-#define __LATH_VERSION__
+#ifndef __CLAMH_VERSION__
+#define __CLAMH_VERSION__
 
 #include <string>
 
 namespace harness_utils_private {
 
-const std::string LATH_VERSION="1.0.0";
+const std::string CLAMH_VERSION="1.0.0";
 
 } // namespace harness_utils_private
 
 #endif
-// __LATH_VERSION__
+// __CLAMH_VERSION__

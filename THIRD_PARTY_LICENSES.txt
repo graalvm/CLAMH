@@ -1,12 +1,12 @@
 This code base includes the following third-party code distributed under MIT license:
 
-- The RapidJSON library (located at lath-cpp/include/rapidjson)
+- The RapidJSON library (located at clamh-cpp/include/rapidjson)
 
-- Utility files provided by Leick Robinson (located in lath-cpp):
+- Utility files provided by Leick Robinson (located in clamh-cpp):
   CommandOptionHandler.h and MakeStr.hpp
 
 
-All Java benchmark code (located in lath/benchmarks) is distibuted under the GNU General
+All Java benchmark code (located in clamh/benchmarks) is distibuted under the GNU General
 Public License (GPL) v2.0 with Classpath Exception. Java benchmarks use the JMH APIs.
 JMH is distributed under the GPL v2.0 license with Classpath Exception.
 
@@ -472,8 +472,8 @@ The Apache Software Foundation License, Version 2.0
    END OF TERMS AND CONDITIONS
 
 
---------------------
-JMH Test Harness
+---------------------
+JMH Benchmark Harness
 
 The GNU General Public License (GPL) with Classpath Exception
 

@@ -1,10 +1,16 @@
-Currently, the test harness doesn't yet have the nice scripts that will make things easy.
-So, for now, to use the test harness:
+
+So, for now, to use the benchmark harness:
 
 
 1. Build the parser by running "make". [You only have to do this once]
 
-2. Run the parser by executing:
+
+[[[ Note: you can follow steps 2 and 3 to generate and build the benchmark harness   ]]]
+[[[ "by hand". Or, you can use the convenient build script "clamh_build_cpp.sh" that ]]]
+[[[ can be found in clamh/scripts/ (source clamh.rc to add this to your path).       ]]]
+
+
+2. You can run the parser "by hand" by executing:
    ./cpp_parser <your_benchmark_file>  >  <generated_file_name>
 
    For example, with the included example benchmark, "factorial_test3.cpp":

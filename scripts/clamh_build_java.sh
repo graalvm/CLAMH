@@ -37,17 +37,17 @@
 
 
 # Arguments:
-# Optional first argument: JMH benchmark project directory ($LATH_HOME/jmh/lath_bm by default)
+# Optional first argument: JMH benchmark project directory ($CLAMH_HOME/jmh/clamh_bm by default)
 # Remaining argument(s):  Java source files
 
 
 #if [[ "$2" == "" ]] ; then
-#  if [[ "$LATH_HOME" == "" ]] ; then
-#    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
+#  if [[ "$CLAMH_HOME" == "" ]] ; then
+#    echo "ERROR:  CLAMH_HOME not set. You must set environment variable CLAMH_HOME "
 #    echo "        or specify a JMH benchmark project directory in the second argument."
 #    exit 1
 #  else
-#    jmh_bm_dir=$LATH_HOME/jmh/lath_bm
+#    jmh_bm_dir=$CLAMH_HOME/jmh/clamh_bm
 #  fi
 #else
 #  jmh_bm_dir=$2
@@ -63,8 +63,8 @@ jmh_bm_dir=""
 #base_name=""
 base_dir=""
 base_fname=""
-if [[ "$LATH_HOME" != "" ]] ; then
-  jmh_bm_dir=$LATH_HOME/jmh/lath_bm
+if [[ "$CLAMH_HOME" != "" ]] ; then
+  jmh_bm_dir=$CLAMH_HOME/jmh/clamh_bm
 fi
 
 FIRST_ARG=1
@@ -79,7 +79,7 @@ do
     fi
   else
     if [[ "$jmh_bm_dir" == "" ]] ; then
-      echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
+      echo "ERROR:  CLAMH_HOME not set. You must set environment variable CLAMH_HOME "
       echo "        or specify a JMH benchmark project directory as the first argument."
       exit 1
     fi

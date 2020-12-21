@@ -36,7 +36,7 @@
 # DEALINGS IN THE SOFTWARE.
 
 
-# If lath_exec_all.sh is used for the script,
+# If clamh_exec_all.sh is used for the script,
 # then one or more of these environment variables may be defined
 # (if none of these are defined, then the installed 'java' will be used):
 # JAVA_HOME_GRAAL: the top-level GraalVM directory
@@ -115,7 +115,7 @@ done
 shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
 if [[ "${exec_script}" == "" ]] ; then
-    die "Error: the script to execute must be specified (e.g., '--exec=lath_exec_all.sh')"
+    die "Error: the script to execute must be specified (e.g., '--exec=clamh_exec_all.sh')"
 fi
 if [[ "${queues}" == "" ]] ; then
     die "Error: at least one slurm queue must be specified (Use 'sinfo' to see the available queues)"

@@ -37,11 +37,14 @@
 
 
 # Arguments:
-# Optional first argument: path to directory lath-cpp ($LATH_HOME/lath-cpp by default)
+# Optional first argument: path to directory clamh-cpp ($CLAMH_HOME/clamh-cpp by default)
 # Remaining argument: C++ source file
+#
+# The compiler specified in environment variable "CPP" will be used. If CPP is not defined,
+# then "g++" will be used by default.
 
 print_usage() {
-    echo "Usage:  ${0##*/} [(optional) path to lath-cpp] <c++ source filename>"
+    echo "Usage:  ${0##*/} [(optional) path to clamh-cpp] <c++ source filename>"
     echo "        Note: will use the compiler specified in environment variable CPP."
     echo "        [If CPP is not set, will use g++ by default.]"
 }
@@ -57,19 +60,19 @@ if [[ "$1" == "" ]] ; then
 fi
 
 if [ -d "$1" ] ; then
-    LATH_CPP_DIR="$1"
+    CLAMH_CPP_DIR="$1"
     source_file="$2"
 else
     source_file="$1"
 fi
 
-if [[ "$LATH_CPP_DIR" == "" ]] ; then
-  if [[ "$LATH_HOME" == "" ]] ; then
-    echo "ERROR:  LATH_HOME not set. You must set environment variable LATH_HOME "
-    echo "        or specify the path to lath-cpp in the first argument."
+if [[ "$CLAMH_CPP_DIR" == "" ]] ; then
+  if [[ "$CLAMH_HOME" == "" ]] ; then
+    echo "ERROR:  CLAMH_HOME not set. You must set environment variable CLAMH_HOME "
+    echo "        or specify the path to clamh-cpp in the first argument."
     exit 1
   else
-    LATH_CPP_DIR="$LATH_HOME/lath-cpp"
+    CLAMH_CPP_DIR="$CLAMH_HOME/clamh-cpp"
   fi
 fi
 
@@ -79,8 +82,8 @@ if [[ "$source_file" == "" ]] ; then
     exit 1
 fi
 
-if ! [[ -d "$LATH_CPP_DIR" ]] ; then
-  echo "ERROR:  LATH-cpp directory \"$LATH_CPP_DIR\" does not exist or is not a directory."
+if ! [[ -d "$CLAMH_CPP_DIR" ]] ; then
+  echo "ERROR:  CLAMH-cpp directory \"$CLAMH_CPP_DIR\" does not exist or is not a directory."
   exit 1
 fi
 
@@ -89,9 +92,9 @@ if ! [[ -f "$source_file" ]] ; then
     exit 1
 fi
 
-if ! [[ -f "$LATH_CPP_DIR/cpp_parser" ]] ; then
-    echo "ERROR:  \"$LATH_CPP_DIR/cpp_parser\" does not exist."
-    echo "(You may need to run \"make\" in the top-level LATH directory or in $LATH_CPP_DIR)"
+if ! [[ -f "$CLAMH_CPP_DIR/cpp_parser" ]] ; then
+    echo "ERROR:  \"$CLAMH_CPP_DIR/cpp_parser\" does not exist."
+    echo "(You may need to run \"make\" in the top-level CLAMH directory or in $CLAMH_CPP_DIR)"
     exit 1
 fi
 
@@ -108,12 +111,12 @@ base_fname="${base_fname%.cpp}"
 
 gen_file="${base_dir}run_${base_fname}.cpp"
 
-echo "Generating test harness ($gen_file)..."
-"$LATH_CPP_DIR/cpp_parser" "$source_file" > "$gen_file" || exit 1
+echo "Generating benchmark harness ($gen_file)..."
+"$CLAMH_CPP_DIR/cpp_parser" "$source_file" > "$gen_file" || exit 1
 
 echo "Building executable..."
 echo "Using compiler:  $CPP"
-"$CPP" -std=c++11 -O3 "-I$LATH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
+"$CPP" -std=c++11 -O3 "-I$CLAMH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
 
 if [[ -f "${base_dir}run_${base_fname}" ]] ; then
     echo "Done. ${base_dir}run_${base_fname} built."

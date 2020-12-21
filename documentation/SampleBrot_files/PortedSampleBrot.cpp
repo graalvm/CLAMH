@@ -11,7 +11,7 @@
 #include <time.h>
 #endif
 
-//#include "lath.h"
+//#include "clamh.h"
 #include "Blackhole.hpp"
 using harness_utils::Blackhole;
 //==============================
@@ -221,7 +221,7 @@ void Teardown(MyState_t &state, Blackhole &bh)
 	}
 
 //-----------------------------------------------------
-// STEP 5: Create a driver loop to mimic the test harness.
+// STEP 5: Create a driver loop to mimic the benchmark harness.
 //-----------------------------------------------------
 void DriveBenchmark()
 	{
@@ -244,7 +244,7 @@ void DriveBenchmark()
 		}
 	}
 
-#ifdef NO_LATH
+#ifdef NO_CLAMH
 // Timing the benchmark, plus defining it...
 //
 int main(int argc, char *argv[])

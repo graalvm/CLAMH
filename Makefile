@@ -5,9 +5,9 @@ NC=\033[0m # No Color
 
 all:
 	@echo "======================"
-	@echo "Building lath-cpp:"
+	@echo "Building clamh-cpp:"
 	@echo "======================"
-	@make -C lath-cpp || echo "Build of lath-cpp ${RED}FAILED${NC}"
+	@make -C clamh-cpp || echo "Build of clamh-cpp ${RED}FAILED${NC}"
 	@echo ""
 	@echo "============================================"
 	@echo "Building JMH benchmark project directory:"
