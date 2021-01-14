@@ -44,7 +44,7 @@
 #
 # Script options:
 #
-# --cpp=<C++ executable>
+# --cpp=<C++ binary>
 # --java=<Java jar file>
 # --js=<Javascript file> (future - not yet implemented)
 # -o <output directory/file base name>
@@ -53,7 +53,7 @@
 print_usage() {
   echo "Usage:"
   echo "${0##*/} -h"
-  echo "${0##*/} [--cpp=<C++ executable>] [--java=<Java jar file>] -o <supplementary output directory/file base name>"
+  echo "${0##*/} [--cpp=<C++ binary>] [--java=<Java jar file>] -o <supplementary output directory/file base name>"
   echo ""
   echo "For Java benchmarks, if any of these environment variables are defined, the benchmark will"
   echo "be run for each respective VM. If none are defined, it will just run using the installed 'java':"

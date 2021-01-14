@@ -23,7 +23,6 @@
  * questions.
  */
 
-//package org.graalvm.benchmarks;
 package clamh;
 
 import org.openjdk.jmh.annotations.Benchmark;
@@ -37,7 +36,6 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
-//import org.graalvm.polyglot.*;
 import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;

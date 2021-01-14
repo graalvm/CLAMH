@@ -35,7 +35,7 @@ bool save_image(const char* file_name, pix_t* data, int w, int h);
 // The meat of the benchmark!
 //==============================
 
-// For this, we just use a simple 2D Mandelbrot set, NOT the 4D Juliabrot set.
+// For this, we will use a simple 2D Mandelbrot set, NOT the 4D Juliabrot set.
 // (In this case, we only compute the 2D plane passing through Zi = 0.)
 // It returns the total "brots" computed, where a "brot" is approximately
 // 6 multiplies, 5 adds, a control flow branch, and 2 moves.

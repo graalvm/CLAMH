@@ -230,7 +230,7 @@ public:
 	//if (fileName.equals(""))
 	//  break;
 
-	// Just copy the file
+	// In this baseline benchmark method, we just copy the file
 	std::string line;
 	std::ifstream file_in(fileName.c_str());
 	while (std::getline(file_in, line)) {

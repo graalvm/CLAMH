@@ -292,7 +292,7 @@ inline bool setVarFromString(T &var, const std::string &val_str) {
 
 // Set a parameter value from a value string (will work even if the param is volatile)
 // (convenience method, just renames setVarFromString for clarity)
-// XXX should probably deprecate this and just use the above function
+// XXX we should probably deprecate this and just use the above function
 template <typename T>
 inline bool setParam(T &param, const std::string &val_str) {
    return setVarFromString(param, val_str);
@@ -894,7 +894,7 @@ struct CPUAndTimingTrend {
             } 
          }
          if (winnow) {
-            // Just update the running values to compute the average av_tpo
+            // Update the running values to compute the average av_tpo
             lc_run_end = lc;
             av_tpo_run_sum += av_tpo;
             rcs_run_end = rcs;

@@ -63,7 +63,7 @@ gen_file="run_xalantest.cpp"
 echo "Generating benchmark harness ($gen_file)..."
 "$CLAMH_CPP_DIR/cpp_parser" xalantest.cpp > "$gen_file"
 
-echo "Building executable..."
+echo "Building binary..."
 g++ -std=c++11 -O3 "-I$CLAMH_CPP_DIR" "-I${XALAN_DIR}/include" "-L${XALAN_DIR}/lib" -lxalan-c -lxalanMsg -lxerces-c -o run_xalantest "$gen_file" || exit 1
 
 echo "Done. run_xalantest built."

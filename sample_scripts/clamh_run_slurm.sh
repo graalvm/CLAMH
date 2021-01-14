@@ -47,7 +47,7 @@
 print_usage() {
     echo "Usage:"
     echo "${0##*/} -h"
-    echo "${0##*/} [--cpp=<C++ executable>] [--java=<Java jar file>] --exec=<script to execute>"
+    echo "${0##*/} [--cpp=<C++ binary>] [--java=<Java jar file>] --exec=<script to be run>"
     echo "                  -q <queue name> -o <output directory base name> [-t <time_limit ('00:15:00' by default)>]"
     echo "                  [--reps=<number of repetitions (3 by default)>]"
     echo "[The -q option may be specified multiple times. The script will be run for each specified queue.]"
@@ -115,7 +115,7 @@ done
 shift $((OPTIND-1)) # remove parsed options and args from $@ list
 
 if [[ "${exec_script}" == "" ]] ; then
-    die "Error: the script to execute must be specified (e.g., '--exec=clamh_exec_all.sh')"
+    die "Error: the script to be run must be specified (e.g., '--exec=clamh_exec_all.sh')"
 fi
 if [[ "${queues}" == "" ]] ; then
     die "Error: at least one slurm queue must be specified (Use 'sinfo' to see the available queues)"

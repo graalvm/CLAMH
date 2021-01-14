@@ -114,7 +114,7 @@ gen_file="${base_dir}run_${base_fname}.cpp"
 echo "Generating benchmark harness ($gen_file)..."
 "$CLAMH_CPP_DIR/cpp_parser" "$source_file" > "$gen_file" || exit 1
 
-echo "Building executable..."
+echo "Building binary..."
 echo "Using compiler:  $CPP"
 "$CPP" -std=c++11 -O3 "-I$CLAMH_CPP_DIR" -o "${base_dir}run_${base_fname}" "$gen_file" || exit 1
 
