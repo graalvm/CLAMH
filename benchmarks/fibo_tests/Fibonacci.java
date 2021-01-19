@@ -40,8 +40,6 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-//import java.io.File;
-//import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -51,11 +49,6 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(1)
 public class Fibonacci {
-
-    //@State(Scope.Thread)
-    //public static class InputValue {
-    //    volatile static long number = 25;
-    //}
 
     @State(Scope.Benchmark)
     public static class Values {
