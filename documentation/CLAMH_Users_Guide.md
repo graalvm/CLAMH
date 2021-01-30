@@ -1,4 +1,4 @@
-<font size="+12">
+<font size="+8">
 Cross-Language Microbenchmark Harness (CLAMH) User’s Guide
 </font>
 
