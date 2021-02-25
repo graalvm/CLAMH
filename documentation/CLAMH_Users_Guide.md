@@ -6,7 +6,7 @@ November 6, 2020
 
 ---
 
-# What is CLAMH?
+# 1 What is CLAMH?
 
 CLAMH is
 
@@ -22,7 +22,7 @@ Java.
 
 ---
 
-# Purpose
+# 2 Purpose
 
 There is often a need to compare the performance of the same benchmark
 implemented in different languages and/or run in different frameworks.
@@ -48,7 +48,7 @@ Benchmark guidelines.
 
 ---
 
-# Definitions
+# 3 Definitions
 
 These are some terms that will be used throughout this document.
 
@@ -77,7 +77,7 @@ These are some terms that will be used throughout this document.
 
 ---
 
-# Operation Flow
+# 4 Operation Flow
 
 The operation flow is shown in Figure 1.
 
@@ -104,7 +104,7 @@ how CLAMH should run the benchmark (see Section 7.5, Annotations).
 
 ---
 
-# Quick Start
+# 5 Quick Start
 
 This section outlines the minimal steps that the user needs to follow in order
 to get started using CLAMH. They include the steps necessary to:
@@ -128,7 +128,7 @@ For further information, consult:
 
 -   Section 12, Advanced Topics, for a deeper dive into some advanced topics.
 
-## Build CLAMH (and other libraries)
+## 5.1 Build CLAMH (and other libraries)
 
 **Step 1**: Clone CLAMH from the GitHub repository:
 
@@ -233,7 +233,7 @@ mvn archetype:generate -DinteractiveMode=false -DarchetypeGroupId=org.openjdk.jm
 make[1]: Leaving directory `your-path-to-clamh/jmh'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Run a benchmark
+## 5.2 Run a benchmark
 
 Here, we will build and run the factorial benchmarks as an example.
 
@@ -746,7 +746,7 @@ End: Sun Jun  7 07:50:25 PDT 2020
 
 ---
 
-# CLAMH Components
+# 6 CLAMH Components
 
 This section gives an overview of the components of CLAMH. The top-level CLAMH
 directory contains clamh.rc, and has the following subdirectories: clamh-cpp, jmh,
@@ -760,7 +760,7 @@ cd clamh
 make
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## clamh.rc
+## 6.1 clamh.rc
 
 clamh.rc is a script file located in the top-level CLAMH directory that is
 provided as a convenience. Sourcing this file will correctly set the CLAMH_HOME
@@ -770,7 +770,7 @@ environment variable and add the appropriate CLAMH directories your PATH.
 source <path_to_clamh_directory>/clamh.rc	
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## clamh-cpp
+## 6.2 clamh-cpp
 
 \$CLAMH_HOME/clamh-cpp/ contains the source code and build files for the C++
 implementation of CLAMH, including the benchmark harness generator and the header
@@ -779,7 +779,7 @@ files used by the generated benchmark harness code.
 The typical user will interact with the tools in this file indirectly through
 the build scripts provided in clamh/scripts.
 
-## JMH project directory
+## 6.3 JMH project directory
 
 Running “make” from the top-level CLAMH directory or from \$CLAMH_HOME/jmh will
 build the default JMH project directory (\$CLAMH_HOME/jmh/clamh_bm) that will be
@@ -788,14 +788,14 @@ used to generate the benchmark harness and compile Java benchmarks.
 The typical user will interact with this project file indirectly through the
 build scripts provided in clamh/scripts.
 
-## Scripts
+## 6.4 Scripts
 
 \$CLAMH_HOME/scripts/ contains scripts that streamline and normalize the build
 process. These scripts are detailed below.
 
 If you source clamh.rc (see above), this directory will be included in your PATH.
 
-### Building Java benchmarks
+### 6.4.1 Building Java benchmarks
 
 clamh_build_java.sh [(optional) \<JMH project directory\>] \<java source
 filenames\>...
@@ -836,7 +836,7 @@ clamh_build_java.sh ../private/jmh/bm_project Benchmark3.java
 This uses a JMH project directory located at “../private/jmh/bm_project” to
 build benchmark jar file “run_Benchmark3.jar”.
 
-### Building C++ benchmarks
+### 6.4.2 Building C++ benchmarks
 
 clamh_build_cpp.sh [(optional) \<path to clamh-cpp\>] \<C++ source filename\>
 
@@ -859,13 +859,13 @@ clamh_build_cpp.sh my_benchmark.cpp
 
 will generate the benchmark harness and build binary file “run_my_benchmark”.
 
-## Sample_scripts
+## 6.5 Sample_scripts
 
 \$CLAMH_HOME/sample_scripts contains some examples of runtime scripts that can be
 used to run your benchmarks. You can either use these scripts as written,
 customize them for your environment, or use them as templates to write your own.
 
-### clamh_exec_all.sh
+### 6.5.1 clamh_exec_all.sh
 
 clamh_exec_all.sh -h
 
@@ -913,7 +913,7 @@ version of the benchmark will be run twice on each of the specified VMs). Any
 supplementary data files created will be of the form
 “my_benchmark_results/test1\*”.
 
-### clamh_run_slurm.sh
+### 6.5.2 clamh_run_slurm.sh
 
 clamh_run_slurm.sh -h
 
@@ -994,7 +994,7 @@ batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>.result
 (and stderr will be captured in
 batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>.err).
 
-## Benchmarks
+## 6.6 Benchmarks
 
 This contains some provided benchmarks implemented in multiple languages.
 
@@ -1019,16 +1019,16 @@ These benchmarks are provided both to provide some “out of the box” examples
 how CLAMH can be used, as well as guidelines for creating your own multi-language
 benchmarks.
 
-## Documentation
+## 6.7 Documentation
 
 This directory contains the CLAMH User’s Guide in markdown and PDF formats (one
 of which you are reading now).
 
 ---
 
-# Benchmark Construction and Design
+# 7 Benchmark Construction and Design
 
-## Benchmark Harness Wrapper
+## 7.1 Benchmark Harness Wrapper
 
 The wrapper generator extracts the annotations from the benchmark code and use
 them to generate the wrapper code. The wrapper code is designed to facilitate
@@ -1044,7 +1044,7 @@ above.
 [Note that the figure does not cover all possible permutations (that would be
 too cluttered). However, it shows some of the more common cases.]
 
-## Form of a CLAMH/JMH Benchmark (Single threaded)
+## 7.2 Form of a CLAMH/JMH Benchmark (Single threaded)
 
 CLAMH and JMH are different from other benchmarking frameworks, as they were
 designed for *micro*-benchmarks which tend to be smaller, faster, and more
@@ -1085,7 +1085,7 @@ parallelism.
 We’ll now go over the main options for each of the standard functions that are
 implemented for JMH/CLAMH.
 
-### The \@Benchmark Function
+### 7.2.1 The \@Benchmark Function
 
 The \@Benchmark annotation is at the heart of the CLAMH/JMH paradigm. This
 annotation denotes the benchmark functions or methods whose performance the test
@@ -1098,7 +1098,7 @@ considered independent benchmarks that will be run sequentially, EXCEPT in the
 case of a functionally parallel benchmark, but that is described in the parallel
 benchmark section.)
 
-### The Benchmark Mode
+### 7.2.2 The Benchmark Mode
 
 The *benchmark mode* effects how performance is computed:
 
@@ -1142,7 +1142,7 @@ shot mode measures the time taken by a single *operation*, and the *batchSize*
 argument of the \@Measurement and \@Warmup annotations specifies the number of
 invocations for each operation.
 
-### \@State Objects
+### 7.2.3 \@State Objects
 
 State objects are *defined* in the benchmark (and marked with the \@State
 annotation), but they are *instantiated* by the benchmark harness. A State
@@ -1159,7 +1159,7 @@ Note that, in single-threaded benchmarks, for each State object definition, only
 and fields in a State object are common across all of your benchmark
 functions. The State object definition should be public.
 
-### Blackhole objects
+### 7.2.4 Blackhole objects
 
 Any computed value that you don’t want dead-code-eliminated along with the
 computation that created it must be protected. This can be done implicitly, by
@@ -1170,7 +1170,7 @@ The Blackhole object has a key method called consume(any variable). By consuming
 a value, the Blackhole protects the computations that produced that value from
 dead code elimination.
 
-### \@Setup and \@Teardown
+### 7.2.5 \@Setup and \@Teardown
 
 These methods are used to initialize and finalize your benchmark. Some common
 uses for Setup and Teardown methods include:
@@ -1195,7 +1195,7 @@ will be called:
     This is commonly used in combination with Single Shot or Sample Time
     benchmark modes.
 
-## Benchmark guidelines
+## 7.3 Benchmark guidelines
 
 This section contains guidelines for the benchmark developer to help avoid some
 common benchmarking pitfalls that can result in inaccurate, misleading, or
@@ -1205,13 +1205,13 @@ Each section generally follows the same format: a problem is introduced and the
 generally guidelines for avoiding it are discussed, which is then followed by
 the specific assistance provided by CLAMH/JMH.
 
-### Unwanted optimization
+### 7.3.1 Unwanted optimization
 
 Many of the pitfalls associated with benchmarking are related to avoiding
 undesirable compiler optimization that can obscure or skew the performance
 results of interest.
 
-#### Loops
+#### 7.3.1.1 Loops
 
 In benchmarking, we are generally attempting to measure the time required for
 some behavior. However, the timer granularity may often be too coarse to
@@ -1242,7 +1242,7 @@ independently.]
     optimizations. Your code should only provide the method to be run on
     each loop iteration.
 
-#### Warmup and inlining
+#### 7.3.1.2 Warmup and inlining
 
 There are some cases where aggressive inlining of the benchmark code is
 undesirable.
@@ -1259,7 +1259,7 @@ run during warmup and during measurement.
     you provide, the generated code will ensure that warm-up is performed
     correctly.
 
-#### Dead code elimination
+#### 7.3.1.3 Dead code elimination
 
 One common source of inaccuracy in benchmarks is when an optimizing compiler
 eliminates branches of the code tree that produce results that are never used.
@@ -1284,7 +1284,7 @@ measurement.
     correctly) or explicitly consumed by a Blackhole object that is passed in as
     an argument to the benchmark method.
 
-#### Constant folding
+#### 7.3.1.4 Constant folding
 
 Smart compilers can introduce optimizations involving hard-coded constants. This
 is known as *constant folding*.
@@ -1310,7 +1310,7 @@ uncertain as to the final value.
     inappropriately use any hard-coded constants. Instead, any constant values
     should be specified as an initialized variable in an annotated State object.
 
-#### Data regularity
+#### 7.3.1.5 Data regularity
 
 If the data used in your benchmark is overly regular (particularly in comparison
 to any real-world code that this is intended to represent), then this can
@@ -1323,12 +1323,12 @@ regular (unless that is explicitly desired).
 
 -   The benchmark harness does not provide any assistance here.
 
-### Reproducibility
+### 7.3.2 Reproducibility
 
 This section contains guidelines to help ensure that your benchmarks are
 deterministic and/or reproducible.
 
-#### Random numbers
+#### 7.3.2.1 Random numbers
 
 For reproducibility, if your benchmark makes use of a random number generator,
 it should provide a mechanism to enable a specific benchmark run to be
@@ -1344,7 +1344,7 @@ determine the cause of some observed behavior.
     generated seed should be output as part of a teardown method so that the
     outputting of the value does not contribute to the benchmark timing.
 
-#### Memory usage
+#### 7.3.2.2 Memory usage
 
 The details of how data is mapped into the address space can affect the measured
 performance, leading to either an inaccurate estimation of *average* performance
@@ -1378,11 +1378,11 @@ There are two main scenarios that need to be accommodated:
     harness through annotated State objects. The harness has options to
     accommodate both of the scenarios detailed above.
 
-### Multi-threaded benchmarks
+### 7.3.3 Multi-threaded benchmarks
 
 This section provides additional guidelines for multi-threaded benchmarks.
 
-#### False sharing
+#### 7.3.3.1 False sharing
 
 For multi-threaded benchmarks, one source of performance loss that can
 artificially reduce your benchmark results is false sharing, where the private
@@ -1400,7 +1400,7 @@ with other data.
     State objects in memory, and it will ensure that these objects are allocated
     so as to prevent false sharing.
 
-#### Thread start/stop skew
+#### 7.3.3.2 Thread start/stop skew
 
 When starting multiple threads, there may be some variation in the thread start
 time. Threads that begin earlier may exhibit unrealistically good performance
@@ -1416,11 +1416,11 @@ threads are running.
     all threads have had time to start, and will end timing before the threads
     terminate.
 
-### Porting benchmarks
+### 7.3.4 Porting benchmarks
 
 This section contains some guidelines for porting benchmarks between languages.
 
-#### Target language expertise and code quality
+#### 7.3.4.1 Target language expertise and code quality
 
 There is rarely benefit to be obtained by benchmarking code that is poorly
 designed and constructed.
@@ -1434,7 +1434,7 @@ capabilities of each language.
 >   respected or considered a “standard”. We have found a significant number of
 >   widely used benchmarks that are very poorly implemented!
 
-#### Algorithmic equivalence rule (and when to break it)
+#### 7.3.4.2 Algorithmic equivalence rule (and when to break it)
 
 It is important to eliminate as many confounding factors as possible when making
 comparisons between implementations of the same benchmark in different
@@ -1450,15 +1450,15 @@ vector operation when porting a benchmark to R.)
 Rule of thumb: algorithmic differences are OK if each implementation is using
 the best algorithmic choice for that language.
 
-## Support Classes
+## 7.4 Support Classes
 
-### Blackhole
+### 7.4.1 Blackhole
 
 Each implementation provides a Blackhole class that allows values and results to
 be safely and robustly consumed with minimal overhead. This allows the benchmark
 code to avoid pitfalls such as *dead code elimination*.
 
-## Annotations
+## 7.5 Annotations
 
 Annotations provide a way for the benchmark to pass meta-information to the test
 harness that it needs to generate the appropriate wrapper code. Annotations are
@@ -1573,7 +1573,7 @@ the specific section for that language.]
 -   batchSize = \<int\> (default 1) Number of method calls per operation
 
 
-## Parallel (multi-threaded) benchmarks
+## 7.6 Parallel (multi-threaded) benchmarks
 
 **TBD**
 
@@ -1616,11 +1616,11 @@ parallel. This is enabled in JMH in two steps:
 
 ---
 
-# CLAMH C++
+# 8 CLAMH C++
 
-## Benchmark file
+## 8.1 Benchmark file
 
-### Compiling outside of CLAMH
+### 8.1.1 Compiling outside of CLAMH
 
 CLAMH C++ provides two features to facilitate compiling benchmark code outside of
 the CLAMH environment. [This can be useful, for example, for developing the
@@ -1658,7 +1658,7 @@ static void consume(T val) { } // Do nothing, but at least it compiles
 #endif // CLAMH
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Method semantics
+### 8.1.2 Method semantics
 
 Your annotated Benchmark methods, along with any annotated Setup and Teardown
 methods, are invoked by the generated benchmark harness code. These methods can use
@@ -1679,7 +1679,7 @@ void Foo(const MyState &state, harness_utils::Blackhole &bh) {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Classes
+## 8.2 Classes
 
 CLAMH C++ defines the Blackhole class that is used to consume results and prevent
 unwanted dead code elimination. It can safely consume any object in as
@@ -1723,16 +1723,16 @@ public:
 The Blackhole definition is automatically included by the generated benchmark
 harness code.
 
-## CLAMH C++ Annotations
+## 8.3 CLAMH C++ Annotations
 
-### Alternate Notation Syntax
+### 8.3.1 Alternate Notation Syntax
 
 CLAMH C++ provides an alternate notation for annotations, where “\@” is replaced
 by “//\@\@”. This enables benchmark code to compile outside of CLAMH, which can
 be useful for code development outside of CLAMH. See 8.1.1, Compiling outside of
 CLAMH.
 
-### Supported annotations
+### 8.3.2 Supported annotations
 
 The following annotations are currently supported by CLAMH C++:
 
@@ -1758,7 +1758,7 @@ The following annotations are currently supported by CLAMH C++:
 
 See 7.5, Annotations, for general annotation details.
 
-## Building the benchmark runtime
+## 8.4 Building the benchmark runtime
 
 In order to build the benchmark runtime, the annotated benchmark file is parsed
 and used to generate the benchmark harness wrapper code specific to this benchmark
@@ -1782,7 +1782,7 @@ include additional libraries), the easiest way to do this is to modify a copy of
 clamh_build_cpp.sh specific to your benchmark. [An example of this can be seen in
 \$CLAMH_HOME/benchmarks/xml_transform_tests.]
 
-## Benchmark runtime options
+## 8.5 Benchmark runtime options
 
 The generated test binary has some pre-defined command-line options:
 
@@ -1832,9 +1832,9 @@ The generated test binary has some pre-defined command-line options:
 
 ---
 
-# JMH (for Java benchmarks)
+# 9 JMH (for Java benchmarks)
 
-## JMH Setup
+## 9.1 JMH Setup
 
 -   STEP 1: Installing the latest public version of the Java JDK on your
     computer.
@@ -1976,7 +1976,7 @@ want to read our summary first. :) Here we assume you know why you want to use
 JMH for java benchmarking, and we’ll give you a solid reference of terms on HOW
 to use it.
 
-## Getting the JMH source code and building it to create the API JavaDocs…
+## 9.2 Getting the JMH source code and building it to create the API JavaDocs…
 
 The Java AVI Docs can be a good reference to the JMH API. But they do not exist
 online - they instead need to be created from the actual JMH source code during
@@ -2032,36 +2032,36 @@ echo $JAVA_HOME
 **If this doesn’t work for you, we’ve included a recent version of the java docs
 with CLAMH.**
 
-## Benchmark file
+## 9.3 Benchmark file
 
-## Classes
+## 9.4 Classes
 
-## Annotations
+## 9.5 Annotations
 
-## Building the benchmark jar file
+## 9.6 Building the benchmark jar file
 
-## Benchmark runtime options
+## 9.7 Benchmark runtime options
 
 ---
 
-# CLAMH JS
+# 10 CLAMH JS
 
 CLAMH for Javascript will be available soon.
 
 ---
 
-# Limitations, Future Growth, and Reporting Issues
+# 11 Limitations, Future Growth, and Reporting Issues
 
 ---
 
-# Advanced Topics
+# 12 Advanced Topics
 
-## Controlling the Environment
+## 12.1 Controlling the Environment
 
 Accurate and dependable benchmark measurement can depend on providing a stable,
 consistent environment that is free from interference that can skew the results.
 
-### Variations in CPU frequency
+### 12.1.1 Variations in CPU frequency
 
 Modern CPUs can step their frequency up or down to provide improved performance
 (e.g., TurboBoost) or for thermal management. Changes in the CPU frequency
@@ -2074,7 +2074,7 @@ safely (you would not want to disable thermal management and damage the chip).
 Regardless, the generated test code will periodically monitor the relative speed
 of the CPU and report the results at the end of the run.
 
-### Interference from other processes
+### 12.1.2 Interference from other processes
 
 Other processes running on the same core, the same CPU, or the same compute node
 can contend with the benchmark code for resources and potentially invalidate the
@@ -2091,7 +2091,7 @@ Of course, any suspension or disabling of features in the environment should be
 optional to allow for the potential investigation of the impact on performance
 of those features.
 
-### Internal interference
+### 12.1.3 Internal interference
 
 It is also possible for different parts of the benchmark to interfere with each
 other.
@@ -2110,14 +2110,14 @@ touches state that is thread-private, that thread should be used to call the
 setup method. Likewise, for state that has group scope, one of the threads in
 the group should be used to call the setup method.
 
-### File system
+### 12.1.4 File system
 
 For benchmarks that include file I/O, the framework could optionally run a
 temporary file system in memory so that the performance is not dominated by the
 I/O performance (unless that's relevant to what the user is trying to measure -
 hence optional).
 
-## Drilling Down - Benchmark Harness Details
+## 12.2 Drilling Down - Benchmark Harness Details
 
 This section expands and explains the motivations behind the design decisions.
 
@@ -2141,13 +2141,13 @@ and how they are addressed by the benchmark harness design:
 The last subsection addresses measurement and some other metrics that may be of
 interest.
 
-### Undesired over-optimization
+### 12.2.1 Undesired over-optimization
 
 Over-optimization during compilation (either static or dynamic) can result in
 errors that invalidate performance measurement. Two of the most common pitfalls
 are dead code elimination and constant folding.
 
-#### Dead code elimination
+#### 12.2.1.1 Dead code elimination
 
 One common source of inaccuracy in benchmarks is when an optimizing compiler
 eliminates branches of the code tree that produce results that are never used.
@@ -2166,7 +2166,7 @@ correctly consume the results in a manner that is as lightweight as possible.
 This frees the developer from the burden of knowing how to correctly apply one
 of the ad hoc methods.
 
-#### Constant folding
+#### 12.2.1.2 Constant folding
 
 A related issue occurs when the inputs are too deterministic. As stated
 previously, benchmark code is typically an abstraction that is intended to be
@@ -2187,13 +2187,13 @@ provides a way to avoid constant folding, regardless of language, through use of
 the \@Param annotation. This is guaranteed to do the “right thing” regardless of
 the target language.
 
-### Memory issues
+### 12.2.2 Memory issues
 
 The details of how data is mapped into the address space can affect the measured
 performance, leading to either an inaccurate underestimation of performance or
 the introduction of non-determinism in the benchmark measurements.
 
-#### Memory layout and determinism
+#### 12.2.2.1 Memory layout and determinism
 
 If a benchmark has a sufficiently large data footprint that cache contention
 comes into play, the performance can depend on where the various data structures
@@ -2233,7 +2233,7 @@ There are two main scenarios that need to be accommodated:
 >   ensuring that the memory layout in one language/platform is identical to the
 >   other.]
 
-#### False sharing
+#### 12.2.2.2 False sharing
 
 For multi-threaded benchmarks, false sharing can occur when two different state
 objects accessed by different threads share the same cache granule.
@@ -2242,13 +2242,13 @@ The benchmark harness avoids false sharing between state belonging to different
 threads by sufficiently padding the state objects in memory such that one state
 object never shares a cache granule with another state object.
 
-#### NUMA hardware
+#### 12.2.2.3 NUMA hardware
 
 For NUMA architectures, the data location in memory can impact the benchmark
 performance due to differences in access time. In this case, the code can be
 bound to a specific NUMA node.
 
-### Warmup
+### 12.2.3 Warmup
 
 The benchmark harness provides conventional means for the user to explicitly
 specify how long to warm up the benchmark before starting measurement. However,
@@ -2283,9 +2283,9 @@ performance measurements during the run, and print a warning if:
     particularly if performance appears to be improving over the course of the
     run. This can indicate a benchmark that was insufficiently warmed up.
 
-### Measuring time correctly
+### 12.2.4 Measuring time correctly
 
-#### Accuracy
+#### 12.2.4.1 Accuracy
 
 The facilities for time measurement can vary widely from one language/platform
 to the next. There can be variations in
@@ -2310,7 +2310,7 @@ benchmark result in timing intervals that are too short for the timing facility
 to accurately measure, or results in calls to the timing facility are too
 frequent such that they would skew the performance measurements.
 
-#### Thread skew
+#### 12.2.4.2 Thread skew
 
 When starting multiple threads, there may be some variation in the thread start
 time. Threads that begin earlier may appear to have unrealistically good
@@ -2322,7 +2322,7 @@ For multi-threaded benchmarks, the harness should postpone timing of iterations
 until all threads have had time to start, and should end timing before the
 threads end.
 
-### Benchmark Harness Loop Structure
+### 12.2.5 Benchmark Harness Loop Structure
 
 The outer loop(s) may include the following:
 
@@ -2452,17 +2452,17 @@ The generated wrapper code will implement code that will do the following:
     <https://wiki.osdev.org/Detecting_CPU_Speed> for some examples of how to do
     this that are minimally intrusive (very fast) and hardware-independent.
 
-## CPU frequency monitoring
+## 12.3 CPU frequency monitoring
 
 **TBD**
 
-## Deep performance analysis
+## 12.4 Deep performance analysis
 
 **TBD**
 
-## PORTING BENCHMARKS TO JMH/CLAMH - A PRIMER
+## 12.5 PORTING BENCHMARKS TO JMH/CLAMH - A PRIMER
 
-### Walkthrough and tutorial
+### 12.5.1 Walkthrough and tutorial
 
 Here we take you through a tutorial in which you start with a small C benchmark
 and port it to CLAMH, run it, and interpret the output. We will later add a
