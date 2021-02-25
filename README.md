@@ -1,9 +1,7 @@
 Quick links
 -----------
 
-[Full CLAMH User's Guide (md)](documentation/CLAMH_Users_Guide.md)
-
-[Full CLAMH User's Guide (PDF)](documentation/CLAMH_Users_Guide.pdf)
+[Full *CLAMH User's Guide* (md)](documentation/CLAMH_Users_Guide.md)
 
 
 What is CLAMH?
@@ -24,5 +22,5 @@ other languages are designed to be directly comparable to JMH benchmarks for Jav
 Quick Start
 ===========
 
-See the Quick Start section in the CLAMH User's Guide (links above) to get started.
+See the "Quick Start" section in the CLAMH User's Guide (links above) to get started.
 
