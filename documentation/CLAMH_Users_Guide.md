@@ -1028,6 +1028,8 @@ of which you are reading now).
 
 # 7 Benchmark Construction and Design
 
+This section discusses the structure of CLAMH benchmarks, along with general guidelines for benchmark design.
+
 ## 7.1 Benchmark Harness Wrapper
 
 The wrapper generator extracts the annotations from the benchmark code and use
@@ -1452,6 +1454,9 @@ the best algorithmic choice for that language.
 
 ## 7.4 Support Classes
 
+CLAMH provides support classes that benchmarks can use to facilitate accurate
+performance measurement.
+
 ### 7.4.1 Blackhole
 
 Each implementation provides a Blackhole class that allows values and results to
@@ -1618,7 +1623,13 @@ parallel. This is enabled in JMH in two steps:
 
 # 8 CLAMH C++
 
+This section provides the details of the C++ implementation of CLAMH, including
+semantics and syntax that are particular to C++.
+
 ## 8.1 Benchmark file
+
+Here we detail the language syntax and features that are specific to the C++
+implementation of CLAMH.
 
 ### 8.1.1 Compiling outside of CLAMH
 
@@ -1724,6 +1735,9 @@ The Blackhole definition is automatically included by the generated benchmark
 harness code.
 
 ## 8.3 CLAMH C++ Annotations
+
+This subsection discusses the annotation details specific to the C++
+implementation of CLAMH.
 
 ### 8.3.1 Alternate Notation Syntax
 
@@ -1833,6 +1847,9 @@ The generated test binary has some pre-defined command-line options:
 ---
 
 # 9 JMH (for Java benchmarks)
+
+This section provides the details specific to JMH, which CLAMH uses to build
+Java benchmarks.
 
 ## 9.1 JMH Setup
 
@@ -2055,6 +2072,9 @@ CLAMH for Javascript will be available soon.
 ---
 
 # 12 Advanced Topics
+
+The final section of the User's Guide discusses additional topics not covered
+under the other sections.
 
 ## 12.1 Controlling the Environment
 
@@ -2285,6 +2305,9 @@ performance measurements during the run, and print a warning if:
 
 ### 12.2.4 Measuring time correctly
 
+Accurate time measurement is crucial to performance benchmarking. The following
+discuss some issues and how they are addressed by CLAMH.
+
 #### 12.2.4.1 Accuracy
 
 The facilities for time measurement can vary widely from one language/platform
@@ -2297,18 +2320,18 @@ to the next. There can be variations in
 -   Timing overhead
 
 Instead of requiring every benchmark developer to be aware of the idiosyncrasies
-of the timing facilities in each of the target languages, the benchmark harness
-will generate code appropriate for each target language. It will ensure that
-calls to the timing facility are frequent enough to make the necessary
-measurements (for benchmark performance calculations as well as for detecting
-insufficient warmup and variations in CPU frequency – see the sections on
-“Warmup” and “Controlling the Environment” for more information), but not so
-frequent that it invalidates the results.
+of the timing facilities in each of the target languages, CLAMH will generate
+code appropriate for each target language. It will ensure that calls to the
+timing facility are frequent enough to make the necessary measurements (for
+benchmark performance calculations as well as for detecting insufficient warmup
+and variations in CPU frequency – see the sections on “Warmup” and “Controlling
+the Environment” for more information), but not so frequent that it invalidates
+the results.
 
-The benchmark harness should print a warning if the annotated directives in the
-benchmark result in timing intervals that are too short for the timing facility
-to accurately measure, or results in calls to the timing facility are too
-frequent such that they would skew the performance measurements.
+CLAMH will print a warning if the annotated directives in the benchmark result
+in timing intervals that are too short for the timing facility to accurately
+measure, or results in calls to the timing facility are too frequent such that
+they would skew the performance measurements.
 
 #### 12.2.4.2 Thread skew
 
