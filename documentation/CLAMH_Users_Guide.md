@@ -8,7 +8,7 @@ March, 2021
 
 Table of Contents
 
-  - [1 What is CLAMH?](what-is-clamh?)
+  - [1 What is CLAMH?](#what-is-clamh?)
   - [2 Purpose](#2-purpose)
   - [3 Definitions](#3-definitions)
   - [4 Operation Flow](#4-operation-flow)
