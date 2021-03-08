@@ -453,13 +453,13 @@ be written to directory “results” with base file name “run1”.
 
 Here is an example of what the primary results should look like:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<pre>
 $CLAMH_HOME/sample_scripts/clamh_exec_all.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1
 
 Running benchmarks:
   C++ benchmark run_factorial
   Java benchmark run_Factorial.jar
-    will run on Java VM at *your_java_location*
+    will run on Java VM at <i>your_java_location</i>
 
 Supplementary output files will be written to "results"
 
@@ -553,7 +553,7 @@ Run Java
 java version "1.8.0_72"
 Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-# VM invoker: *your_path_to_GraalVM*/graalvm-ee-1.0.0-rc9/jre/bin/java
+# VM invoker: <i>your_path_to_GraalVM</i>/graalvm-ee-1.0.0-rc9/jre/bin/java
 # VM options: <none>
 # Warmup: 5 iterations, 1 s each
 # Measurement: 5 iterations, 1 s each
@@ -597,7 +597,7 @@ l.Factorial.JavaFactorialRecursive           30  avgt        5  27.329        4.
 .
 
 End: Sun Feb  7 07:50:25 PDT 2021
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</pre>
 
 ---
 
