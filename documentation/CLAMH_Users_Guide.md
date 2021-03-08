@@ -459,15 +459,22 @@ $CLAMH_HOME/sample_scripts/clamh_exec_all.sh --cpp=run_factorial --java=run_Fact
 Running benchmarks:
   C++ benchmark run_factorial
   Java benchmark run_Factorial.jar
+    will run on Java VM at *your_java_location*
 
 Supplementary output files will be written to "results"
 
 Hostname: abcde001
-Start: Sun Jun  7 06:37:06 PDT 2020
+Start: Sun Feb  7 06:37:06 PDT 2021
 
 ================================================================================
 Environment information:
 ================================================================================
+
+OS:  Linux (linux-gnu)
+
+System info:
+(from uname)
+Linux abcde001 4.1.12-112.14.13.el7uek.x86_64 #2 SMP Sun Jan 18 11:38:29 PST 2018 x86_64 x86_64 x86_64 GNU/Linux
 
 Processor info:
 (from lscpu)
@@ -484,97 +491,11 @@ Vendor ID:             GenuineIntel
 CPU family:            6
 Model:                 79
 Model name:            Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
-Stepping:              1
-CPU MHz:               2600.000
-CPU max MHz:           3500.0000
-CPU min MHz:           1200.0000
-BogoMIPS:              5188.37
-Virtualization:        VT-x
-Hypervisor vendor:     vertical
-Virtualization type:   full
-L1d cache:             32K
-L1i cache:             32K
-L2 cache:              256K
-L3 cache:              35840K
-NUMA node0 CPU(s):     0-13,28-41
-NUMA node1 CPU(s):     14-27,42-55
-Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch ida arat epb invpcid_single pln pts dtherm intel_pt spec_ctrl stipb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdseed adx smap xsaveopt cqm_llc cqm_occup_llc
 
-(from head of /proc/cpuinfo)
-processor	: 0
-vendor_id	: GenuineIntel
-cpu family	: 6
-model		: 79
-model name	: Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
-stepping	: 1
-microcode	: 0xb00002e
-cpu MHz		: 2372.601
-cache size	: 35840 KB
-physical id	: 0
-siblings	: 28
-core id		: 0
-cpu cores	: 14
-apicid		: 0
-initial apicid	: 0
-fpu		: yes
-fpu_exception	: yes
-cpuid level	: 20
-wp		: yes
-flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch ida arat epb invpcid_single pln pts dtherm intel_pt spec_ctrl stipb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdseed adx smap xsaveopt cqm_llc cqm_occup_llc
-bugs		: cpu_meltdown spectre_v2
-bogomips	: 5188.37
-clflush size	: 64
-cache_alignment	: 64
-address sizes	: 46 bits physical, 48 bits virtual
-power management:
-
-
-Memory info:
-(free -m)
-              total        used        free      shared  buff/cache   available
-Mem:         773922      227886      163895       24817      382140      638585
-Swap:         12287       11186        1101
-
-(vmstat -s)
-    792496512 K total memory
-    233356192 K used memory
-    269553664 K active memory
-    340865600 K inactive memory
-    167828848 K free memory
-         2272 K buffer memory
-    391309216 K swap cache
-     12582908 K total swap
-     11455300 K used swap
-      1127608 K free swap
-   3188155721 non-nice user cpu ticks
-      2768354 nice user cpu ticks
-   5180587512 system cpu ticks
-  90500773745 idle cpu ticks
-     49745836 IO-wait cpu ticks
-       161083 IRQ cpu ticks
-     23336507 softirq cpu ticks
-            0 stolen cpu ticks
-     83476650 pages paged in
-   2081287865 pages paged out
-     14421607 pages swapped in
-     28402457 pages swapped out
-   2064556849 interrupts
-   3929219527 CPU context switches
-   1573850655 boot time
-   4222276852 forks
-
-Current activity:
-top - 06:37:07 up 205 days, 16:52, 119 users,  load average: 11.81, 11.29, 11.67
-Tasks: 4828 total,   4 running, 4782 sleeping,  16 stopped,  26 zombie
-%Cpu(s):  5.7 us, 13.8 sy,  0.2 ni, 80.3 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-KiB Mem : 79249651+total, 16782336+free, 23336158+used, 39131158+buff/cache
-KiB Swap: 12582908 total,  1127608 free, 11455300 used. 65390604+avail Mem 
-
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
- 2856 root      20   0  223824   4548   3792 R 100.0  0.0   7836:02 abrtd
-11631 ldrobins  25   5  170992   9012   3700 R  29.0  0.0   0:00.24 top
-    8 root      20   0       0      0      0 S   1.6  0.0   1686:46 rcu_sched
-
+*Additional details of the processor, memory, and current background activity here*
+.
+.
+.
 
 ================================================================================
 Benchmark results:
@@ -618,38 +539,21 @@ Result for Benchmarks::factorialRecursive:
   43.9404 ±(99.9%) 5.86354 ns/op
   (min, avg, max) = (42.1703, 43.9404, 46.6927), stdev = 1.5228
 
-Parameter values:
-    Benchmarks::InputValue::number = 30
+*Additional detailed results for other benchmark methods and/or parameter values*
+.
+.
+.
 
-Benchmark: Benchmarks::factorialRecursive
-Benchmark mode: Average time, time/op
-Threads: 1 threads
-Warmup: 5 iterations, 1 s each
-Measurement: 5 iterations, 1 s each
-Parameters: (Benchmarks::InputValue::number = 30)
-
-Benchmark Benchmarks::factorialRecursive, warmup iteration 1: 52.5929 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 2: 51.6011 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 3: 49.6298 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 4: 48.8061 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 5: 48.5914 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 1: 49.0048 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 2: 50.6852 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 3: 50.0188 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 4: 49.4021 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 5: 49.5224 ns/op
-
-Result for Benchmarks::factorialRecursive:
-  49.7267 ±(99.9%) 2.22687 ns/op
-  (min, avg, max) = (49.0048, 49.7267, 50.6852), stdev = 0.578332
+Benchmark                       (number)   Mode    Cnt     Score         Error   Units
+Benchmarks::factorialRecursive        25   avgt      5    43.9404 +/-  5.86354   ns/op
+Benchmarks::factorialRecursive        30   avgt      5    49.7267 +/-  2.22687   ns/op
 
 ================================================================================
 Run Java
 java version "1.8.0_72"
 Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
+# VM invoker: *your_path_to_GraalVM*/graalvm-ee-1.0.0-rc9/jre/bin/java
 # VM options: <none>
 # Warmup: 5 iterations, 1 s each
 # Measurement: 5 iterations, 1 s each
@@ -676,174 +580,23 @@ Result: 22.686 ±(99.9%) 5.911 ns/op [Average]
   Statistics: (min, avg, max) = (21.296, 22.686, 25.137), stdev = 1.535
   Confidence interval (99.9%): [16.774, 28.597]
 
-
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: clamh.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:40
-# Fork: 1 of 1
-# Warmup Iteration   1: 64.882 ns/op
-# Warmup Iteration   2: 26.906 ns/op
-# Warmup Iteration   3: 26.128 ns/op
-# Warmup Iteration   4: 26.025 ns/op
-# Warmup Iteration   5: 25.751 ns/op
-Iteration   1: 28.890 ns/op
-Iteration   2: 25.962 ns/op
-Iteration   3: 27.297 ns/op
-Iteration   4: 26.375 ns/op
-Iteration   5: 28.118 ns/op
-
-
-Result: 27.329 ±(99.9%) 4.652 ns/op [Average]
-  Statistics: (min, avg, max) = (25.962, 27.329, 28.890), stdev = 1.208
-  Confidence interval (99.9%): [22.677, 31.980]
-
-
-# Run complete. Total time: 00:07:46
+*Additional detailed results for other benchmark methods and/or parameter values*
+.
+.
+.
 
 Benchmark                              (number)  Mode  Samples   Score  Score error  Units
 l.Factorial.JavaFactorialRecursive           25  avgt        5  22.686        5.911  ns/op
 l.Factorial.JavaFactorialRecursive           30  avgt        5  27.329        4.652  ns/op
 
-================================================================================
-Run C++
-CLAMH version: 0.5.0
-Compiler version: g++ 7.3.0
-./run_factorial -trendfile results/run1_cpp_2.trends -rf json -rff results/run1_cpp_2.json 
 
-CPU speed and warmup trends written to file results/run1_cpp_2.trends
-Results written to JSON file: results/run1_cpp_2.json
-high-resolution clock: estimated precision: 2.8878
-system clock: estimated precision: 1.1284
-steady clock: estimated precision: 2.67645
-Using the system clock
+*These will be followed by additional repetitions of each benchmark with summary*
+*information at the end of each.*
+.
+.
+.
 
-Parameter values:
-    Benchmarks::InputValue::number = 25
-
-Benchmark: Benchmarks::factorialRecursive
-Benchmark mode: Average time, time/op
-Threads: 1 threads
-Warmup: 5 iterations, 1 s each
-Measurement: 5 iterations, 1 s each
-Parameters: (Benchmarks::InputValue::number = 25)
-
-Benchmark Benchmarks::factorialRecursive, warmup iteration 1: 43.7513 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 2: 46.7776 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 3: 44.6167 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 4: 46.1669 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 5: 46.6895 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 1: 43.5848 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 2: 44.4213 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 3: 44.8419 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 4: 43.6248 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 5: 44.7507 ns/op
-
-Result for Benchmarks::factorialRecursive:
-  44.2447 ±(99.9%) 2.08326 ns/op
-  (min, avg, max) = (43.5848, 44.2447, 44.8419), stdev = 0.541035
-
-Parameter values:
-    Benchmarks::InputValue::number = 30
-
-Benchmark: Benchmarks::factorialRecursive
-Benchmark mode: Average time, time/op
-Threads: 1 threads
-Warmup: 5 iterations, 1 s each
-Measurement: 5 iterations, 1 s each
-Parameters: (Benchmarks::InputValue::number = 30)
-
-Benchmark Benchmarks::factorialRecursive, warmup iteration 1: 52.4381 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 2: 55.5676 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 3: 52.6055 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 4: 51.8816 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 5: 61.7279 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 1: 54.9237 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 2: 52.3683 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 3: 50.8935 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 4: 51.0811 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 5: 50.9417 ns/op
-
-Result for Benchmarks::factorialRecursive:
-  52.0417 ±(99.9%) 5.93109 ns/op
-  (min, avg, max) = (50.8935, 52.0417, 54.9237), stdev = 1.54034
-
-================================================================================
-Run Java
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: clamh.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 97.398 ns/op
-# Warmup Iteration   2: 25.918 ns/op
-# Warmup Iteration   3: 21.417 ns/op
-# Warmup Iteration   4: 21.579 ns/op
-# Warmup Iteration   5: 22.316 ns/op
-Iteration   1: 24.391 ns/op
-Iteration   2: 22.019 ns/op
-Iteration   3: 22.219 ns/op
-Iteration   4: 21.145 ns/op
-Iteration   5: 22.455 ns/op
-
-
-Result: 22.446 ±(99.9%) 4.600 ns/op [Average]
-  Statistics: (min, avg, max) = (21.145, 22.446, 24.391), stdev = 1.195
-  Confidence interval (99.9%): [17.845, 27.046]
-
-
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: clamh.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:40
-# Fork: 1 of 1
-# Warmup Iteration   1: 64.926 ns/op
-# Warmup Iteration   2: 25.683 ns/op
-# Warmup Iteration   3: 26.797 ns/op
-# Warmup Iteration   4: 24.615 ns/op
-# Warmup Iteration   5: 28.153 ns/op
-Iteration   1: 28.925 ns/op
-Iteration   2: 25.966 ns/op
-Iteration   3: 25.448 ns/op
-Iteration   4: 25.063 ns/op
-Iteration   5: 25.938 ns/op
-
-
-Result: 26.268 ±(99.9%) 5.899 ns/op [Average]
-  Statistics: (min, avg, max) = (25.063, 26.268, 28.925), stdev = 1.532
-  Confidence interval (99.9%): [20.369, 32.167]
-
-
-# Run complete. Total time: 00:07:46
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  22.446        4.600  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  26.268        5.899  ns/op
-
-
-End: Sun Jun  7 07:50:25 PDT 2020
+End: Sun Feb  7 07:50:25 PDT 2021
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ---
