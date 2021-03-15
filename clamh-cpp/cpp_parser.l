@@ -1871,7 +1871,10 @@ void gen_instantiate_state(const std::string &indent) {
 
    // std::cout << indent << "Benchmarks state_obj1__Benchmarks_;" << std::endl;
    for (auto &state : state_targets) {
-      std::cout << indent << state.full_name << " " << state.instance_name << ";" << std::endl;
+      std::cout << indent << state.full_name << " " << state.instance_name << "base_; // Base state object" << std::endl;
+      std::cout << indent << "// Create \"unfoldable\" reference (to avoid constant folding):" << std::endl;
+      std::cout << indent << state.full_name << " &" << state.instance_name << " =" << std::endl;
+      std::cout << indent << "   harness_utils_private::makeUncertainRef(" << state.instance_name << "base_);" << std::endl;
    }
 
    std::cout << indent << std::endl;
