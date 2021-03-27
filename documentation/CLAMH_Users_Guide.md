@@ -1367,7 +1367,7 @@ the specific section for that language.]
 | @Measurement             | Provides details of how the measurements will be carried out for the accompanying Benchmark function. *Optional* arguments:<br><ul><li>iterations = <i>integer</i> (default 1): Number of times to repeat measurements with this benchmark</li><li>time = <i>integer</i> (default 1): Time to run each iteration (in the specified time units)</li><li>timeUnit = <i>the time unit</i>. Available values:<ul><li>TimeUnit.DAYS</li><li>TimeUnit.HOURS</li><li>TimeUnit.MINUTES</li><li>TimeUnit.SECONDS (*default*)</li><li>TimeUnit.MILLISECONDS</li><li>TimeUnit.MICROSECONDS</li><li>TimeUnit.NANOSECONDS</li></ul><li>batchSize = <i>integer</i> (default 1): Number of method calls per operation</li></ul>|
 | @OperationsPerInvocation | Number of operations per invocation for the accompanying Benchmark function.<br>*Optional* argument:<br> \<int\> (default 1): Number of operations per method call.|
 | @OutputTimeUnit          | The time units in which to specify the results for the accompanying Benchmark function.<br> *Required* argument. Available values:<br><ul><li>TimeUnit.DAYS</li><li>TimeUnit.HOURS</li><li>TimeUnit.MINUTES</li><li>TimeUnit.SECONDS (*default*)</li><li>TimeUnit.MILLISECONDS</li><li>TimeUnit.MICROSECONDS</li><li>TimeUnit.NANOSECONDS</li></ul>|
-| @Param                   | Defines the values to which the following State data member should be set (in the given order). The benchmarks will be run for each parameter setting (if multiple parameters are specified, it will be run for each combination of parameter values).<br> *Required* argument: a list of quoted values.<br> Example:<br> <ul style="list-style-type:none;"><li>@Param({"25", "30"})</li></ul> [Integer parameter values may be specified in decimal or hexadecimal (with a leading "0x").]|
+| @Param                   | Defines the values to which the following State data member should be set (in the given order). The benchmarks will be run for each parameter setting (if multiple parameters are specified, it will be run for each combination of parameter values).<br> *Required* argument: a list of quoted values.<br> Example:<br> <ul style="list-style:none;"><li>@Param({"25", "30"})</li></ul> [Integer parameter values may be specified in decimal or hexadecimal (with a leading "0x").]|
 | @Setup                   | Marks the following function or method as a Setup method. These will be invoked by the benchmark harness but are not timed.<br> *Required* argument: specify when this method is to be run. Available values:<ul><li>Level.Trial: Before the trial (default)</li><li>Level.Iteration: Before each iteration</li><li>Level.Invocation: Before each call to the benchmark method [**WARNING!!** This may result in measurement intervals that are too short for accurate measurement.]</li></ul>|
 | @State                   | Marks the following class or struct definition as a State object. The benchmark harness will have the responsibility to safely instantiate the State objects and pass them as arguments to the setup, teardown, and benchmark methods (as needed). The data members of the State objects will be protected from constant folding by the benchmark harness.<br> *Required* argument: for multithreaded benchmarks, specify how each State object will be shared (and how many will need to be instantiated).<br> Available values: <ul><li>Scope.Benchmark: the most “global” state across the entire benchmark (and all threads) [used for all single-threaded benchmarks]</li><li>Scope.Group: shared by all threads within a group</li><li>Scope.Thread: private state for one thread</li></ul>|
 | @Teardown                | Marks the following function or method as a Teardown method. These will be invoked by the benchmark harness but are not timed. *Required* argument: specify when this method is to be run. Available values:<ul><li>Level.Trial: After the trial (default)</li><li>Level.Iteration: After each iteration</li><li>Level.Invocation: After each call to the benchmark method (WARNING!!)</li></ul>|
@@ -1604,7 +1604,7 @@ $CLAMH_HOME/benchmarks/xml_transform_tests.]
 
 The generated test binary has some pre-defined command-line options:
 
-<ul style="list-style-type:none;">
+<ul style="list-style:none;">
 <li>-h Prints the usage.</li><br>
 <li>-v Prints the version information.</li><br>
 
@@ -1612,7 +1612,7 @@ The generated test binary has some pre-defined command-line options:
 
 <li>-r <i>time</i> Run time for each iteration. Overrides annotations.
 Time is specified as an integer followed by the units (e.g., -r 500ms).</li>
-<ul style="list-style-type:none;">
+<ul style="list-style:none;">
 Units:
 <li>ns = nanoseconds</li>
 <li>us = microseconds</li>
@@ -1947,14 +1947,14 @@ java -jar run_MyBenchmark.jar [additional runtime options]
 The generated benchmark and harness has numerous defined command-line
 options. Some commonly used ones include:
 
-<ul style="list-style-type:none;">
+<ul style="list-style:none;">
 <li>-h Prints the usage.</li><br>
 
 <li>-i <i>int</i> Number of measurement iterations to do. Overrides annotations.</li><br>
 
 <li>-r <i>time</i> Run time for each iteration. Overrides annotations.
 Time is specified as an integer followed by the units (e.g., -r 500ms).</li>
-<ul style="list-style-type:none;">
+<ul style="list-style:none;">
 Units:
 <li>ns = nanoseconds</li>
 <li>us = microseconds</li>
