@@ -2,10 +2,106 @@
 Cross-Language Microbenchmark Harness (CLAMH) User’s Guide
 </font>
 
-November 6, 2020
+March, 2021
 
----
+***
 
+Table of Contents
+
+  - [1 What is CLAMH?](#1-what-is-clamh?)
+  - [2 Purpose](#2-purpose)
+  - [3 Definitions](#3-definitions)
+  - [4 Operation Flow](#4-operation-flow)
+  - [5 Quick Start](#5-quick-start)
+    - [5.1 Build CLAMH (and other libraries)](#5.1-build-clamh-and-other-libraries)
+    - [5.2 Run a benchmark](#5.2-run-a-benchmark)
+  - [6 CLAMH Components](#6-clamh-components)
+    - [6.1 clamh.rc](#6.1-clamh.rc)
+    - [6.2 clamh-cpp](#6.2-clamh-cpp)
+    - [6.3 JMH project directory](#6.3-jmh-project-directory)
+    - [6.4 Scripts](#6.4-scripts)
+      - [6.4.1 Building Java benchmarks](#6.4.1-building-java-benchmarks)
+      - [6.4.2 Building C++ benchmarks](#6.4.2-building-c++-benchmarks)
+    - [6.5 Sample_scripts](#6.5-sample_scripts)
+      - [6.5.1 clamh_exec_all.sh](#6.5.1-clamh_exec_all.sh)
+      - [6.5.2 clamh_run_slurm.sh](#6.5.2-clamh_run_slurm.sh)
+    - [6.6 Benchmarks](#6.6-benchmarks)
+    - [6.7 Documentation](#6.7-documentation)
+  - [7 Benchmark Construction and Design](#7-benchmark-construction-and-design)
+    - [7.1 Benchmark Harness Wrapper](#7.1-benchmark-harness-wrapper)
+    - [7.2 Form of a CLAMH/JMH Benchmark (Single threaded)](#7.2-form-of-a-clamh/jmh-benchmark-single-threaded)
+      - [7.2.1 The @Benchmark Function](#7.2.1-the-@benchmark-function)
+      - [7.2.2 The Benchmark Mode](#7.2.2-the-benchmark-mode)
+      - [7.2.3 @State Objects](#7.2.3-@state-objects)
+      - [7.2.4 Blackhole objects](#7.2.4-blackhole-objects)
+      - [7.2.5 @Setup and @Teardown](#7.2.5-@setup-and-@teardown)
+    - [7.3 Benchmark guidelines](#7.3-benchmark-guidelines)
+      - [7.3.1 Unwanted optimization](#7.3.1-unwanted-optimization)
+        - [7.3.1.1 Loops](#7.3.1.1-loops)
+        - [7.3.1.2 Warmup and inlining](#7.3.1.2-warmup-and-inlining)
+        - [7.3.1.3 Dead code elimination](#7.3.1.3-dead-code-elimination)
+        - [7.3.1.4 Constant folding](#7.3.1.4-constant-folding)
+        - [7.3.1.5 Data regularity](#7.3.1.5-data-regularity)
+      - [7.3.2 Reproducibility](#7.3.2-reproducibility)
+        - [7.3.2.1 Random numbers](#7.3.2.1-random-numbers)
+        - [7.3.2.2 Memory usage](#7.3.2.2-memory-usage)
+      - [7.3.3 Multi-threaded benchmarks](#7.3.3-multi-threaded-benchmarks)
+        - [7.3.3.1 False sharing](#7.3.3.1-false-sharing)
+        - [7.3.3.2 Thread start/stop skew](#7.3.3.2-thread-start/stop-skew)
+      - [7.3.4 Porting benchmarks](#7.3.4-porting-benchmarks)
+        - [7.3.4.1 Target language expertise and code quality](#7.3.4.1-target-language-expertise-and-code-quality)
+        - [7.3.4.2 Algorithmic equivalence rule (and when to break it)](#7.3.4.2-algorithmic-equivalence-rule)
+    - [7.4 Support Classes](#7.4-support-classes)
+      - [7.4.1 Blackhole](#7.4.1-blackhole)
+    - [7.5 Annotations](#7.5-annotations)
+    - [7.6 Parallel (multi-threaded) benchmarks](#7.6-parallel-(multi-threaded)-benchmarks)
+  - [8 CLAMH C++](#8-clamh-c++)
+    - [8.1 Benchmark file](#8.1-benchmark-file)
+      - [8.1.1 Compiling outside of CLAMH](#8.1.1-compiling-outside-of-clamh)
+      - [8.1.2 Method semantics](#8.1.2-method-semantics)
+    - [8.2 Classes](#8.2-classes)
+    - [8.3 CLAMH C++ Annotations](#8.3-clamh-c++-annotations)
+      - [8.3.1 Alternate Notation Syntax](#8.3.1-alternate-notation-syntax)
+      - [8.3.2 Supported annotations](#8.3.2-supported-annotations)
+    - [8.4 Building the benchmark runtime](#8.4-building-the-benchmark-runtime)
+    - [8.5 Benchmark runtime options](#8.5-benchmark-runtime-options)
+  - [9 JMH (for Java benchmarks)](#9-jmh-for-java-benchmarks)
+    - [9.1 JMH Setup](#9.1-jmh-setup)
+    - [9.2 Getting the JMH source code and building it to create the API JavaDocs…](#9.2-getting-the-jmh-source-code)
+    - [9.3 Benchmark file](#9.3-benchmark-file)
+    - [9.4 Classes](#9.4-classes)
+    - [9.5 Annotations](#9.5-annotations)
+    - [9.6 Building the benchmark jar file](#9.6-building-the-benchmark-jar-file)
+    - [9.7 Benchmark runtime options](#9.7-benchmark-runtime-options)
+  - [10 CLAMH JS](#10-clamh-js)
+  - [11 Limitations, Future Growth, and Reporting Issues](#11-limitations,-future-growth,-and-reporting-issues)
+  - [12 Advanced Topics](#12-advanced-topics)
+    - [12.1 Controlling the Environment](#12.1-controlling-the-environment)
+      - [12.1.1 Variations in CPU frequency](#12.1.1-variations-in-cpu-frequency)
+      - [12.1.2 Interference from other processes](#12.1.2-interference-from-other-processes)
+      - [12.1.3 Internal interference](#12.1.3-internal-interference)
+      - [12.1.4 File system](#12.1.4-file-system)
+    - [12.2 Drilling Down - Benchmark Harness Details](#12.2-drilling-down---benchmark-harness-details)
+      - [12.2.1 Undesired over-optimization](#12.2.1-undesired-over-optimization)
+        - [12.2.1.1 Dead code elimination](#12.2.1.1-dead-code-elimination)
+        - [12.2.1.2 Constant folding](#12.2.1.2-constant-folding)
+      - [12.2.2 Memory issues](#12.2.2-memory-issues)
+        - [12.2.2.1 Memory layout and determinism](#12.2.2.1-memory-layout-and-determinism)
+        - [12.2.2.2 False sharing](#12.2.2.2-false-sharing)
+        - [12.2.2.3 NUMA hardware](#12.2.2.3-numa-hardware)
+      - [12.2.3 Warmup](#12.2.3-warmup)
+      - [12.2.4 Measuring time correctly](#12.2.4-measuring-time-correctly)
+        - [12.2.4.1 Accuracy](#12.2.4.1-accuracy)
+        - [12.2.4.2 Thread skew](#12.2.4.2-thread-skew)
+      - [12.2.5 Benchmark Harness Loop Structure](#12.2.5-benchmark-harness-loop-structure)
+    - [12.3 CPU frequency monitoring](#12.3-cpu-frequency-monitoring)
+    - [12.4 Deep performance analysis](#12.4-deep-performance-analysis)
+    - [12.5 PORTING BENCHMARKS TO CLAMH/JMH - A PRIMER](#12.5-porting-benchmarks-to-CLAMH/JMH---a-primer)
+      - [12.5.1 Walkthrough and tutorial](#12.5.1-walkthrough-and-tutorial)
+
+***
+
+<a name="1-what-is-clamh?"></a>
 # 1 What is CLAMH?
 
 CLAMH is
@@ -20,8 +116,9 @@ goals of CLAMH for the Java language, the runnable benchmark files generated by 
 for other languages are designed to be directly comparable to JMH benchmarks for
 Java.
 
----
+***
 
+<a name="2-purpose"></a>
 # 2 Purpose
 
 There is often a need to compare the performance of the same benchmark
@@ -46,8 +143,9 @@ cannot remove *all* of the potential hazards which can trap the unwary
 developer. Guidelines and practices to avoid these can be found in Section 7.3,
 Benchmark guidelines.
 
----
+***
 
+<a name="3-definitions"></a>
 # 3 Definitions
 
 These are some terms that will be used throughout this document.
@@ -75,8 +173,9 @@ These are some terms that will be used throughout this document.
 -   *Benchmark iterations* are iterations carried out after warmup. These are
     the iterations used to generate the performance results.
 
----
+***
 
+<a name="4-operation-flow"></a>
 # 4 Operation Flow
 
 The operation flow is shown in Figure 1.
@@ -102,8 +201,9 @@ appropriate benchmark harness code for that benchmark. The benchmark developer u
 annotations within the benchmark code to provide meta-information that indicates
 how CLAMH should run the benchmark (see Section 7.5, Annotations).
 
----
+***
 
+<a name="5-quick-start"></a>
 # 5 Quick Start
 
 This section outlines the minimal steps that the user needs to follow in order
@@ -128,6 +228,7 @@ For further information, consult:
 
 -   Section 12, Advanced Topics, for a deeper dive into some advanced topics.
 
+<a name="5.1-build-clamh-and-other-libraries"></a>
 ## 5.1 Build CLAMH (and other libraries)
 
 **Step 1**: Clone CLAMH from the GitHub repository:
@@ -164,7 +265,7 @@ This will:
 -   Set environment variable CLAMH_HOME to the path to the top-level clamh
     directory.
 
--   Add \$CLAMH_HOME/scripts to your path.
+-   Add $CLAMH_HOME/scripts to your path.
 
 **Step 4**: Build the CLAMH-C++ benchmark harness generator and the JMH benchmark
 project directory used by CLAMH (for Java benchmarks):
@@ -233,6 +334,7 @@ mvn archetype:generate -DinteractiveMode=false -DarchetypeGroupId=org.openjdk.jm
 make[1]: Leaving directory `your-path-to-clamh/jmh'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<a name="5.2-run-a-benchmark"></a>
 ## 5.2 Run a benchmark
 
 Here, we will build and run the factorial benchmarks as an example.
@@ -351,21 +453,28 @@ be written to directory “results” with base file name “run1”.
 
 Here is an example of what the primary results should look like:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<pre>
 $CLAMH_HOME/sample_scripts/clamh_exec_all.sh --cpp=run_factorial --java=run_Factorial.jar –o results/run1
 
 Running benchmarks:
   C++ benchmark run_factorial
   Java benchmark run_Factorial.jar
+    will run on Java VM at <i>your_java_location</i>
 
 Supplementary output files will be written to "results"
 
 Hostname: abcde001
-Start: Sun Jun  7 06:37:06 PDT 2020
+Start: Sun Feb  7 06:37:06 PDT 2021
 
 ================================================================================
 Environment information:
 ================================================================================
+
+OS:  Linux (linux-gnu)
+
+System info:
+(from uname)
+Linux abcde001 4.1.12-112.14.13.el7uek.x86_64 #2 SMP Sun Jan 18 11:38:29 PST 2018 x86_64 x86_64 x86_64 GNU/Linux
 
 Processor info:
 (from lscpu)
@@ -382,97 +491,11 @@ Vendor ID:             GenuineIntel
 CPU family:            6
 Model:                 79
 Model name:            Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
-Stepping:              1
-CPU MHz:               2600.000
-CPU max MHz:           3500.0000
-CPU min MHz:           1200.0000
-BogoMIPS:              5188.37
-Virtualization:        VT-x
-Hypervisor vendor:     vertical
-Virtualization type:   full
-L1d cache:             32K
-L1i cache:             32K
-L2 cache:              256K
-L3 cache:              35840K
-NUMA node0 CPU(s):     0-13,28-41
-NUMA node1 CPU(s):     14-27,42-55
-Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch ida arat epb invpcid_single pln pts dtherm intel_pt spec_ctrl stipb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdseed adx smap xsaveopt cqm_llc cqm_occup_llc
 
-(from head of /proc/cpuinfo)
-processor	: 0
-vendor_id	: GenuineIntel
-cpu family	: 6
-model		: 79
-model name	: Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
-stepping	: 1
-microcode	: 0xb00002e
-cpu MHz		: 2372.601
-cache size	: 35840 KB
-physical id	: 0
-siblings	: 28
-core id		: 0
-cpu cores	: 14
-apicid		: 0
-initial apicid	: 0
-fpu		: yes
-fpu_exception	: yes
-cpuid level	: 20
-wp		: yes
-flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch ida arat epb invpcid_single pln pts dtherm intel_pt spec_ctrl stipb pti tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm rdseed adx smap xsaveopt cqm_llc cqm_occup_llc
-bugs		: cpu_meltdown spectre_v2
-bogomips	: 5188.37
-clflush size	: 64
-cache_alignment	: 64
-address sizes	: 46 bits physical, 48 bits virtual
-power management:
-
-
-Memory info:
-(free -m)
-              total        used        free      shared  buff/cache   available
-Mem:         773922      227886      163895       24817      382140      638585
-Swap:         12287       11186        1101
-
-(vmstat -s)
-    792496512 K total memory
-    233356192 K used memory
-    269553664 K active memory
-    340865600 K inactive memory
-    167828848 K free memory
-         2272 K buffer memory
-    391309216 K swap cache
-     12582908 K total swap
-     11455300 K used swap
-      1127608 K free swap
-   3188155721 non-nice user cpu ticks
-      2768354 nice user cpu ticks
-   5180587512 system cpu ticks
-  90500773745 idle cpu ticks
-     49745836 IO-wait cpu ticks
-       161083 IRQ cpu ticks
-     23336507 softirq cpu ticks
-            0 stolen cpu ticks
-     83476650 pages paged in
-   2081287865 pages paged out
-     14421607 pages swapped in
-     28402457 pages swapped out
-   2064556849 interrupts
-   3929219527 CPU context switches
-   1573850655 boot time
-   4222276852 forks
-
-Current activity:
-top - 06:37:07 up 205 days, 16:52, 119 users,  load average: 11.81, 11.29, 11.67
-Tasks: 4828 total,   4 running, 4782 sleeping,  16 stopped,  26 zombie
-%Cpu(s):  5.7 us, 13.8 sy,  0.2 ni, 80.3 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
-KiB Mem : 79249651+total, 16782336+free, 23336158+used, 39131158+buff/cache
-KiB Swap: 12582908 total,  1127608 free, 11455300 used. 65390604+avail Mem 
-
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
- 2856 root      20   0  223824   4548   3792 R 100.0  0.0   7836:02 abrtd
-11631 ldrobins  25   5  170992   9012   3700 R  29.0  0.0   0:00.24 top
-    8 root      20   0       0      0      0 S   1.6  0.0   1686:46 rcu_sched
-
+<i>Additional details of the processor, memory, and current background activity here</i>
+.
+.
+.
 
 ================================================================================
 Benchmark results:
@@ -516,38 +539,21 @@ Result for Benchmarks::factorialRecursive:
   43.9404 ±(99.9%) 5.86354 ns/op
   (min, avg, max) = (42.1703, 43.9404, 46.6927), stdev = 1.5228
 
-Parameter values:
-    Benchmarks::InputValue::number = 30
+<i>Additional detailed results for other benchmark methods and/or parameter values</i>
+.
+.
+.
 
-Benchmark: Benchmarks::factorialRecursive
-Benchmark mode: Average time, time/op
-Threads: 1 threads
-Warmup: 5 iterations, 1 s each
-Measurement: 5 iterations, 1 s each
-Parameters: (Benchmarks::InputValue::number = 30)
-
-Benchmark Benchmarks::factorialRecursive, warmup iteration 1: 52.5929 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 2: 51.6011 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 3: 49.6298 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 4: 48.8061 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 5: 48.5914 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 1: 49.0048 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 2: 50.6852 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 3: 50.0188 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 4: 49.4021 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 5: 49.5224 ns/op
-
-Result for Benchmarks::factorialRecursive:
-  49.7267 ±(99.9%) 2.22687 ns/op
-  (min, avg, max) = (49.0048, 49.7267, 50.6852), stdev = 0.578332
+Benchmark                       (number)   Mode    Cnt     Score         Error   Units
+Benchmarks::factorialRecursive        25   avgt      5    43.9404 +/-  5.86354   ns/op
+Benchmarks::factorialRecursive        30   avgt      5    49.7267 +/-  2.22687   ns/op
 
 ================================================================================
 Run Java
 java version "1.8.0_72"
 Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
+# VM invoker: <i>your_path_to_GraalVM</i>/graalvm-ee-1.0.0-rc9/jre/bin/java
 # VM options: <none>
 # Warmup: 5 iterations, 1 s each
 # Measurement: 5 iterations, 1 s each
@@ -574,178 +580,28 @@ Result: 22.686 ±(99.9%) 5.911 ns/op [Average]
   Statistics: (min, avg, max) = (21.296, 22.686, 25.137), stdev = 1.535
   Confidence interval (99.9%): [16.774, 28.597]
 
-
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: clamh.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:40
-# Fork: 1 of 1
-# Warmup Iteration   1: 64.882 ns/op
-# Warmup Iteration   2: 26.906 ns/op
-# Warmup Iteration   3: 26.128 ns/op
-# Warmup Iteration   4: 26.025 ns/op
-# Warmup Iteration   5: 25.751 ns/op
-Iteration   1: 28.890 ns/op
-Iteration   2: 25.962 ns/op
-Iteration   3: 27.297 ns/op
-Iteration   4: 26.375 ns/op
-Iteration   5: 28.118 ns/op
-
-
-Result: 27.329 ±(99.9%) 4.652 ns/op [Average]
-  Statistics: (min, avg, max) = (25.962, 27.329, 28.890), stdev = 1.208
-  Confidence interval (99.9%): [22.677, 31.980]
-
-
-# Run complete. Total time: 00:07:46
+<i>Additional detailed results for other benchmark methods and/or parameter values</i>
+.
+.
+.
 
 Benchmark                              (number)  Mode  Samples   Score  Score error  Units
 l.Factorial.JavaFactorialRecursive           25  avgt        5  22.686        5.911  ns/op
 l.Factorial.JavaFactorialRecursive           30  avgt        5  27.329        4.652  ns/op
 
-================================================================================
-Run C++
-CLAMH version: 0.5.0
-Compiler version: g++ 7.3.0
-./run_factorial -trendfile results/run1_cpp_2.trends -rf json -rff results/run1_cpp_2.json 
 
-CPU speed and warmup trends written to file results/run1_cpp_2.trends
-Results written to JSON file: results/run1_cpp_2.json
-high-resolution clock: estimated precision: 2.8878
-system clock: estimated precision: 1.1284
-steady clock: estimated precision: 2.67645
-Using the system clock
+<i>These will be followed by additional repetitions of each benchmark with summary</i>
+<i>information at the end of each.</i>
+.
+.
+.
 
-Parameter values:
-    Benchmarks::InputValue::number = 25
+End: Sun Feb  7 07:50:25 PDT 2021
+</pre>
 
-Benchmark: Benchmarks::factorialRecursive
-Benchmark mode: Average time, time/op
-Threads: 1 threads
-Warmup: 5 iterations, 1 s each
-Measurement: 5 iterations, 1 s each
-Parameters: (Benchmarks::InputValue::number = 25)
+***
 
-Benchmark Benchmarks::factorialRecursive, warmup iteration 1: 43.7513 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 2: 46.7776 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 3: 44.6167 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 4: 46.1669 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 5: 46.6895 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 1: 43.5848 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 2: 44.4213 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 3: 44.8419 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 4: 43.6248 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 5: 44.7507 ns/op
-
-Result for Benchmarks::factorialRecursive:
-  44.2447 ±(99.9%) 2.08326 ns/op
-  (min, avg, max) = (43.5848, 44.2447, 44.8419), stdev = 0.541035
-
-Parameter values:
-    Benchmarks::InputValue::number = 30
-
-Benchmark: Benchmarks::factorialRecursive
-Benchmark mode: Average time, time/op
-Threads: 1 threads
-Warmup: 5 iterations, 1 s each
-Measurement: 5 iterations, 1 s each
-Parameters: (Benchmarks::InputValue::number = 30)
-
-Benchmark Benchmarks::factorialRecursive, warmup iteration 1: 52.4381 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 2: 55.5676 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 3: 52.6055 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 4: 51.8816 ns/op
-Benchmark Benchmarks::factorialRecursive, warmup iteration 5: 61.7279 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 1: 54.9237 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 2: 52.3683 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 3: 50.8935 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 4: 51.0811 ns/op
-Benchmark Benchmarks::factorialRecursive, iteration 5: 50.9417 ns/op
-
-Result for Benchmarks::factorialRecursive:
-  52.0417 ±(99.9%) 5.93109 ns/op
-  (min, avg, max) = (50.8935, 52.0417, 54.9237), stdev = 1.54034
-
-================================================================================
-Run Java
-java version "1.8.0_72"
-Java(TM) SE Runtime Environment (build 1.8.0_72-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 25.72-b15, mixed mode)
-WARNING: Not a HotSpot compiler command compatible VM ("GraalVM 1.0.0-rc9-1.8.0_192"), compilerHints are disabled.
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: clamh.Factorial.JavaFactorialRecursive
-# Parameters: (number = 25)
-
-# Run progress: 0.00% complete, ETA 00:06:25
-# Fork: 1 of 1
-# Warmup Iteration   1: 97.398 ns/op
-# Warmup Iteration   2: 25.918 ns/op
-# Warmup Iteration   3: 21.417 ns/op
-# Warmup Iteration   4: 21.579 ns/op
-# Warmup Iteration   5: 22.316 ns/op
-Iteration   1: 24.391 ns/op
-Iteration   2: 22.019 ns/op
-Iteration   3: 22.219 ns/op
-Iteration   4: 21.145 ns/op
-Iteration   5: 22.455 ns/op
-
-
-Result: 22.446 ±(99.9%) 4.600 ns/op [Average]
-  Statistics: (min, avg, max) = (21.145, 22.446, 24.391), stdev = 1.195
-  Confidence interval (99.9%): [17.845, 27.046]
-
-
-# VM invoker: your_path_to_GraalVM/graalvm-ee-1.0.0-rc9/jre/bin/java
-# VM options: <none>
-# Warmup: 5 iterations, 1 s each
-# Measurement: 5 iterations, 1 s each
-# Threads: 1 thread, will synchronize iterations
-# Benchmark mode: Average time, time/op
-# Benchmark: clamh.Factorial.JavaFactorialRecursive
-# Parameters: (number = 30)
-
-# Run progress: 14.29% complete, ETA 00:06:40
-# Fork: 1 of 1
-# Warmup Iteration   1: 64.926 ns/op
-# Warmup Iteration   2: 25.683 ns/op
-# Warmup Iteration   3: 26.797 ns/op
-# Warmup Iteration   4: 24.615 ns/op
-# Warmup Iteration   5: 28.153 ns/op
-Iteration   1: 28.925 ns/op
-Iteration   2: 25.966 ns/op
-Iteration   3: 25.448 ns/op
-Iteration   4: 25.063 ns/op
-Iteration   5: 25.938 ns/op
-
-
-Result: 26.268 ±(99.9%) 5.899 ns/op [Average]
-  Statistics: (min, avg, max) = (25.063, 26.268, 28.925), stdev = 1.532
-  Confidence interval (99.9%): [20.369, 32.167]
-
-
-# Run complete. Total time: 00:07:46
-
-Benchmark                              (number)  Mode  Samples   Score  Score error  Units
-l.Factorial.JavaFactorialRecursive           25  avgt        5  22.446        4.600  ns/op
-l.Factorial.JavaFactorialRecursive           30  avgt        5  26.268        5.899  ns/op
-
-
-End: Sun Jun  7 07:50:25 PDT 2020
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
----
-
+<a name="6-clamh-components"></a>
 # 6 CLAMH Components
 
 This section gives an overview of the components of CLAMH. The top-level CLAMH
@@ -760,6 +616,7 @@ cd clamh
 make
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<a name="6.1-clamh.rc"></a>
 ## 6.1 clamh.rc
 
 clamh.rc is a script file located in the top-level CLAMH directory that is
@@ -770,35 +627,39 @@ environment variable and add the appropriate CLAMH directories your PATH.
 source <path_to_clamh_directory>/clamh.rc	
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<a name="6.2-clamh-cpp"></a>
 ## 6.2 clamh-cpp
 
-\$CLAMH_HOME/clamh-cpp/ contains the source code and build files for the C++
+$CLAMH_HOME/clamh-cpp/ contains the source code and build files for the C++
 implementation of CLAMH, including the benchmark harness generator and the header
 files used by the generated benchmark harness code.
 
 The typical user will interact with the tools in this file indirectly through
-the build scripts provided in clamh/scripts.
+the build scripts provided in $CLAMH_HOME/scripts.
 
+<a name="6.3-jmh-project-directory"></a>
 ## 6.3 JMH project directory
 
-Running “make” from the top-level CLAMH directory or from \$CLAMH_HOME/jmh will
-build the default JMH project directory (\$CLAMH_HOME/jmh/clamh_bm) that will be
+Running “make” from the top-level CLAMH directory or from $CLAMH_HOME/jmh will
+build the default JMH project directory ($CLAMH_HOME/jmh/clamh_bm) that will be
 used to generate the benchmark harness and compile Java benchmarks.
 
 The typical user will interact with this project file indirectly through the
-build scripts provided in clamh/scripts.
+build scripts provided in $CLAMH_HOME/scripts.
 
+<a name="6.4-scripts"></a>
 ## 6.4 Scripts
 
-\$CLAMH_HOME/scripts/ contains scripts that streamline and normalize the build
+$CLAMH_HOME/scripts/ contains scripts that streamline and normalize the build
 process. These scripts are detailed below.
 
 If you source clamh.rc (see above), this directory will be included in your PATH.
 
+<a name="6.4.1-building-java-benchmarks"></a>
 ### 6.4.1 Building Java benchmarks
 
-clamh_build_java.sh [(optional) \<JMH project directory\>] \<java source
-filenames\>...
+`clamh_build_java.sh [(optional) <JMH project directory>] <java source
+filenames>...`
 
 This script takes one or more Java benchmark source files and uses the Java
 Microbenchmark Harness (JMH) to generate the corresponding benchmark harness and
@@ -809,7 +670,7 @@ name will be based on the name of the first source file on the command line with
 “run_” prepended.
 
 Unless the path to a JMH project directory is specified, then the JMH benchmark
-project directory at \$CLAMH_HOME/jmh/clamh_bm will be used by default (run “make”
+project directory at $CLAMH_HOME/jmh/clamh_bm will be used by default (run “make”
 from the top-level directory to create the project directory).
 
 *Examples:*
@@ -836,16 +697,17 @@ clamh_build_java.sh ../private/jmh/bm_project Benchmark3.java
 This uses a JMH project directory located at “../private/jmh/bm_project” to
 build benchmark jar file “run_Benchmark3.jar”.
 
+<a name="6.4.2-building-c++-benchmarks"></a>
 ### 6.4.2 Building C++ benchmarks
 
-clamh_build_cpp.sh [(optional) \<path to clamh-cpp\>] \<C++ source filename\>
+`clamh_build_cpp.sh [(optional) <path to clamh-cpp>] <C++ source filename>`
 
 This script takes an annotated C++ source file and uses the generator in
 clamh-cpp to build the benchmark harness and compile the benchmark harness and
 benchmark into a binary file. The binary file name will be based on the source
 file name with “run_” prepended.
 
-Unless a path to clamh-cpp is specified, \$CLAMH_HOME/clamh-cpp will be used by
+Unless a path to clamh-cpp is specified, $CLAMH_HOME/clamh-cpp will be used by
 default.
 
 The C++ compiler specified in environment variable "CPP" will be used for
@@ -859,19 +721,19 @@ clamh_build_cpp.sh my_benchmark.cpp
 
 will generate the benchmark harness and build binary file “run_my_benchmark”.
 
+<a name="6.5-sample_scripts"></a>
 ## 6.5 Sample_scripts
 
-\$CLAMH_HOME/sample_scripts contains some examples of runtime scripts that can be
+$CLAMH_HOME/sample_scripts contains some examples of runtime scripts that can be
 used to run your benchmarks. You can either use these scripts as written,
 customize them for your environment, or use them as templates to write your own.
 
+<a name="6.5.1-clamh_exec_all.sh"></a>
 ### 6.5.1 clamh_exec_all.sh
 
-clamh_exec_all.sh -h
-
-clamh_exec_all.sh [--cpp=\<C++ binary\>] [--java=\<Java jar file\>]
-
-\-o \<supplementary output directory/file base name\>
+`clamh_exec_all.sh -h`  
+`clamh_exec_all.sh [--cpp=<C++ binary>] [--java=<Java jar file>]
+-o <supplementary output directory/file base name>`
 
 This script is intended for use in running one or more versions of a benchmark
 written in different languages in order to compare their performance. This will
@@ -881,17 +743,15 @@ In addition, if a Java benchmark (jar file) is specified, and one or more of the
 following environment variables is defined, it will run the Java benchmark on
 each of the specified VMs:
 
-JAVA_HOME_GRAALVM the top-level GraalVM directory
+JAVA_HOME_GRAALVM:   the top-level GraalVM directory  
+JAVA_HOME_HOTSPOT8:  the top-level HotSpot 8 directory  
+JAVA_HOME_HOTSPOT11: the top-level HotSpot 11 directory
 
-JAVA_HOME_HOTSPOT8 the top-level HotSpot 8 directory
-
-JAVA_HOME_HOTSPOT11 the top-level HotSpot 11 directory
-
-[On the second time that the benchmark is run, the order will be varied in case
-there exists any order-dependent performance bias.]
+On the second time that the benchmark is run, the order will be varied in case
+there exists any order-dependent performance bias.
 
 If none of these environment variables is defined, then any specified Java
-benchmark will be run using the installed “java” runtime.
+benchmark will be run using the installed “java” runtime, if available.
 
 The primary results will be written to stdout in text format. Additional data
 formats and supplementary data will also be written to a number of output files.
@@ -901,33 +761,27 @@ by the “output directory/file base name” argument.
 *Example:*
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$CLAMH_HOME/sample_scripts/clamh_exec_all.sh --cpp=run_my_benchmark 
---java=run_MyBenchmark –o my_benchmark_results/test1
+$CLAMH_HOME/sample_scripts/clamh_exec_all.sh --cpp=run_my_benchmark --java=run_MyBenchmark –o my_benchmark_results/test1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 will run the C++ and Java versions of the specified benchmark,
 “run_my_benchmark” and “run_MyBenchmark” (previously built using the
-clamh_build_\*.sh scripts). Each version will be run twice (additionally, if one
+clamh_build_*.sh scripts).
+
+Each version will be run twice (additionally, if one
 or more of the environment variables described above is set, then the Java
 version of the benchmark will be run twice on each of the specified VMs). Any
 supplementary data files created will be of the form
-“my_benchmark_results/test1\*”.
+“my_benchmark_results/test1*”.
 
+<a name="6.5.2-clamh_run_slurm.sh"></a>
 ### 6.5.2 clamh_run_slurm.sh
 
-clamh_run_slurm.sh -h
-
-clamh_run_slurm.sh [--cpp=\<C++ binary\>] [--java=\<Java jar file\>]
-
-\--exec=\<script to be run\>
-
-\-q \<queue name (may be repeated)\>
-
-\-o \<output directory base name\>
-
-[-t \<time limit (“00:15:00” by default)\>]
-
-[--reps=\<number of repetitions (3 by default)\>]
+`clamh_run_slurm.sh -h`  
+`clamh_run_slurm.sh [--cpp=<C++ binary>] [--java=<Java jar file>] --exec=<script to be run>`  
+` ` ` -q <queue name (may be repeated)>
+-o <output directory base name>`  
+` ` ` [-t <time limit (“00:15:00” by default)>] [--reps=<number of repetitions (3 by default)>]`
 
 This is an example of a script that could be used to run comparisons of one or
 more different language versions of a given benchmark in batch mode using a
@@ -959,41 +813,38 @@ write their own.
     submitted to each queue.
 
 The output for all of the jobs on each of the queues will be captured in
-directory
-
-\<output directory base name\>_\<queue\>.
+directory `<output directory base name>_<queue>`.
 
 The primary output for each job will be written to a file in that directory
-called \<label\>_test_rep\<N\>.result, where the \<label\> is obtained from the
-benchmark name, and \<N\> is from 1 to the number of repetitions. (Likewise,
-stderr for each job will be directed to \<label\>_test_rep\<N\>.err.)
-Supplementary data files for the job will also be of the form
-“\<label\>_test_rep\<N\>\*”.
+called `<label>_test_rep<N>.result`, where the `<label>` is obtained from the
+benchmark name, and `<N>` is from 1 to the number of repetitions. (Likewise,
+stderr for each job will be directed to `<label>_test_rep<N>.err`.)
+Supplementary data files for the job will also be of the form `<label>_test_rep<N>*`.
 
 *Example:*
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-$CLAMH_HOME/sample_scripts/clamh_run_slurm.sh --cpp=run_my_benchmark
---java=run_MyBenchmark –exec=$CLAMH_HOME/sample_scripts/clamh_exec_all.sh
--q x86_q –q foo_q –o batch_results1
+$CLAMH_HOME/sample_scripts/clamh_run_slurm.sh --cpp=run_my_benchmark --java=run_MyBenchmark
+ -–exec=$CLAMH_HOME/sample_scripts/clamh_exec_all.sh -q x86_q –q foo_q –o batch_results1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This will submit 3 jobs each (the default) to Slurm queues “x86_q” and “foo_q”.
 Each job will run the following command:
 
-\$CLAMH_HOME/sample_scripts/clamh_exec_all.sh --cpp=run_my_benchmark
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+$CLAMH_HOME/sample_scripts/clamh_exec_all.sh --cpp=run_my_benchmark
+--java=run_MyBenchmark –o batch_results1_<queue>/run_my_benchmark_test_rep<N>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-\--java=run_MyBenchmark –o
-batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>
-
-where \<queue\> is either “x86_q” or “foo_q”, and \<N\> is 1, 2, or 3.
+where `<queue>` is either “x86_q” or “foo_q”, and `<N>` is 1, 2, or 3.
 
 The primary results for each job will be written to file:
-batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>.result
+`batch_results1_<queue>/run_my_benchmark_test_rep<N>.result`
 
 (and stderr will be captured in
-batch_results1_\<queue\>/run_my_benchmark_test_rep\<N\>.err).
+`batch_results1_<queue>/run_my_benchmark_test_rep<N>.err`).
 
+<a name="6.6-benchmarks"></a>
 ## 6.6 Benchmarks
 
 This contains some provided benchmarks implemented in multiple languages.
@@ -1019,17 +870,22 @@ These benchmarks are provided both to provide some “out of the box” examples
 how CLAMH can be used, as well as guidelines for creating your own multi-language
 benchmarks.
 
+<a name="6.7-documentation"></a>
 ## 6.7 Documentation
 
-This directory contains the CLAMH User’s Guide in markdown and PDF formats (one
-of which you are reading now).
+This directory contains the CLAMH User’s Guide (which you are reading now).
 
----
+It also contains the SampleBrot code files that are used in the SampleBrot benchmark porting
+example in Section 12.5.
 
+***
+
+<a name="7-benchmark-construction-and-design"></a>
 # 7 Benchmark Construction and Design
 
 This section discusses the structure of CLAMH benchmarks, along with general guidelines for benchmark design.
 
+<a name="7.1-benchmark-harness-wrapper"></a>
 ## 7.1 Benchmark Harness Wrapper
 
 The wrapper generator extracts the annotations from the benchmark code and use
@@ -1046,28 +902,29 @@ above.
 [Note that the figure does not cover all possible permutations (that would be
 too cluttered). However, it shows some of the more common cases.]
 
+<a name="7.2-form-of-a-clamh/jmh-benchmark-single-threaded"></a>
 ## 7.2 Form of a CLAMH/JMH Benchmark (Single threaded)
 
 CLAMH and JMH are different from other benchmarking frameworks, as they were
 designed for *micro*-benchmarks which tend to be smaller, faster, and more
 self-contained than larger benchmarks. As such, instead of defining timing
-intervals in a program, CLAMH and JMH are entirely **function based**. Each
-component of the benchmark is broken into one or more functions. Each function
+intervals in a program, CLAMH and JMH are **function based**. Each
+component of the benchmark is split into one or more functions. Each function
 passes key profiling parameters to CLAMH or JMH using **annotations.**
 
 This is fine for a microbenchmark, but a larger benchmark may need to be
 refactored into the following five key parts:
 
-1.  One or more functions you annotate as \@Setup - these do all of the
+1.  One or more functions you annotate as @Setup - these do all of the
     initialization and are not timed.
 
-2.  One or more functions you annotate as \@Teardown - these do all necessary
+2.  One or more functions you annotate as @Teardown - these do all necessary
     cleanup and are not timed.
 
-3.  One or more functions you annotate as \@Benchmark - the core code of your
+3.  One or more functions you annotate as @Benchmark - the core code of your
     program that *is* timed.
 
-4.  One or more classes or structures you annotate as \@State. These should hold
+4.  One or more classes or structures you annotate as @State. These should hold
     all the data needed by your benchmark, and all the *parameters* to this
     benchmark.
 
@@ -1078,28 +935,28 @@ refactored into the following five key parts:
 >   ready made CLAMH/JMH benchmark file and replace the parts above with
 >   your own.
 
-Note that Multithreaded benchmarks, especially ones with functional parallelism,
-are even trickier in CLAMH/JMH. Because parallelism adds complexity to
-understanding and use of CLAMH/JMH, we will first describe everything for a
-single threaded benchmark, and then follow up with a special section on
-parallelism.
+Note that, because parallelism adds complexity to understanding and use of
+CLAMH/JMH, we will first describe everything for a single threaded benchmark,
+and then follow up with a special section on parallelism.
 
 We’ll now go over the main options for each of the standard functions that are
-implemented for JMH/CLAMH.
+implemented for CLAMH/JMH.
 
-### 7.2.1 The \@Benchmark Function
+<a name="7.2.1-the-@benchmark-function"></a>
+### 7.2.1 The @Benchmark Function
 
-The \@Benchmark annotation is at the heart of the CLAMH/JMH paradigm. This
+The @Benchmark annotation is at the heart of the CLAMH/JMH paradigm. This
 annotation denotes the benchmark functions or methods whose performance the test
 harness will be measuring.
 
-This function can (but is not required to) take one or more \@**State object**
+This function can (but is not required to) take one or more **@State** objects
 and (optionally) a **Blackhole** object as its inputs, and is the only function
 that is timed. (If you have more than one benchmark function, they will be
 considered independent benchmarks that will be run sequentially, EXCEPT in the
 case of a functionally parallel benchmark, but that is described in the parallel
 benchmark section.)
 
+<a name="7.2.2-the-benchmark-mode"></a>
 ### 7.2.2 The Benchmark Mode
 
 The *benchmark mode* effects how performance is computed:
@@ -1113,7 +970,7 @@ The *benchmark mode* effects how performance is computed:
 
 -   Single shot: measures the time for a single operation
 
-The benchmark mode is specified by the \@BenchmarkMode annotation. (See Section
+The benchmark mode is specified by the @BenchmarkMode annotation. (See Section
 7.5, Annotations, for more information)
 
 >   Warning! Sample time and Single shot modes attempt to measure the time for a
@@ -1141,13 +998,14 @@ specified number of *invocations* rather than a specified amount of time.
 Currently, however, the only way to do this in CLAMH/JMH is by using the
 *batchSize* argument combined with the *single shot* benchmark mode. The single
 shot mode measures the time taken by a single *operation*, and the *batchSize*
-argument of the \@Measurement and \@Warmup annotations specifies the number of
+argument of the @Measurement and @Warmup annotations specifies the number of
 invocations for each operation.
 
-### 7.2.3 \@State Objects
+<a name="7.2.3-@state-objects"></a>
+### 7.2.3 @State Objects
 
-State objects are *defined* in the benchmark (and marked with the \@State
-annotation), but they are *instantiated* by the benchmark harness. A State
+State classes are *defined* in the benchmark (and marked with the @State
+annotation), but the State objects are *instantiated* by the benchmark harness. A State
 object can be passed to any of the other CLAMH/JMH functions (benchmark, setup,
 or teardown) as an argument. The State objects are allocated by CLAMH/JMH in
 order to control memory alignment and (for multithreaded benchmarks) false
@@ -1159,8 +1017,10 @@ folding.
 Note that, in single-threaded benchmarks, for each State object definition, only
 *one* instance is created by the benchmark harness. So, in essence, the values
 and fields in a State object are common across all of your benchmark
-functions. The State object definition should be public.
+functions. In general, the State object definition should be public
+(see the section specific to each given language for more details).
 
+<a name="7.2.4-blackhole-objects"></a>
 ### 7.2.4 Blackhole objects
 
 Any computed value that you don’t want dead-code-eliminated along with the
@@ -1172,7 +1032,8 @@ The Blackhole object has a key method called consume(any variable). By consuming
 a value, the Blackhole protects the computations that produced that value from
 dead code elimination.
 
-### 7.2.5 \@Setup and \@Teardown
+<a name="7.2.5-@setup-and-@teardown"></a>
+### 7.2.5 @Setup and @Teardown
 
 These methods are used to initialize and finalize your benchmark. Some common
 uses for Setup and Teardown methods include:
@@ -1182,21 +1043,22 @@ uses for Setup and Teardown methods include:
 -   Outputting additional information specific to the benchmark (in Teardown).
 
 The methods take as input one or more State objects. The parameter to the
-\@State annotation defines the “Level”, which determines when and how often they
-will be called:
+@Setup and @Teardown annotations defines the “Level”, which determines when and 
+how often they will be called:
 
--   \@Setup(Level.Trial). = called once per Trial, i.e., Setup before any of the
+-   @Setup(Level.Trial). = called once per Trial, i.e., Setup before any of the
     warmup and benchmark iterations, and Teardown after all iterations have been
     completed.
 
--   \@Setup(Level.Iteration) = called once per iteration.
+-   @Setup(Level.Iteration) = called once per iteration.
 
--   \@Setup(Level.Invocation) = called before every call to each Benchmark
+-   @Setup(Level.Invocation) = called before every call to each Benchmark
     method. Warning: this can only be used with sufficiently long-running
     Benchmark functions, since timing will be interrupted for each invocation.
     This is commonly used in combination with Single Shot or Sample Time
     benchmark modes.
 
+<a name="7.3-benchmark-guidelines"></a>
 ## 7.3 Benchmark guidelines
 
 This section contains guidelines for the benchmark developer to help avoid some
@@ -1207,12 +1069,14 @@ Each section generally follows the same format: a problem is introduced and the
 generally guidelines for avoiding it are discussed, which is then followed by
 the specific assistance provided by CLAMH/JMH.
 
+<a name="7.3.1-unwanted-optimization"></a>
 ### 7.3.1 Unwanted optimization
 
 Many of the pitfalls associated with benchmarking are related to avoiding
 undesirable compiler optimization that can obscure or skew the performance
 results of interest.
 
+<a name="7.3.1.1-loops"></a>
 #### 7.3.1.1 Loops
 
 In benchmarking, we are generally attempting to measure the time required for
@@ -1234,9 +1098,9 @@ aggressive optimization across multiple loop iterations, but, at the same time,
 minimizes any introduced overhead that could skew the results in the other
 direction.
 
-[Note: When doing this on your own, inspection of the resulting compiled
-instructions is recommended to ensure that each loop iteration is run
-independently.]
+[Note: If doing this on your own without the aid of the CLAMH/JMH harnesses, 
+inspection of the resulting compiled instructions is recommended to ensure 
+that each loop iteration is run independently.]
 
 -   The benchmark harness takes care of this by generating the loop code for
     you.  Each implementation of the benchmark harness will generate code
@@ -1244,6 +1108,7 @@ independently.]
     optimizations. Your code should only provide the method to be run on
     each loop iteration.
 
+<a name="7.3.1.2-warmup-and-inlining"></a>
 #### 7.3.1.2 Warmup and inlining
 
 There are some cases where aggressive inlining of the benchmark code is
@@ -1261,6 +1126,7 @@ run during warmup and during measurement.
     you provide, the generated code will ensure that warm-up is performed
     correctly.
 
+<a name="7.3.1.3-dead-code-elimination"></a>
 #### 7.3.1.3 Dead code elimination
 
 One common source of inaccuracy in benchmarks is when an optimizing compiler
@@ -1283,9 +1149,10 @@ measurement.
     lightweight as possible. The benchmark developer is responsible for assuring
     that the result of every computation is either returned by the benchmark
     method (in which case the generated code will ensure that it is consumed
-    correctly) or explicitly consumed by a Blackhole object that is passed in as
+    correctly) or explicitly consumed by a Blackhole object that has been passed in as
     an argument to the benchmark method.
 
+<a name="7.3.1.4-constant-folding"></a>
 #### 7.3.1.4 Constant folding
 
 Smart compilers can introduce optimizations involving hard-coded constants. This
@@ -1294,7 +1161,7 @@ is known as *constant folding*.
 For example, clever compilers can replace a divide by a constant with a
 (typically much faster) sequence of operations using multiplies and shifts.
 However, if the constant is standing in for a value that could be runtime
-dependent in real-world code that the benchmark is intended to represent, this
+dependent in the real-world code that the benchmark is intended to represent, this
 could result in artificially optimistic performance measurements.
 
 So, it is often necessary to “trick” the compiler into believing that a value
@@ -1310,8 +1177,11 @@ uncertain as to the final value.
 -   The benchmark harness takes care of most of this for you. You are
     responsible for ensuring that your benchmark method code does not
     inappropriately use any hard-coded constants. Instead, any constant values
-    should be specified as an initialized variable in an annotated State object.
+    should be specified as an initialized variable in an annotated State object. 
+    All annotated State objects are protected from constant-folding by the 
+    benchmark harness.
 
+<a name="7.3.1.5-data-regularity"></a>
 #### 7.3.1.5 Data regularity
 
 If the data used in your benchmark is overly regular (particularly in comparison
@@ -1325,11 +1195,13 @@ regular (unless that is explicitly desired).
 
 -   The benchmark harness does not provide any assistance here.
 
+<a name="7.3.2-reproducibility"></a>
 ### 7.3.2 Reproducibility
 
 This section contains guidelines to help ensure that your benchmarks are
 deterministic and/or reproducible.
 
+<a name="7.3.2.1-random-numbers"></a>
 #### 7.3.2.1 Random numbers
 
 For reproducibility, if your benchmark makes use of a random number generator,
@@ -1346,6 +1218,7 @@ determine the cause of some observed behavior.
     generated seed should be output as part of a teardown method so that the
     outputting of the value does not contribute to the benchmark timing.
 
+<a name="7.3.2.2-memory-usage"></a>
 #### 7.3.2.2 Memory usage
 
 The details of how data is mapped into the address space can affect the measured
@@ -1370,20 +1243,22 @@ There are two main scenarios that need to be accommodated:
     anti-resonance). In this situation, it may be better for the benchmark to be
     run multiple times with different random memory layouts.
 
->   [Note: when comparing across languages and/or platforms, it may not be
+>   Note: when comparing across languages and/or platforms, it may not be
 >   possible to ensure that the different implementations provide equivalent
 >   layouts in memory. Consequently, a random layout may often be the better
->   option for cross-language comparisons.]
+>   option for cross-language comparisons.
 
 -   The benchmark method and/or setup should avoid allocating data on the heap
     for itself. Instead, it should delegate data allocation to the benchmark
     harness through annotated State objects. The harness has options to
     accommodate both of the scenarios detailed above.
 
+<a name="7.3.3-multi-threaded-benchmarks"></a>
 ### 7.3.3 Multi-threaded benchmarks
 
 This section provides additional guidelines for multi-threaded benchmarks.
 
+<a name="7.3.3.1-false-sharing"></a>
 #### 7.3.3.1 False sharing
 
 For multi-threaded benchmarks, one source of performance loss that can
@@ -1402,6 +1277,7 @@ with other data.
     State objects in memory, and it will ensure that these objects are allocated
     so as to prevent false sharing.
 
+<a name="7.3.3.2-thread-start/stop-skew"></a>
 #### 7.3.3.2 Thread start/stop skew
 
 When starting multiple threads, there may be some variation in the thread start
@@ -1418,10 +1294,12 @@ threads are running.
     all threads have had time to start, and will end timing before the threads
     terminate.
 
+<a name="7.3.4-porting-benchmarks"></a>
 ### 7.3.4 Porting benchmarks
 
 This section contains some guidelines for porting benchmarks between languages.
 
+<a name="7.3.4.1-target-language-expertise-and-code-quality"></a>
 #### 7.3.4.1 Target language expertise and code quality
 
 There is rarely benefit to be obtained by benchmarking code that is poorly
@@ -1434,8 +1312,9 @@ capabilities of each language.
 >   Note: this assumes that the original implementation is likewise of high
 >   quality. DO NOT assume that this is true simply because a benchmark is well
 >   respected or considered a “standard”. We have found a significant number of
->   widely used benchmarks that are very poorly implemented!
+>   widely used benchmarks that are *very* poorly implemented!
 
+<a name="7.3.4.2-algorithmic-equivalence-rule"></a>
 #### 7.3.4.2 Algorithmic equivalence rule (and when to break it)
 
 It is important to eliminate as many confounding factors as possible when making
@@ -1450,145 +1329,60 @@ operations well. Therefore, it might make sense to re-implement a loop as a
 vector operation when porting a benchmark to R.)
 
 Rule of thumb: algorithmic differences are OK if each implementation is using
-the best algorithmic choice for that language.
+the best algorithmic choice for that language. However, all such differences 
+in your benchmark implementations should be *clearly* documented!
 
+<a name="7.4-support-classes"></a>
 ## 7.4 Support Classes
 
 CLAMH provides support classes that benchmarks can use to facilitate accurate
 performance measurement.
 
+<a name="7.4.1-blackhole"></a>
 ### 7.4.1 Blackhole
 
 Each implementation provides a Blackhole class that allows values and results to
 be safely and robustly consumed with minimal overhead. This allows the benchmark
-code to avoid pitfalls such as *dead code elimination*.
+code to avoid pitfalls such as *dead code elimination*. See the individual 
+language-specific sections for more details.
 
+<a name="7.5-annotations"></a>
 ## 7.5 Annotations
 
 Annotations provide a way for the benchmark to pass meta-information to the test
 harness that it needs to generate the appropriate wrapper code. Annotations are
-specified by the “\@” symbol followed by the annotation name, with no spaces in
+specified by the “@” symbol followed by the annotation name, with no spaces in
 between. Some annotations may accept one or more arguments (expressed as is
 typical as a comma-separated list enclosed by parentheses). These arguments may
 be optional.
 
-[If the “\@” symbol is an operator in a target language, another symbol will be
+[If the “@” symbol is an operator in a target language, another symbol will be
 substituted to indicate annotations for benchmarks written in that language. See
 the specific section for that language.]
 
-| \@Benchmark               | Marks the following function or method as a Benchmark function. These are the functions that are invoked by the benchmark harness and timed. [no arguments]                                                                                                                                                                                                                                                                                                                                                          |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| \@BenchmarkMode           | Specifies the mode for running and measuring the accompanying Benchmark function. *Required* argument. Available argument values are:                                                                                                                                                                                                                                                                                                                                                                           |
-| \@Measurement             | Provides details of how the measurements will be carried out for the accompanying Benchmark function. *Optional* arguments:                                                                                                                                                                                                                                                                                                                                                                                     |
-| \@OperationsPerInvocation | Number of operations per invocation for the accompanying Benchmark function. *Optional* argument: \<int\> (default 1) Number of operations per method call.                                                                                                                                                                                                                                                                                                                                                     |
-| \@OutputTimeUnit          | The time units in which to specify the results for the accompanying Benchmark function. *Required* argument. Available values:                                                                                                                                                                                                                                                                                                                                                                                  |
-| \@Param                   | Defines the values to which the following State data member should be set (in the given order). The benchmarks will be run for each parameter setting (if multiple parameters are specified, it will be run for each combination of parameter values). *Required* argument: a list of quoted values. Example: \@Param({"25", "30"})  [Integer parameter values may be specified in decimal or hexadecimal (with a leading "0x").]                                                                                                                                                                              |
-| \@Setup                   | Marks the following function or method as a Setup method. These will be invoked by the benchmark harness but are not timed. *Required* argument: specify when this method is to be run. Available values:                                                                                                                                                                                                                                                                                                            |
-| \@State                   | Marks the following class or struct definition as a State object. The benchmark harness will have the responsibility to safely instantiate the State objects and pass them as arguments to the setup, teardown, and benchmark methods (as needed). The data members of the State objects will be protected from constant folding by the benchmark harness. *Required* argument: for multithreaded benchmarks, specify how each State object will be shared (and how many will need to be instantiated). Available values: |
-| \@Teardown                | Marks the following function or method as a Teardown method. These will be invoked by the benchmark harness but are not timed. *Required* argument: specify when this method is to be run. Available values:                                                                                                                                                                                                                                                                                                         |
-| \@Warmup                  | Provides details of how warmup will be carried out for the accompanying Benchmark function. *Optional* arguments:                                                                                                                                                                                                                                                                                                                                                                                               |
+| Annotation               | Description                                                                                                                                                                                                                                                                                                                                               |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| @Benchmark               | Marks the following function or method as a Benchmark function. These are the functions that are invoked by the benchmark harness and timed.<br>[no arguments]|
+| @BenchmarkMode           | Specifies the mode for running and measuring the accompanying Benchmark function.<br>*Required* argument. Available argument values are:<br><ul><li>Mode.AverageTime: average time per operation</li><li>Mode.SampleTime: samples the time for each operation and shows the distribution of the sampled times</li><li>Mode.SingleShotTime: measures the time for a single operation</li><li>Mode.Throughput: average operations per unit of time</li></ul>|
+| @Measurement             | Provides details of how the measurements will be carried out for the accompanying Benchmark function. *Optional* arguments:<br><ul><li>iterations = <i>integer</i> (default 1): Number of times to repeat measurements with this benchmark</li><li>time = <i>integer</i> (default 1): Time to run each iteration (in the specified time units)</li><li>timeUnit = <i>the time unit</i>. Available values:<ul><li>TimeUnit.DAYS</li><li>TimeUnit.HOURS</li><li>TimeUnit.MINUTES</li><li>TimeUnit.SECONDS (*default*)</li><li>TimeUnit.MILLISECONDS</li><li>TimeUnit.MICROSECONDS</li><li>TimeUnit.NANOSECONDS</li></ul><li>batchSize = <i>integer</i> (default 1): Number of method calls per operation</li></ul>|
+| @OperationsPerInvocation | Number of operations per invocation for the accompanying Benchmark function.<br>*Optional* argument:<br> \<int\> (default 1): Number of operations per method call.|
+| @OutputTimeUnit          | The time units in which to specify the results for the accompanying Benchmark function.<br> *Required* argument. Available values:<br><ul><li>TimeUnit.DAYS</li><li>TimeUnit.HOURS</li><li>TimeUnit.MINUTES</li><li>TimeUnit.SECONDS (*default*)</li><li>TimeUnit.MILLISECONDS</li><li>TimeUnit.MICROSECONDS</li><li>TimeUnit.NANOSECONDS</li></ul>|
+| @Param                   | Defines the values to which the following State data member should be set (in the given order). The benchmarks will be run for each parameter setting (if multiple parameters are specified, it will be run for each combination of parameter values).<br> *Required* argument: a list of quoted values.<br> Example:<br> <ul style="list-style:none;"><li>@Param({"25", "30"})</li></ul> [Integer parameter values may be specified in decimal or hexadecimal (with a leading "0x").]|
+| @Setup                   | Marks the following function or method as a Setup method. These will be invoked by the benchmark harness but are not timed.<br> *Required* argument: specify when this method is to be run. Available values:<ul><li>Level.Trial: Before the trial (default)</li><li>Level.Iteration: Before each iteration</li><li>Level.Invocation: Before each call to the benchmark method [**WARNING!!** This may result in measurement intervals that are too short for accurate measurement.]</li></ul>|
+| @State                   | Marks the following class or struct definition as a State object. The benchmark harness will have the responsibility to safely instantiate the State objects and pass them as arguments to the setup, teardown, and benchmark methods (as needed). The data members of the State objects will be protected from constant folding by the benchmark harness.<br> *Required* argument: for multithreaded benchmarks, specify how each State object will be shared (and how many will need to be instantiated).<br> Available values: <ul><li>Scope.Benchmark: the most “global” state across the entire benchmark (and all threads) [used for all single-threaded benchmarks]</li><li>Scope.Group: shared by all threads within a group</li><li>Scope.Thread: private state for one thread</li></ul>|
+| @Teardown                | Marks the following function or method as a Teardown method. These will be invoked by the benchmark harness but are not timed. *Required* argument: specify when this method is to be run. Available values:<ul><li>Level.Trial: After the trial (default)</li><li>Level.Iteration: After each iteration</li><li>Level.Invocation: After each call to the benchmark method (WARNING!!)</li></ul>|
+| @Warmup                  | Provides details of how warmup will be carried out for the accompanying Benchmark function.<br> *Optional* arguments:<ul><li>iterations = <i>integer</i> (default 1): Number of warmup iterations</li><li>time = <i>integer</i> (default 1): Time to run each warmup iteration (in the specified time units)</li><li>timeUnit = <i>the time unit</i>. Available values:</li><ul><li>TimeUnit.DAYS</li><li>TimeUnit.HOURS</li><li>TimeUnit.MINUTES</li><li>TimeUnit.SECONDS (*default*)</li><li>TimeUnit.MILLISECONDS</li><li>TimeUnit.MICROSECONDS</li><li>TimeUnit.NANOSECONDS</li></ul><li>batchSize = <i>integer</i> (default 1): Number of method calls per operation</li></ul>|
 
--   Mode.AverageTime average time per operation
-
--   Mode.SampleTime samples the time for each operation and shows the
-    distribution of the sampled times
-
--   Mode.SingleShotTime measures the time for a single operation
-
--   Mode.Throughput average operations per unit of time
-
--   iterations = \<int\> (default 1) Number of times to repeat measurements with
-    this benchmark
-
--   time = \<int\> (default 1) Time to run each iteration (in the specified time
-    units)
-
--   timeUnit The time unit. Available values:
-
--   TimeUnit.DAYS
-
--   TimeUnit.HOURS
-
--   TimeUnit.MINUTES
-
--   TimeUnit.SECONDS (*default*)
-
--   TimeUnit.MILLISECONDS
-
--   TimeUnit.MICROSECONDS
-
--   TimeUnit.NANOSECONDS
-
--   batchSize = \<int\> (default 1) Number of method calls per operation
-
--   TimeUnit.DAYS
-
--   TimeUnit.HOURS
-
--   TimeUnit.MINUTES
-
--   TimeUnit.SECONDS (*default*)
-
--   TimeUnit.MILLISECONDS
-
--   TimeUnit.MICROSECONDS
-
--   TimeUnit.NANOSECONDS
-
--   Level.Trial Before the trial (default)
-
--   Level.Iteration Before each iteration
-
--   Level.Invocation Before each call to the benchmark method (WARNING!!)
-
--   Scope.Benchmark the most “global” state across the entire benchmark (and all
-    threads) [used for all single-threaded benchmarks]
-
--   Scope.Group shared by all threads within a group
-
--   Scope.Thread private state for one thread
-
--   Level.Trial After the trial (default)
-
--   Level.Iteration After each iteration
-
--   Level.Invocation After each call to the benchmark method (WARNING!!)
-
--   iterations = \<int\> (default 1) Number of warmup iterations
-
--   time = \<int\> (default 1) Time to run each warmup iteration (in the
-    specified time units)
-
--   timeUnit The time unit. Available values:
-
--   TimeUnit.DAYS
-
--   TimeUnit.HOURS
-
--   TimeUnit.MINUTES
-
--   TimeUnit.SECONDS (*default*)
-
--   TimeUnit.MILLISECONDS
-
--   TimeUnit.MICROSECONDS
-
--   TimeUnit.NANOSECONDS
-
--   batchSize = \<int\> (default 1) Number of method calls per operation
-
-
+<a name="7.6-parallel-(multi-threaded)-benchmarks"></a>
 ## 7.6 Parallel (multi-threaded) benchmarks
 
-**TBD**
-
-State is given the parameter of scope:
+For multi-threaded benchmarks, the State annotation has a *scope* paramter:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @State(Scope.benchmark)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Where scope can be:
+where scope can be:
 
 -   Thread - each thread has its own instance.
 
@@ -1598,7 +1392,7 @@ Where scope can be:
     instance. See the parallel benchmark section for details.
 
 Note that Setup will be called once for every state object, to allow all state
-objects to be initialized correctly. (For example) In order to give each thread
+objects to be initialized correctly. For example, in order to give each thread
 its own work ID, a static value can be set to zero in the TearDown method and
 incremented in the Setup Method. This gets trickier with parallel benchmarks.
 
@@ -1610,27 +1404,30 @@ In this more complex case, different groups of threads work on different
 functions simultaneously, and each single function might itself be scalar or
 parallel. This is enabled in JMH in two steps:
 
-1.  Declare more than one function a \@benchmark function. This indicates the
+1.  Declare more than one function a @Benchmark function. This indicates the
     heterogeneous (functional) parallelism. For example, one function might
     produce data while another might consume it, and a third monitor the entire
     benchmark process. For each function, you can declare the number of threads
     and state objects as in the homogeneous case.
 
 2.  Set fork to zero. This is a special case value that tells JMH to run all the
-    individual \@benchmark functions simultaneously.
+    individual @benchmark functions simultaneously.
 
----
+***
 
+<a name="8-clamh-c++"></a>
 # 8 CLAMH C++
 
 This section provides the details of the C++ implementation of CLAMH, including
 semantics and syntax that are particular to C++.
 
+<a name="8.1-benchmark-file"></a>
 ## 8.1 Benchmark file
 
 Here we detail the language syntax and features that are specific to the C++
 implementation of CLAMH.
 
+<a name="8.1.1-compiling-outside-of-clamh"></a>
 ### 8.1.1 Compiling outside of CLAMH
 
 CLAMH C++ provides two features to facilitate compiling benchmark code outside of
@@ -1647,10 +1444,10 @@ CLAMH environment.]
 This enables conditional code to be included within the benchmark code when
 running either within or outside the CLAMH environment.
 
--   CLAMH C++ also provides an alternative notation for annotations (“//\@\@”).
+-   CLAMH C++ also provides an alternative notation for annotations (“//@@”).
     See 8.3, CLAMH C++ Annotations.
 
-Example of the former:
+*Example:*
 
 An open question is how you test/develop this outside of the benchmark harness? One
 way is to add a null definition of a Blackhole into your project.
@@ -1669,6 +1466,7 @@ static void consume(T val) { } // Do nothing, but at least it compiles
 #endif // CLAMH
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<a name="8.1.2-method-semantics"></a>
 ### 8.1.2 Method semantics
 
 Your annotated Benchmark methods, along with any annotated Setup and Teardown
@@ -1677,10 +1475,10 @@ any of the benchmark harness-generated state objects or the provided Blackhole
 object. To indicate that a method needs to use one of these objects,
 specify it as a *reference* or *const-reference* argument to the method.
 
-For example, if your benchmark has a State class named “MyState”, and you have a
-benchmark method Foo() that needs to read (but not modify) this state, and also
-needs to (explicitly) use the Blackhole object, you could define the method as
-follows:
+For example, if your C++ benchmark has a State class named “MyState”, and you
+have a benchmark method Foo() that needs to read (but not modify) this state,
+and also needs to (explicitly) use the Blackhole object, you could define the
+method as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @Benchmark
@@ -1690,6 +1488,7 @@ void Foo(const MyState &state, harness_utils::Blackhole &bh) {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+<a name="8.2-classes"></a>
 ## 8.2 Classes
 
 CLAMH C++ defines the Blackhole class that is used to consume results and prevent
@@ -1734,18 +1533,21 @@ public:
 The Blackhole definition is automatically included by the generated benchmark
 harness code.
 
+<a name="8.3-clamh-c++-annotations"></a>
 ## 8.3 CLAMH C++ Annotations
 
 This subsection discusses the annotation details specific to the C++
 implementation of CLAMH.
 
+<a name="8.3.1-alternate-notation-syntax"></a>
 ### 8.3.1 Alternate Notation Syntax
 
-CLAMH C++ provides an alternate notation for annotations, where “\@” is replaced
-by “//\@\@”. This enables benchmark code to compile outside of CLAMH, which can
+CLAMH C++ provides an alternate notation for annotations, where “@” is replaced
+by “//@@”. This enables benchmark code to compile outside of CLAMH, which can
 be useful for code development outside of CLAMH. See 8.1.1, Compiling outside of
 CLAMH.
 
+<a name="8.3.2-supported-annotations"></a>
 ### 8.3.2 Supported annotations
 
 The following annotations are currently supported by CLAMH C++:
@@ -1772,6 +1574,7 @@ The following annotations are currently supported by CLAMH C++:
 
 See 7.5, Annotations, for general annotation details.
 
+<a name="8.4-building-the-benchmark-runtime"></a>
 ## 8.4 Building the benchmark runtime
 
 In order to build the benchmark runtime, the annotated benchmark file is parsed
@@ -1781,76 +1584,88 @@ stripped out). This is then compiled to create the test binary.
 
 The vast majority of microbenchmarks are encapsulated within a single file. The
 easiest way to build these is to use the provided build script,
-clamh_build_cpp.sh (located in \$CLAMH_HOME/scripts). For example:
+clamh_build_cpp.sh (located in $CLAMH_HOME/scripts). For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 clamh_build_cpp.sh my_benchmark.cpp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This will parse my_benchmark.cpp and write the generated the benchmark harness
-wrapper code to *run_my_benchmark.cpp*, which will in turn be compiled to a
-binary file called *run_my_benchmark*.
+This will parse my_benchmark.cpp and write the generated benchmark harness
+wrapper code, along with the stripped benchmark code, to *run_my_benchmark.cpp*, 
+which will in turn be compiled to a binary file called *run_my_benchmark*.
 
 If you need to modify any of these steps for your specific benchmark (e.g., to
 include additional libraries), the easiest way to do this is to modify a copy of
 clamh_build_cpp.sh specific to your benchmark. [An example of this can be seen in
-\$CLAMH_HOME/benchmarks/xml_transform_tests.]
+$CLAMH_HOME/benchmarks/xml_transform_tests.]
 
+<a name="8.5-benchmark-runtime-options"></a>
 ## 8.5 Benchmark runtime options
 
 The generated test binary has some pre-defined command-line options:
 
->   \-h Prints the usage.
+<ul style="list-style:none;">
+<li>-h Prints the usage.</li><br>
+<li>-v Prints the version information.</li><br>
 
->   \-v Prints the version information.
+<li>-i <i>int</i> Number of measurement iterations to do. Overrides annotations.</li><br>
 
->   \-i <int> Number of measurement iterations to do. Overrides annotations.
+<li>-r <i>time</i> Run time for each iteration. Overrides annotations.
+Time is specified as an integer followed by the units (e.g., -r 500ms).</li>
+<ul style="list-style:none;">
+Units:
+<li>ns = nanoseconds</li>
+<li>us = microseconds</li>
+<li>ms = milliseconds</li>
+<li>s = seconds</li>
+<li>m = minutes</li>
+<li>h = hours</li>
+<li>d = days</li>
+</ul>
+<br>
+<li>-w <i>time</i> Run time for each warmup iteration. Overrides annotations.  See
+"-r" for time formatting details.</li><br>
 
->   \-r <time> Run time for each iteration. Overrides annotations.
->   Time is specified as an integer followed by the units (e.g., -r 500ms).
->     Units:
->     ns = nanoseconds
->     us = microseconds
->     ms = milliseconds
->     s = seconds
->     m = minutes
->     h = hours
->     d = days
+<li>-wi <i>int</i> Number of warmup iterations to do. Overrides annotations.</li><br>
 
->   \-w <time> Run time for each warmup iteration. Overrides annotations.  See
->   "-r" for time formatting details.
+<li>-p <i>param</i> = <i>values</i> Parameter override: overrides the set of values for a given parameter,
+specified by either the unqualified name or the fully qualified name. This
+option may be used more than once on the command line for different
+parameters. (Examples: “-p some_parm=3,4,5”)
+[Integer parameter values may be specified in decimal or hexadecimal (with a
+leading "0x").]</li><br>
 
->   \-wi <int> Number of warmup iterations to do. Overrides annotations.
+<li>-rf <i>format</i> Specifies the report format (currently, the only valid option is
+“json”)</li><br>
 
->   \-p Parameter override: overrides the set of values for a given parameter,
->   specified by either the unqualified name or the fully qualified name. This
->   option may be used more than once on the command line for different
->   parameters. (Examples: “-p some_parm=3,4,5”)
+<li>-rff <i>filename</i> If specified, names a report file to be created. This
+will contain all of the generated output data in a convenient
+machine-readable format for post-processing.</li><br>
 
->   [Integer parameter values may be specified in decimal or hexadecimal (with a
-    leading "0x").]
+<li>-trendfile <i>filename</i> If specified, the generated file will contain the
+detailed trend information for warmup and for relative CPU speed
+measurements at runtime. [Note: this can generate a lot of data,
+particularly for long-running benchmarks!] See Section 12.3, CPU frequency
+monitoring, for more details.</li>
+</ul>
 
+***
 
->   \-rf Specifies the report format (currently, the only valid option is
->   “json”)
-
->   \-rff \<filename\> If specified, names a report file to be created. This
->   will contain all of the generated output data in a convenient
->   machine-readable format for post-processing.
-
->   \-trendfile \<filename\> If specified, the generated file will contain the
->   detailed trend information for warmup and for relative CPU speed
->   measurements at runtime. [Note: this can generate a lot of data,
->   particularly for long-running benchmarks!] See Section 12.3, CPU frequency
->   monitoring, for more details.
-
----
-
+<a name="9-jmh-for-java-benchmarks"></a>
 # 9 JMH (for Java benchmarks)
 
 This section provides the details specific to JMH, which CLAMH uses to build
 Java benchmarks.
 
+JMH is the premier benchmark harness for Java benchmarks. Rather than
+reinventing what JMH already does well, CLAMH utilizes JMH for building Java
+benchmarks. The JMH benchmark harness follows the same design pattern used by
+CLAMH, and it provides the same mechanisms to avoid benchmarking pitfalls that
+CLAMH provides for other languages.
+
+JMH is made available as part of [OpenJDK](https://openjdk.java.net/projects/code-tools/jmh/).
+
+<a name="9.1-jmh-setup"></a>
 ## 9.1 JMH Setup
 
 -   STEP 1: Installing the latest public version of the Java JDK on your
@@ -1867,9 +1682,7 @@ Java benchmarks.
 (Building from source is NOT recommended due to dependencies on other projects.)
 You may find it more convenient to download and install a ready made binary
 package from the Oracle website:
-https://www.oracle.com/technetwork/java/javase/downloads/jdk13-downloads-5672538.html
-As of November, 2019, the most recent Java version is 13, with 14 due out in
-March, 2020
+https://www.oracle.com/java/technologies/javase-downloads.html
 
 In your bash shell, set JAVA_HOME and your PATH to point to the latest java. I
 use a special script to do this, specifically for when I need to do something
@@ -1891,16 +1704,18 @@ which java
 java --version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-| \#\#\# STEP 3. Installing maven (mvn) |
+| STEP 3. Installing maven (mvn) |
 |---------------------------------------|
 
 
 Maven is the Make utility for Java. Again, I can’t recommend attempting to build
-it from source - the dependencies spiral out of control. Instead, the easiest
-way I found was to install it as a package. On a Mac, I used home-brew.
+it from source - the dependencies spiral out of control. You can find ready-made
+binary distributions at the maven home page:
+https://maven.apache.org/download.cgi
 
-You might have to install/update brew first. Brew is great for telling you how
-to fix issues…
+On a Mac, I found it easier to install it as a package using home-brew.  You
+might have to install/update brew first. Brew is great for telling you how to
+fix issues…
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 brew update
@@ -1922,7 +1737,8 @@ which mvn
 mvn —version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note that for java 13, we need maven version 3.6.2
+Note: if you have difficulties with maven, you may need to update to the latest
+version (currently 3.6.3).
 
 Maven can be used to install JMH as a project dependency by creating a JMH
 project, which you’ll presumably need anyway.
@@ -1993,6 +1809,7 @@ want to read our summary first. :) Here we assume you know why you want to use
 JMH for java benchmarking, and we’ll give you a solid reference of terms on HOW
 to use it.
 
+<a name="9.2-getting-the-jmh-source-code"></a>
 ## 9.2 Getting the JMH source code and building it to create the API JavaDocs…
 
 The Java AVI Docs can be a good reference to the JMH API. But they do not exist
@@ -2020,7 +1837,7 @@ echo $JAVA_HOME
 
     **ASIDE**: Having an incompatible version of maven will cause the build to
     act like it has a corrupted maven repository, which it stores in your home
-    directory under \~.m2
+    directory under ~.m2
 
 -   Get the actual source code for JMH. One way to do this is with Mercurial
     (ironically, not on GitHub):
@@ -2034,7 +1851,7 @@ echo $JAVA_HOME
     mvn clean install -DskipTests
 
     Note that at this point, maven will download the repo onto your machine in
-    \~/.m2
+    ~/.m2
 
 -   If you wish, you can attempt to also build the standard JMH benchmarks,
     although this is not needed to get the java docs.
@@ -2046,41 +1863,154 @@ echo $JAVA_HOME
     "jmh/jmh-core/target/apidocs". Double click on "index.html" and start
     browsing the docs!
 
-**If this doesn’t work for you, we’ve included a recent version of the java docs
-with CLAMH.**
+**If this doesn’t work for you, please consult the JMH documentation.**
 
+<a name="9.3-benchmark-file"></a>
 ## 9.3 Benchmark file
 
+The annotated Benchmark methods, along with any annotated Setup and Teardown
+methods, are invoked by the generated benchmark harness code. These methods can
+use any of the benchmark harness-generated state objects or the provided
+Blackhole object. [Note that the state class should be defined with public
+scope.]
+
+For example, if your Java benchmark has a State class named “MyState”, and you
+have a benchmark method Foo() that needs to access this state, and also needs to
+(explicitly) use the Blackhole object, you could define the method as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@Benchmark
+// ... other annotations ...
+public void Foo(MyState state, Blackhole &bh) {
+   // ... body of method ...
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<a name="9.4-classes"></a>
 ## 9.4 Classes
 
+JMH defines a Blackhole class that is used to consume results and prevent
+unwanted dead code elimination. It can safely consume any object in as
+lightweight a manner as possible.
+
+Any value returned from a benchmark method will be automatically consumed by the
+Blackhole object. However, the Blackhole object can also be used to explicitly
+consume a computed value in your benchmark. In order to use it in this way, you
+must import the Blackhole class definition:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import org.openjdk.jmh.infra.Blackhole;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Blackhole _consume()_ method can then be used to safely consume any computed values:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@Benchmark
+// ... other annotations ...
+public void Foo(Blackhole &bh) {
+   // ... body of method ...
+   bh.consume(computed_value);
+   // ...
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<a name="9.5-annotations"></a>
 ## 9.5 Annotations
 
+JMH supports all annotations detailed in Section 7.5.
+
+<a name="9.6-building-the-benchmark-jar-file"></a>
 ## 9.6 Building the benchmark jar file
 
+CLAMH provides a build script to simplify the build process for Java benchmarks.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+clamh_build_java.sh MyBenchmark.java [optional supplementary Java files]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This will create a jar file containing the compiled benchmark and harness in
+*run_MyBenchmark.jar*. [Note that the name of the jar file will be based on the
+name of the first Java file specified in the build script arguments.]
+
+Note that CLAMH's JMH project directory must have first been created in order
+for the build script to work correctly. See Section 5.1 for more details.
+
+<a name="9.7-benchmark-runtime-options"></a>
 ## 9.7 Benchmark runtime options
 
----
+To explicitly run the benchmark, you should pass the jar file to the java runtime:
 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+java -jar run_MyBenchmark.jar [additional runtime options]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The generated benchmark and harness has numerous defined command-line
+options. Some commonly used ones include:
+
+<ul style="list-style:none;">
+<li>-h Prints the usage.</li><br>
+
+<li>-i <i>int</i> Number of measurement iterations to do. Overrides annotations.</li><br>
+
+<li>-r <i>time</i> Run time for each iteration. Overrides annotations.
+Time is specified as an integer followed by the units (e.g., -r 500ms).</li>
+<ul style="list-style:none;">
+Units:
+<li>ns = nanoseconds</li>
+<li>us = microseconds</li>
+<li>ms = milliseconds</li>
+<li>s = seconds</li>
+<li>m = minutes</li>
+<li>h = hours</li>
+<li>d = days</li>
+</ul>
+<br>
+<li>-w <i>time</i> Run time for each warmup iteration. Overrides annotations.  See
+"-r" for time formatting details.</li><br>
+
+<li>-wi <i>int</i> Number of warmup iterations to do. Overrides annotations.</li><br>
+
+<li>-p <i>param</i> = <i>values</i> Parameter override: overrides the set of values for a given parameter,
+specified by either the unqualified name or the fully qualified name. This
+option may be used more than once on the command line for different
+parameters. (Examples: “-p some_parm=3,4,5”)<br>
+[Note that, with JMH, integer parameter values may only be specified as 
+decimal values.]</li><br>
+
+<li>-rf <i>format</i> Specifies the report format (e.g., “json”)</li><br>
+
+<li>-rff <i>filename</i> If specified, names a report file to be created. This
+will contain all of the generated output data in a convenient
+machine-readable format for post-processing.</li>
+</ul>
+
+***
+
+<a name="10-clamh-js"></a>
 # 10 CLAMH JS
 
 CLAMH for Javascript will be available soon.
 
----
+***
 
+<a name="11-limitations,-future-growth,-and-reporting-issues"></a>
 # 11 Limitations, Future Growth, and Reporting Issues
 
----
+***
 
+<a name="12-advanced-topics"></a>
 # 12 Advanced Topics
 
 The final section of the User's Guide discusses additional topics not covered
 under the other sections.
 
+<a name="12.1-controlling-the-environment"></a>
 ## 12.1 Controlling the Environment
 
 Accurate and dependable benchmark measurement can depend on providing a stable,
 consistent environment that is free from interference that can skew the results.
 
+<a name="12.1.1-variations-in-cpu-frequency"></a>
 ### 12.1.1 Variations in CPU frequency
 
 Modern CPUs can step their frequency up or down to provide improved performance
@@ -2094,6 +2024,7 @@ safely (you would not want to disable thermal management and damage the chip).
 Regardless, the generated test code will periodically monitor the relative speed
 of the CPU and report the results at the end of the run.
 
+<a name="12.1.2-interference-from-other-processes"></a>
 ### 12.1.2 Interference from other processes
 
 Other processes running on the same core, the same CPU, or the same compute node
@@ -2111,6 +2042,7 @@ Of course, any suspension or disabling of features in the environment should be
 optional to allow for the potential investigation of the impact on performance
 of those features.
 
+<a name="12.1.3-internal-interference"></a>
 ### 12.1.3 Internal interference
 
 It is also possible for different parts of the benchmark to interfere with each
@@ -2119,7 +2051,7 @@ other.
 If multiple benchmark methods are specified, the benchmark harness must guarantee
 that they do not interfere with each other; i.e., the measured performance will
 be independent of the order in which they are run (unless explicitly requested,
-e.g., with the \@Fork annotation). If this guarantee cannot be met for a
+e.g., with the @Fork annotation). If this guarantee cannot be met for a
 particular target language, running multiple benchmark methods will be
 disallowed.
 
@@ -2130,6 +2062,7 @@ touches state that is thread-private, that thread should be used to call the
 setup method. Likewise, for state that has group scope, one of the threads in
 the group should be used to call the setup method.
 
+<a name="12.1.4-file-system"></a>
 ### 12.1.4 File system
 
 For benchmarks that include file I/O, the framework could optionally run a
@@ -2137,6 +2070,7 @@ temporary file system in memory so that the performance is not dominated by the
 I/O performance (unless that's relevant to what the user is trying to measure -
 hence optional).
 
+<a name="12.2-drilling-down---benchmark-harness-details"></a>
 ## 12.2 Drilling Down - Benchmark Harness Details
 
 This section expands and explains the motivations behind the design decisions.
@@ -2161,12 +2095,14 @@ and how they are addressed by the benchmark harness design:
 The last subsection addresses measurement and some other metrics that may be of
 interest.
 
+<a name="12.2.1-undesired-over-optimization"></a>
 ### 12.2.1 Undesired over-optimization
 
 Over-optimization during compilation (either static or dynamic) can result in
 errors that invalidate performance measurement. Two of the most common pitfalls
 are dead code elimination and constant folding.
 
+<a name="12.2.1.1-dead-code-elimination"></a>
 #### 12.2.1.1 Dead code elimination
 
 One common source of inaccuracy in benchmarks is when an optimizing compiler
@@ -2186,6 +2122,7 @@ correctly consume the results in a manner that is as lightweight as possible.
 This frees the developer from the burden of knowing how to correctly apply one
 of the ad hoc methods.
 
+<a name="12.2.1.2-constant-folding"></a>
 #### 12.2.1.2 Constant folding
 
 A related issue occurs when the inputs are too deterministic. As stated
@@ -2204,15 +2141,17 @@ benchmark performance.]
 There are ad hoc ways to avoid this that are language dependent, such as
 declaring a variable to be volatile in C or Java. However, the benchmark harness
 provides a way to avoid constant folding, regardless of language, through use of
-the \@Param annotation. This is guaranteed to do the “right thing” regardless of
+the @Param annotation. This is guaranteed to do the “right thing” regardless of
 the target language.
 
+<a name="12.2.2-memory-issues"></a>
 ### 12.2.2 Memory issues
 
 The details of how data is mapped into the address space can affect the measured
 performance, leading to either an inaccurate underestimation of performance or
 the introduction of non-determinism in the benchmark measurements.
 
+<a name="12.2.2.1-memory-layout-and-determinism"></a>
 #### 12.2.2.1 Memory layout and determinism
 
 If a benchmark has a sufficiently large data footprint that cache contention
@@ -2253,6 +2192,7 @@ There are two main scenarios that need to be accommodated:
 >   ensuring that the memory layout in one language/platform is identical to the
 >   other.]
 
+<a name="12.2.2.2-false-sharing"></a>
 #### 12.2.2.2 False sharing
 
 For multi-threaded benchmarks, false sharing can occur when two different state
@@ -2262,12 +2202,14 @@ The benchmark harness avoids false sharing between state belonging to different
 threads by sufficiently padding the state objects in memory such that one state
 object never shares a cache granule with another state object.
 
+<a name="12.2.2.3-numa-hardware"></a>
 #### 12.2.2.3 NUMA hardware
 
 For NUMA architectures, the data location in memory can impact the benchmark
 performance due to differences in access time. In this case, the code can be
 bound to a specific NUMA node.
 
+<a name="12.2.3-warmup"></a>
 ### 12.2.3 Warmup
 
 The benchmark harness provides conventional means for the user to explicitly
@@ -2291,7 +2233,7 @@ following reasons:
     confound attempts to detect the completion of warmup.
 
 Therefore, a given implementation of the benchmark harness can optionally
-implement the \@AutoWarmup capability as appropriate for a given
+implement the @AutoWarmup capability as appropriate for a given
 language/platform.
 
 However, all implementations should be capable of measuring the variation in the
@@ -2303,11 +2245,13 @@ performance measurements during the run, and print a warning if:
     particularly if performance appears to be improving over the course of the
     run. This can indicate a benchmark that was insufficiently warmed up.
 
+<a name="12.2.4-measuring-time-correctly"></a>
 ### 12.2.4 Measuring time correctly
 
 Accurate time measurement is crucial to performance benchmarking. The following
 discuss some issues and how they are addressed by CLAMH.
 
+<a name="12.2.4.1-accuracy"></a>
 #### 12.2.4.1 Accuracy
 
 The facilities for time measurement can vary widely from one language/platform
@@ -2333,6 +2277,7 @@ in timing intervals that are too short for the timing facility to accurately
 measure, or results in calls to the timing facility are too frequent such that
 they would skew the performance measurements.
 
+<a name="12.2.4.2-thread-skew"></a>
 #### 12.2.4.2 Thread skew
 
 When starting multiple threads, there may be some variation in the thread start
@@ -2345,6 +2290,7 @@ For multi-threaded benchmarks, the harness should postpone timing of iterations
 until all threads have had time to start, and should end timing before the
 threads end.
 
+<a name="12.2.5-benchmark-harness-loop-structure"></a>
 ### 12.2.5 Benchmark Harness Loop Structure
 
 The outer loop(s) may include the following:
@@ -2475,16 +2421,20 @@ The generated wrapper code will implement code that will do the following:
     <https://wiki.osdev.org/Detecting_CPU_Speed> for some examples of how to do
     this that are minimally intrusive (very fast) and hardware-independent.
 
+<a name="12.3-cpu-frequency-monitoring"></a>
 ## 12.3 CPU frequency monitoring
 
 **TBD**
 
+<a name="12.4-deep-performance-analysis"></a>
 ## 12.4 Deep performance analysis
 
 **TBD**
 
-## 12.5 PORTING BENCHMARKS TO JMH/CLAMH - A PRIMER
+<a name="12.5-porting-benchmarks-to-CLAMH/JMH---a-primer"></a>
+## 12.5 PORTING BENCHMARKS TO CLAMH/JMH - A PRIMER
 
+<a name="12.5.1-walkthrough-and-tutorial"></a>
 ### 12.5.1 Walkthrough and tutorial
 
 Here we take you through a tutorial in which you start with a small C benchmark
@@ -2520,7 +2470,7 @@ This will further aid us in later porting it to Java and JMH.
 
 In the beginning of this tutorial, we explained that you will need to break your
 benchmark down into at least 3 different functions: Setup, Benchmark, and
-Teardown. The problem is that JMH/CLAMH calls these functions, so there is no
+Teardown. The problem is that CLAMH/JMH calls these functions, so there is no
 way for these functions to directly communicate with each other in any way. They
 cannot pass parameters to each other, nor can they return values! So the first
 step is to create a structure which holds all the variables that need to be used
@@ -2582,7 +2532,7 @@ benchmarks, may completely distort the timing. However, this is the best way to
 start the port. (In testing, we found for this benchmark the slowdown is around
 10%.
 
-Because current JMH/CLAMH support for parallel benchmarks are incomplete, we'll
+Because current CLAMH/JMH support for parallel benchmarks are incomplete, we'll
 also wrap the parallel version of our benchmark the same way, and only use the
 built in parallelism instead of JMH at the moment...
 
@@ -2634,7 +2584,7 @@ Both CLAMH and JMH allow parameter values to be passed to a benchmark at runtime
 But, for now, we'll have to hard code the parameters.
 However, we'll have the parallel and scalar versions of the benchmark as two
 independent benchmarks, with the first using one thread, and the other using the
-JMH/CLAMH construct for MAX_THREADS.
+CLAMH/JMH construct for MAX_THREADS.
 
 Note that we want to keep the heads up information because our benchmark takes a
 long time, and we'd like to know it's running. Finally, we'll store the number
@@ -2685,7 +2635,7 @@ This cleans up the memory allocation and also computes rates we need that
 currently aren't computable with the standard CLAMH/JMH interface - namely
 measure of work/second. Here we will use the boolean state value alerting us as
 to which benchmark was actually called, so we know the true thread number. Note
-that there's no way currently to convey to JMH/CLAMH how much work the benchmark
+that there's no way currently to convey to CLAMH/JMH how much work the benchmark
 did, so we have to report the meaningful rate ourselves. On this benchmark, it
 will do the same amount of work each time as long as the configuration is
 identical, but on the real Mandelbrot benchmark, every frame is different, so
