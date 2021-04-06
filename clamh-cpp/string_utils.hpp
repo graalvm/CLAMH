@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #define __STRING_UTILS_HPP__
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace string_utils {
