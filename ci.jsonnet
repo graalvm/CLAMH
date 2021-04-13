@@ -3,12 +3,12 @@
       packages+: {
         gcc: '>=7.3.0',
         make: '>=3.83',
-        java: '==1.8.0',
+        # java: '==1.8.0',
         maven: '>=3.6.3'
       },
-      # downloads: {
-      #   JAVA_HOME: {"name": "graalvm-ee-java8", "version": "20.2.0", "platformspecific": true}
-      # },
+      downloads: {
+        JAVA_HOME: {"name": "graalvm-ee-java8", "version": "20.2.0", "platformspecific": true}
+      },
       # environment: {
       #   SBT_OPTS: "$GRADLE_OPTS" // until the CI sets it by default
       # },

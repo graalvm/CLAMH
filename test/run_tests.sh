@@ -41,6 +41,9 @@
 
 die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
 
+alias java=$JAVA_HOME/bin/java
+alias javac=$JAVA_HOME/bin/javac
+
 cd ../benchmarks/fac_tests/ || die "Can't find directory ../benchmarks/fac_tests/"
 
 echo "Building C++..."
