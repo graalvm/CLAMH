@@ -3,7 +3,7 @@
       packages+: {
         gcc: '>=7.3.0',
         make: '>=3.83',
-        'java:jdk': '==1.8.0',
+        java: '==1.8.0',
         maven: '>=3.6.3'
       },
       # downloads: {
