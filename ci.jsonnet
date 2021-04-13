@@ -14,7 +14,9 @@
       # },
       setup: [
         # ["set-export", "PATH", "$JAVA_HOME/bin:$PATH"],
-        ["cd", "./clamh"],
+        ["pwd"],
+        ["ls"],
+        # ["cd", "./clamh"],
         ["source", "./clamh.rc"],
         ["make"],
         ["cd", "./test"]
