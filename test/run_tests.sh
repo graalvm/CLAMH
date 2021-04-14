@@ -57,5 +57,5 @@ echo "Executing clamh_exec_all.sh..."
 
 cd -
 
-return 0
+exit 0
 
