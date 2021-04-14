@@ -13,11 +13,13 @@
       #   SBT_OPTS: "$GRADLE_OPTS" // until the CI sets it by default
       # },
       setup: [
-        # ["set-export", "PATH", "$JAVA_HOME/bin:$PATH"],
+        ["set-export", "PATH", "$JAVA_HOME/bin:$PATH"],
+        ["set-export", "CLAMH_HOME", "$PWD"],
+        ["set-export", "PATH", "$CLAMH_HOME/scripts:$PATH"],
         ["pwd"],
         ["ls"],
         # ["cd", "./clamh"],
-        ["source", "./clamh.rc"],
+        # ["source", "./clamh.rc"],
         ["make"],
         ["cd", "./test"]
       ],
