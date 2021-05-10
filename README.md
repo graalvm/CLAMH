@@ -24,3 +24,21 @@ Quick Start
 
 See the "Quick Start" section in the CLAMH User's Guide (links above) to get started.
 
+
+Language Support
+================
+
+At the moment, CLAMH supports C++, Java, and Javascript.
+
+
+Platform/Compiler/VM Support
+============================
+
+CLAMH has been tested on RedHat Enterprise Linux, Ubuntu Linux, Windows cygwin, and MacOS,
+on x86 and aarch64 hardware.
+
+CLAMH-C++ has been tested with gcc and clang.
+
+CLAMH-Java has been tested with HotSpot JDKs 8, 11, 15, and 16, and GraalVM.
+
+CLAMH-JS has been tested with node.js.
