@@ -68,9 +68,9 @@ public class Fibonacci {
 
 
    @Benchmark
-   public int fibonacci_local() {
-      int a = 0x10023a41;
-      int b = 0x0139fc27;
+   public int fibonacci_local(Values vals) {
+      int a = vals.a;
+      int b = vals.b;
       a += b;
       b += a;
       a += b;
