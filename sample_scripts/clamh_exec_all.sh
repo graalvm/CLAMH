@@ -46,14 +46,15 @@
 #
 # --cpp=<C++ binary>
 # --java=<Java jar file>
-# --js=<Javascript file> (future - not yet implemented)
+# --js=<Javascript file>
 # -o <output directory/file base name>
 #
 
 print_usage() {
   echo "Usage:"
   echo "${0##*/} -h"
-  echo "${0##*/} [--cpp=<C++ binary>] [--java=<Java jar file>] -o <supplementary output directory/file base name>"
+  echo "${0##*/} [--cpp=<C++ binary>] [--java=<Java jar file>] [--js=<Javascript file>]"
+  echo "          -o <supplementary output directory/file base name>"
   echo ""
   echo "For Java benchmarks, if any of these environment variables are defined, the benchmark will"
   echo "be run for each respective VM. If none are defined, it will just run using the installed 'java':"
@@ -121,6 +122,7 @@ while getopts ho:-: OPT "${cl_args[@]}"; do
   case "$OPT" in
     cpp )    needs_arg; cpp_exe="$OPTARG" ;;
     java )   needs_arg; java_jar="$OPTARG" ;;
+    js )     needs_arg; js_file="$OPTARG" ;;
     o )      needs_arg; obase="$OPTARG" ;;
     h )      print_usage; exit 0 ;;
     ??* )    die "Illegal option --$OPT" ;;  # bad long option
@@ -140,6 +142,9 @@ fi
 echo Running benchmarks:
 if ! [[ "${cpp_exe}" == "" || "${cpp_exe}" == "-" ]] ; then
   echo "  C++ benchmark ${cpp_exe}"
+fi
+if ! [[ "${js_file}" == "" || "${js_file}" == "-" ]] ; then
+  echo "  Javascript benchmark ${js_file}"
 fi
 plain_java=false
 if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
@@ -299,6 +304,14 @@ if ! [[ "${cpp_exe}" == "" || "${cpp_exe}" == "-" ]] ; then
   echo ""
 fi
 
+if ! [[ "${js_file}" == "" || "${js_file}" == "-" ]] ; then
+  echo "================================================================================"
+  echo "Run Javascript (node.js)"
+  echo "node $js_file"
+  node "$js_file"
+  echo ""
+fi
+
 if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
     if [ "$plain_java" = true ] ; then
         echo "================================================================================"
@@ -396,5 +409,14 @@ if ! [[ "${java_jar}" == "" || "${java_jar}" == "-" ]] ; then
         fi
     fi
 fi
+
+if ! [[ "${js_file}" == "" || "${js_file}" == "-" ]] ; then
+  echo "================================================================================"
+  echo "Run Javascript (node.js)"
+  echo "node $js_file"
+  node "$js_file"
+  echo ""
+fi
+
 echo ""
 echo "End: $(date)"

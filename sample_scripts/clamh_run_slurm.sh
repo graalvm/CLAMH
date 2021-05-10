@@ -47,7 +47,7 @@
 print_usage() {
     echo "Usage:"
     echo "${0##*/} -h"
-    echo "${0##*/} [--cpp=<C++ binary>] [--java=<Java jar file>] --exec=<script to be run>"
+    echo "${0##*/} [--cpp=<C++ binary>] [--java=<Java jar file>] [--js=<Javascript file>] --exec=<script to be run>"
     echo "                  -q <queue name> -o <output directory base name> [-t <time_limit ('00:15:00' by default)>]"
     echo "                  [--reps=<number of repetitions (3 by default)>]"
     echo "[The -q option may be specified multiple times. The script will be run for each specified queue.]"
@@ -102,6 +102,7 @@ while getopts ho:q:t:-: OPT "${cl_args[@]}"; do
   case "$OPT" in
     cpp )    needs_arg; cpp_exe="$OPTARG" ;;
     java )   needs_arg; java_jar="$OPTARG" ;;
+    js )     needs_arg; js_file="$OPTARG" ;;
     exec )   needs_arg; exec_script="$OPTARG" ;;
     reps )   needs_arg; reps="$OPTARG" ;;
     q )      needs_arg; queues="$queues $OPTARG" ;;
@@ -132,7 +133,12 @@ else
     if ! [[ "${java_jar}" == "" ]] ; then
         label="${java_jar%%.jar}"
     else
-        die "Error: a benchmark to run must be specified (via --cpp or --java)"
+        if ! [[ "${js_file}" == "" ]] ; then
+            # strip off the ".js"
+            label="${js_file%%.js}"
+        else
+            die "Error: a benchmark to run must be specified (via --cpp, --java, or --js)"
+        fi
     fi
 fi
 
@@ -141,6 +147,9 @@ if ! [[ "${cpp_exe}" == "" ]] ; then
 fi
 if ! [[ "${java_jar}" == "" ]] ; then
     exec_options="${exec_options} --java=${java_jar}"
+fi
+if ! [[ "${js_file}" == "" ]] ; then
+    exec_options="${exec_options} --js=${js_file}"
 fi
 
 for queue in ${queues}
