@@ -1,0 +1,34 @@
+
+So, for now, to use the test harness:
+
+
+1. Build the parser by running "make". [You only have to do this once]
+
+
+[[[ Note: you can follow steps 2 and 3 to generate the benchmark harness             ]]]
+[[[ "by hand". Or, you can use the convenient build script "clamh_build_js.sh" that  ]]]
+[[[ can be found in clamh/scripts/ (source clamh.rc to add this to your path).       ]]]
+
+
+2. You can run the parser "by hand" as follows:
+   ./js_parser <your_benchmark_file>  >  <generated_file_name>
+
+   For example, with the included example benchmark, "factorial_test3.js":
+   ./js_parser factorial_test3.js > run_factorial_test3.js
+
+3. Build the generated test code:
+   g++ -std=c++11 -O3 -o <executable_name> <generated_file_name>
+
+   For example,
+   g++ -std=c++11 -O3 -o run_factorial_test3 run_factorial_test3.js
+
+4. Run the test code that you just built:
+   ./<executable_name> > <results_file_name>
+
+   For example,
+   ./run_factorial_test3 > fac_test3.result
+
+
+Command-line options for the generated executable:
+Enter "<binary_file_name> -h" on the command line to get a list of the available
+command line options.
