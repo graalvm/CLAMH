@@ -35,46 +35,59 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
+const SIZE = 64;
 
 @State(Scope.Benchmark)
-@StateLabel(inputvalue)
-class InputValue {
-    @Param({"25","30"})
-    number;
-}
-
-
-function factorialRecursive_(n) {
-    if (n <= 1) { return 1; }
-    else        { return (n * factorialRecursive_(n-1)); }
-}
-
-function factorialIterative_(n) {
-    let result = 1;
-    for (var i = 1; i <= n; i++) {
-       result = result * i;
+@StateLabel(arrs)
+class Arrays {
+    arr = new Array(SIZE);
+    
+    constructor() {
+	    for (var i = 0; i < this.arr.length; i++) {
+            this.arr[i] = new Array(SIZE);
+        }
     }
-    return result;
 }
 
+@Setup(Level.Trial)
+function setup(arrs) {
+	for (var i = 0; i < arrs.arr.length; i++) {
+	    for (var j = 0; j < arrs.arr.length; j++) {
+            arrs.arr[i][j] = i+j;
+        }
+    }
+}
 
-@Benchmark
+@BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-function factorialRecursive(inputvalue) {
-    return factorialRecursive_(inputvalue.number);
-}
-
+@Warmup(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
 @Benchmark
-@OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
-function factorialIterative(inputvalue) {
-    return factorialIterative_(inputvalue.number);
+function seq_by_rows(arrs) {
+    let sum = 0;
+
+	for (var i = 0; i < arrs.arr.length; i++) {
+	    for (var j = 0; j < arrs.arr.length; j++) {
+            sum += arrs.arr[i][j];
+        }
+    }
+
+    return sum;
 }
 
-//function doNothing() {
-//    return 0;
-//}
+@BenchmarkMode(Mode.AverageTime)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
+@Warmup(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
+@Benchmark
+function seq_by_cols(arrs) {
+    let sum = 0;
 
+	for (var j = 0; j < arrs.arr.length; j++) {
+	    for (var i = 0; i < arrs.arr.length; i++) {
+            sum += arrs.arr[i][j];
+        }
+    }
+
+    return sum;
+}
