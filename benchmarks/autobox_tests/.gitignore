@@ -1,9 +1,7 @@
-run_autobox.cpp
-run_autobox
-run_autobox.exe
-run_autobox2.cpp
-run_autobox2
-run_autobox2.exe
-run_Autobox.jar
+run_autobox*.cpp
+run_autobox*
+run_autobox*.exe
+run_Autobox*.jar
+run_autobox*.js
 *.out
 results

@@ -1,6 +1,7 @@
-run_fibonacci.cpp
-run_fibonacci
-run_fibonacci.exe
-run_Fibonacci.jar
+run_fibonacci*.cpp
+run_fibonacci*
+run_fibonacci*.exe
+run_Fibonacci*.jar
+run_fibonacci*.js
 *.out
 results

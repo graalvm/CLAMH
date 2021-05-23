@@ -1,6 +1,7 @@
-run_memory_tests.cpp
-run_memory_tests
-run_memory_tests.exe
-run_MemoryTests.jar
+run_memory_tests*.cpp
+run_memory_tests*
+run_memory_tests*.exe
+run_MemoryTests*.jar
+run_memory_tests*.js
 *.out
 results
