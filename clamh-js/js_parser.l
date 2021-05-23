@@ -6,7 +6,7 @@
 ///////////////////////////////////////////////////////////
 
 /*
-Copyright (c) 2019 Oracle
+Copyright (c) 2021 Oracle
 
 The Universal Permissive License (UPL), Version 1.0
 
@@ -53,6 +53,7 @@ DEALINGS IN THE SOFTWARE.
 #include <functional>
 #include "CommandOptionHandler.h"
 #include "string_utils.hpp"
+#include "clamh_js_version.hpp"
 
 
 #define DEBUG 1
@@ -863,7 +864,7 @@ void gen_common_code() {
    std::cout << "" << std::endl;
    std::cout << "function printVersion() {" << std::endl;
    std::cout << "   // XXX" << std::endl;
-   std::cout << "   console.log(\"LATH-JS version: \" + \"XXX\");" << std::endl;
+   std::cout << "   console.log(\"CLAMH-JS version: \" + \"" << harness_utils_private::CLAMH_VERSION << "\");" << std::endl;
    std::cout << "   console.log(\"JavaScript runtime version(s):\");" << std::endl;
    std::cout << "   console.log(process.release);" << std::endl;
    std::cout << "   console.log(process.versions);" << std::endl;
@@ -2540,7 +2541,7 @@ int main(int argc, char **argv)
 
    // Output the stripped benchmark file:
    std::cout << "\n// ========== Stripped file ===========\n" << std::endl;
-   //std::cout << "#define LATH\n" << std::endl;
+   //std::cout << "#define CLAMH\n" << std::endl;
 
    for (auto &file_line : file_lines) {
       std::cout << file_line.line << std::endl;
