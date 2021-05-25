@@ -1,6 +1,8 @@
-run_factorial.cpp
-run_factorial
-run_factorial.exe
-run_Factorial.jar
+run_factorial*.cpp
+run_factorial*
+run_factorial*.exe
+run_Factorial*.jar
+run_factorial*.js
 *.out
 results
+test1_*

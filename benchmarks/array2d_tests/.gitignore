@@ -1,6 +1,7 @@
-run_array2d.cpp
-run_array2d
-run_array2d.exe
-run_Array2D.jar
+run_array2d*.cpp
+run_array2d*
+run_array2d*.exe
+run_Array2D*.jar
+run_array2d*.js
 *.out
 results

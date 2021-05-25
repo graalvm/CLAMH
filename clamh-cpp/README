@@ -14,24 +14,21 @@ So, for now, to use the benchmark harness:
    ./cpp_parser <your_benchmark_file>  >  <generated_file_name>
 
    For example, with the included example benchmark, "factorial_test3.cpp":
-   ./cpp_parser factorial_test3.cpp > gen_factorial_test3.cpp
+   ./cpp_parser factorial_test3.cpp > run_factorial_test3.cpp
 
 3. Build the generated test code:
    g++ -std=c++11 -O3 -o <binary_file_name> <generated_file_name>
 
    For example,
-   g++ -std=c++11 -O3 -o gen_factorial_test3 gen_factorial_test3.cpp
+   g++ -std=c++11 -O3 -o run_factorial_test3 run_factorial_test3.cpp
 
 4. Run the test code that you just built:
    ./<binary_file_name> > <results_file_name>
 
    For example,
-   ./gen_factorial_test3 > fac_test3.result
+   ./run_factorial_test3 > fac_test3.result
 
 
 Command-line options for the generated binary:
--trendfile <file_name>
-    Specifies the name of the file to which the CPU speed and warmup trend data will be printed.
-    If '-' is specified instead of a file name, the trend data will be printed to stdout.
-    If not specified, no trend data will be printed.
-
+Enter "<binary_file_name> -h" on the command line to get a list of the available
+command line options.

@@ -89,7 +89,7 @@ public class Factorial {
         return javaFactorialIterative_(iv.number);
     }
 
-    @Benchmark
-    public void javaDoNothing() {
-    }
+   //@Benchmark
+   //public void javaDoNothing() {
+   //}
 }
